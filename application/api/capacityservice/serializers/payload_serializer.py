@@ -17,6 +17,8 @@ This is the request payload serializer. It is responsible for:
     straight to the database model serializer for database level
     validation and update.
 """
+
+
 class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
 
     # The choice of capacity status that are expected.
@@ -71,25 +73,27 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
     and converting them to the correct values for the expected serializer fields for the
     resetdatetime and capacitystatus.
     """
+
     def convertToModel(self, data):
 
-        logger.debug("Data in CapacityStatusRequestPayloadSerializer for model conversion: %s", data)
+        logger.debug(
+            "Data in CapacityStatusRequestPayloadSerializer for model conversion: %s",
+            data,
+        )
 
-        payload_data =  super().validated_data
+        payload_data = super().validated_data
 
-        reset_time = datetime.now() + timedelta(minutes=payload_data["resetStatusIn"])
-        new_reset_dt = reset_time.astimezone().strftime("%Y-%m-%dT%H:%M:%SZ")
-        data["resetdatetime"] = new_reset_dt
+        data["resetdatetime"] = self._resetTime(
+            datetime.now(), payload_data["resetStatusIn"]
+        )
 
         # Set capacity status
         data["capacitystatus"] = {"color": payload_data["capacityStatus"]}
-        
+
         # Set notes to be default note string plus any additional notes that have been
         # included in the request data
-        notesfield = self.fields['notes']
-        notesdefault = notesfield.to_representation(
-            notesfield.get_default()
-        )
+        notesfield = self.fields["notes"]
+        notesdefault = notesfield.to_representation(notesfield.get_default())
         notes = notesdefault
         if "notes" in data:
             notes = notes + " - " + data["notes"]
@@ -97,12 +101,20 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
 
         # Set modified by - At the moment hardcoded, but this will eventually come from
         # the request header.
-        data["modifiedby"]="API user"
+        data["modifiedby"] = "API user"
 
         # Set modified date.
-        data["modifieddate"]=datetime.now().astimezone().strftime("%Y-%m-%dT%H:%M:%SZ")
+        data["modifieddate"] = (
+            datetime.now().astimezone().strftime("%Y-%m-%dT%H:%M:%SZ")
+        )
 
-        logger.debug("Converted data from CapacityStatusRequestPayloadSerializer: %s", data)
-        
+        logger.debug(
+            "Converted data from CapacityStatusRequestPayloadSerializer: %s", data
+        )
+
         return data
-    
+
+    def _resetTime(self, current_date, reset_time_in):
+        reset_time = current_date + timedelta(minutes=reset_time_in)
+        new_reset_dt = reset_time.astimezone().strftime("%Y-%m-%dT%H:%M:%SZ")
+        return new_reset_dt
