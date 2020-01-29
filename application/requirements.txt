@@ -1,0 +1,6 @@
+django
+django-request-id
+django-request-logging
+django-rest-framework
+drf-yasg
+psycopg2-binary

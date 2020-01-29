@@ -1,0 +1,45 @@
+version: "3.7"
+
+services:
+  api:
+    image: $DOCKER_REGISTRY/api:latest
+    container_name: api
+    hostname: api
+    environment:
+      PROFILE: $PROFILE
+      PIP_TARGET: /tmp/.packages
+      PYTHONPATH: /tmp/.packages
+      XDG_CACHE_HOME: /tmp/.cache
+      DB_HOST: db-dos
+      DB_PORT: 5432
+      DB_NAME: postgres
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+    volumes:
+      - $PROJECT_DIR:/project
+      - $HOME/.python/pip/cache:/tmp/.cache/pip
+      - $HOME/.python/pip/packages:/tmp/.packages
+    user: $USER_ID:$GROUP_ID
+    working_dir: /project/application
+    ports:
+      - "8443:8443"
+    command: sh -c "pip install -r requirements.txt && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8443 --certfile /project/certificate/localhost.crt --keyfile /project/certificate/localhost.key --ssl-version 5 api.wsgi"
+
+  db-dos:
+    image: $DOCKER_REGISTRY/postgres:latest
+    container_name: dos-db
+    hostname: dos-db
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - $DATA_DIR/sql:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+
+networks:
+  default:
+    external:
+      name: $DOCKER_NETWORK
