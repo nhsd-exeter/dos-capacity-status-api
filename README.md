@@ -72,11 +72,12 @@ Now install all of the extensions & load the static server files:
 
 First, navigate to the root directory and run the following command:
 
+make project-build
 make api-build
 
 ##### Running the application
 
-In the development environment, the application runs in debug mode.
+In the development environment, the application runs in debug mode on port 8000
 
 To run the application, make sure that you have your python virtual environment
 activated:
@@ -86,9 +87,10 @@ source $HOME/pythonvirtenvs/capacity-status-env/bin/activate
 Now run the following to start the application in the root directory of the
 project:
 
+make project-start
 make api-start
 
-The application is configured to run on https://localhost:8443/apidoc/
+The application is configured to run on http://localhost:8000/apidoc/
 
 Navigate here in a browser to see all available endpoints and routes.
 
