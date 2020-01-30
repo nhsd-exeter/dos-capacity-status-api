@@ -48,7 +48,9 @@ INSTALLED_APPS = [
     # We seem to need this one as a dependency for models.
     "django.contrib.contenttypes",
     "django.contrib.staticfiles",
+    "api.dos",
     "api.capacityservice",
+    "api.capacityauth",
     "drf_yasg",
 ]
 
