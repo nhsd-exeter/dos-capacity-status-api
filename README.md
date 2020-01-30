@@ -75,7 +75,7 @@ First, navigate to the root directory and run the following command:
 make project-build
 make api-build
 
-##### Running the application
+##### Running the application in the development environment
 
 In the development environment, the application runs in debug mode on port 8000
 
@@ -90,7 +90,7 @@ project:
 make project-start
 make api-start
 
-The application is configured to run on http://localhost:8000/apidoc/
+The application is configured to run on http://localhost:8000/apidoc/ in the development environment.
 
 Navigate here in a browser to see all available endpoints and routes.
 
@@ -106,8 +106,8 @@ Navigate here in a browser to see all available endpoints and routes.
 
 ### Running the unit tests
 
-The unit tests can be run by executing the following command:
-    ./manage.py test app
+The unit tests can be run by executing the following command in the root directory:
+    ./application/manage.py test api
 
 ## Todo
 
