@@ -92,6 +92,21 @@ The application is configured to run on https://localhost:8443/apidoc/
 
 Navigate here in a browser to see all available endpoints and routes.
 
+## Unit testing
+
+### Creating unit tests
+
+* Ensure test files are created in a relevant sub-directory under the test directory of the app under test.
+* Ensure all test files are prefixed with "test_" and match the name of the module/class that this test file tests.
+* Ensure that import unittest is brought into the test file.
+* Base your test class on unittest.TestCase.
+* Add the new test file to the __init__.py file so that the unit test runner picks the new tests up.
+
+### Running the unit tests
+
+The unit tests can be run by executing the following command:
+    ./manage.py test app
+
 ## Todo
 
 * The `api` image weights more than 300MB. Can we drop the build dependencies but still keep `pg_config` binary?
