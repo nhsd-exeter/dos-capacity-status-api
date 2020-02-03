@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class CapacityStatusView(RetrieveUpdateAPIView):
-    queryset = ServiceCapacities.objects.db_manager("dos").all()
+    queryset = ServiceCapacities.objects.all()
     serializer_class = CapacityStatusModelSerializer
     lookup_field = "service__uid"
 
@@ -78,7 +78,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
     """
     def _process_service_status_retrieval(self, request, service__uid):
 
-        service_status = ServiceCapacities.objects.db_manager("dos").get(
+        service_status = ServiceCapacities.objects.get(
             service__uid=service__uid
         )
 

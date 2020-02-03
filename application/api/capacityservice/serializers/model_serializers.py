@@ -55,7 +55,7 @@ class CapacityStatusModelSerializer(serializers.ModelSerializer):
         ragStatusColor = validated_data.get("capacitystatus", instance.capacitystatus)[
             "color"
         ]
-        capStatus = Capacitystatuses.objects.db_manager("dos").get(color=ragStatusColor)
+        capStatus = Capacitystatuses.objects.get(color=ragStatusColor)
 
         # Adapted from the super class's update method
         for attr, value in validated_data.items():

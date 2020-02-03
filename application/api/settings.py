@@ -43,10 +43,6 @@ SECURE_HSTS_SECONDS = 30  # Set low for development (original 3600)
 
 INSTALLED_APPS = [
     "rest_framework",
-    # We seem to need this one as a dependency for the rest_framework APP
-    "django.contrib.auth",
-    # We seem to need this one as a dependency for models.
-    "django.contrib.contenttypes",
     "django.contrib.staticfiles",
     "api.capacityservice",
     "drf_yasg",
@@ -62,7 +58,6 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -92,10 +87,6 @@ WSGI_APPLICATION = "api.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
-    },
-    "dos": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "OPTIONS": {"options": "-c search_path=pathwaysdos"},
         "HOST": os.getenv("DB_HOST", "db-dos"),
@@ -152,19 +143,6 @@ LOGGING = {
 }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
-]
-
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
@@ -189,3 +167,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 # This is so we can trace a request all the way through.
 # https://django-request-id.readthedocs.io/en/latest/
 REQUEST_ID_HEADER = None
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [],
+    'DEFAULT_PERMISSION_CLASSES': [],
+    'UNAUTHENTICATED_USER': None,
+}
