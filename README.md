@@ -88,6 +88,7 @@ Now run the following to start the application in the root directory of the
 project:
 
 make project-start
+make project-migrate
 make api-start
 
 The application is configured to run on http://localhost:8000/apidoc/ in the development environment.
