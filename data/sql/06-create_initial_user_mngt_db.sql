@@ -1,3 +1,1 @@
-CREATE DATABASE user_mngt;
-
-
+CREATE DATABASE cap_status_api;
