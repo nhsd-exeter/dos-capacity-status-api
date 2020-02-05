@@ -10,6 +10,11 @@ project-build: project-config project-stop
 	make docker-image NAME=api
 	make docker-image NAME=postgres
 
+project-migrate:
+	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+	DIR=application \
+	CMD="python manage.py migrate"
+
 project-restart:
 	make \
 		project-stop \
