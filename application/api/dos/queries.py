@@ -1,11 +1,6 @@
 from django.db import connections
 
-sql_temp_01 = "SELECT EXISTS(SELECT s from services s where s.uid = %s)"
-sql_temp_02 = "SELECT EXISTS(SELECT u from users u \
-    join userpermissions up on up.userid = u.id \
-    join userservices us on us.userid = u.id \
-    join services s on s.id = us.serviceid \
-    where u.id = %s and up.permissionid = 3 and s.uid = %s)"
+
 can_user_edit_service_sql = """SELECT EXISTS(SELECT u FROM users u
     JOIN userpermissions up ON up.userid = u.id
     JOIN userservices us ON us.userid = u.id
