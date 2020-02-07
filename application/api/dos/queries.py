@@ -17,10 +17,10 @@ can_user_edit_service_sql = """SELECT EXISTS(SELECT 1 FROM users u
     );"""
 
 
-def can_user_edit_service(userid, service_uid):
+def can_user_edit_service(dos_user_id, service_uid):
     with connections["dos"].cursor() as cursor:
 
-        cursor.execute(can_user_edit_service_sql, [userid, service_uid])
+        cursor.execute(can_user_edit_service_sql, [dos_user_id, service_uid])
         row = cursor.fetchone()
 
     return row[0]
