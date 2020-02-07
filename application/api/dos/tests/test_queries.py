@@ -3,7 +3,7 @@ from unittest import TestCase
 from ..queries import can_user_edit_service
 
 
-class TestQueries(TestCase):
+class TestCanUserEditService(TestCase):
     "Tests for dos query functions"
 
     def test_can_user_edit_service__service_exists(self):
