@@ -132,7 +132,7 @@ LOGGING = {
         "file": {
             "level": "DEBUG",
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": "./logs/capacity-status-api-debug.log",
+            "filename": os.path.join(BASE_DIR, "logs/capacity-status-api-debug.log"),
             "maxBytes": 1024 * 1024 * 15,  # 15MB
             "backupCount": 10,
             "formatter": "datetime_format",
