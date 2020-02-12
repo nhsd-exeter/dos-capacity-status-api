@@ -70,13 +70,6 @@ class TestCanApiUserEdit_service(TestCase):
         mock_convert_api_user_to_dos_user_id.assert_called_with(api_user)
         mock_can_user_edit_service.assert_called_with(dos_user_id, service.uid)
 
-    # def test_can_api_user_edit_service__fail_usr_isn_t_linked_to_service(self):
-    #     "Test can api user edit service, fail user is not linked to service"
-    #     api_user = User(id=1)
-    #     service = Services.objects.db_manager("dos").filter(uid="133014")[0]
-    #     result = can_api_user_edit_service(api_user, service)
-    #     self.assertFalse(result)
-
     @mock.patch.object(authorise, "convert_api_user_to_dos_user_id")
     @mock.patch.object(authorise, "can_user_edit_service")
     def test_can_api_user_edit_service__fail_dos_lookup(
