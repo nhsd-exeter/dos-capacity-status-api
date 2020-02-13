@@ -37,6 +37,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("api/v0.0.1/capacity/", include("api.capacityservice.urls")),
+    path("api/v0.0.1/capacity/", include("api.capacityauth.urls")),
     path("apidoc/", include("rest_framework.urls", namespace="rest_framework")),
     url(
         r"^apidoc(?P<format>\.json|\.yaml)$",

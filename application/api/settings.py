@@ -29,8 +29,12 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 # TODO [Needs Reviewing Start] Added as part of enabling https with gunicorn need to review if the following is needed
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+if os.getenv("PROFILE", "prod") == "local":
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+else:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # Security Headers
 SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -43,9 +47,12 @@ SECURE_HSTS_SECONDS = 30  # Set low for development (original 3600)
 
 INSTALLED_APPS = [
     "rest_framework",
-    # We seem to need this one as a dependency for the rest_framework APP
+    "rest_framework_api_key",
+    "django.contrib.admin",
     "django.contrib.auth",
-    # We seem to need this one as a dependency for models.
+    # messages and sessions APP is needed for the auth APP
+    "django.contrib.messages",
+    "django.contrib.sessions",
     "django.contrib.contenttypes",
     "django.contrib.staticfiles",
     "api.dos",
@@ -57,8 +64,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     # Adds unique request id to logs https://django-request-id.readthedocs.io/en/latest/
     "request_id.middleware.RequestIdMiddleware",
-    # Adds request logging to logs for when an endpoint is called, and its response.
-    # https://github.com/Rhumbix/django-request-logging
     "request_logging.middleware.LoggingMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
