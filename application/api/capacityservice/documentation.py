@@ -1,4 +1,5 @@
 from .validation import validation_rules
+from drf_yasg import openapi
 
 response_entities_desc = {
     "rag_status": "<li><B>RAG status</B> - this is the capacity status of the service, and will be updated to the service status defined \
@@ -59,4 +60,11 @@ description_get = (
     description_model["get__firstline"]
     + description_model["business_logic_header"]
     + description_model["get__business_logic_content"]
+)
+
+service_uid_path_param = openapi.Parameter(
+    "service__uid",
+    in_="path",
+    description="The UID which identifies the service",
+    type=openapi.TYPE_STRING,
 )

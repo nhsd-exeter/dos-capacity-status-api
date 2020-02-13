@@ -13,7 +13,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework_api_key.permissions import HasAPIKey
 
-from .documentation import description_get, description_post
+from .documentation import description_get, description_post, service_uid_path_param
 
 import logging
 
@@ -28,6 +28,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
 
     @swagger_auto_schema(
         operation_description=description_get,
+        manual_parameters=[service_uid_path_param],
         responses={
             200: CapacityStatusResponseSerializer,
             404: "The capacity status for the requested service was not found.",
@@ -41,6 +42,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
 
     @swagger_auto_schema(
         operation_description=description_post,
+        manual_parameters=[service_uid_path_param],
         responses={
             200: CapacityStatusResponseSerializer,
             400: "Bad Request - upon receiving a corrupt request or a request which fails API validation rules.",
@@ -59,6 +61,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
 
     @swagger_auto_schema(
         operation_description=description_post,
+        manual_parameters=[service_uid_path_param],
         responses={
             200: CapacityStatusResponseSerializer,
             400: "Bad Request - upon receiving a corrupt request or a request which fails API validation rules.",

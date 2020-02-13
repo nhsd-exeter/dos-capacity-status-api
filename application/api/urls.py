@@ -35,22 +35,27 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 
+APP_PATH = "api/v0.0.1/capacity/"
+
 urlpatterns = [
-    path("api/v0.0.1/capacity/", include("api.capacityservice.urls")),
-    path("api/v0.0.1/capacity/", include("api.capacityauth.urls")),
-    path("apidoc/", include("rest_framework.urls", namespace="rest_framework")),
+    path(APP_PATH, include("api.capacityservice.urls")),
+    path(APP_PATH, include("api.capacityauth.urls")),
+    path(
+        APP_PATH + "apidoc/",
+        include("rest_framework.urls", namespace="rest_framework"),
+    ),
     url(
-        r"^apidoc(?P<format>\.json|\.yaml)$",
+        r"^" + APP_PATH + "apidoc(?P<format>\.json|\.yaml)$",
         schema_view.without_ui(cache_timeout=0),
         name="schema-json",
     ),
     url(
-        r"^apidoc/$",
+        r"^" + APP_PATH + "apidoc/$",
         schema_view.with_ui("swagger", cache_timeout=0),
         name="schema-swagger-ui",
     ),
     url(
-        r"^altapidoc/$",
+        r"^" + APP_PATH + "altapidoc/$",
         schema_view.with_ui("redoc", cache_timeout=0),
         name="schema-redoc",
     ),
