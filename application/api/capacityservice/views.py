@@ -11,14 +11,17 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
 from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework_api_key.permissions import HasAPIKey
 
 from .documentation import description_get, description_post
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
 class CapacityStatusView(RetrieveUpdateAPIView):
+    permission_classes = [HasAPIKey]
     queryset = ServiceCapacities.objects.db_manager("dos").all()
     serializer_class = CapacityStatusModelSerializer
     lookup_field = "service__uid"
@@ -76,6 +79,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
     Returns a JSON response containing service status details for the service specified via the
     service UID.
     """
+
     def _process_service_status_retrieval(self, request, service__uid):
 
         service_status = ServiceCapacities.objects.db_manager("dos").get(
@@ -83,8 +87,10 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         )
 
         modelSerializer = CapacityStatusModelSerializer(service_status)
-        
-        responseData = CapacityStatusResponseSerializer.convertModelToResponse(modelSerializer.data)
+
+        responseData = CapacityStatusResponseSerializer.convertModelToResponse(
+            modelSerializer.data
+        )
 
         responseSerializer = CapacityStatusResponseSerializer(data=responseData)
 
@@ -97,6 +103,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
     Updates capacity status details for a service specified by the service UID and returns
     a JSON response containing the newly updated capacity status details for the service.
     """
+
     def _process_service_status_update(self, request, service__uid):
         payloadSerializer = CapacityStatusRequestPayloadSerializer(data=request.data)
         if payloadSerializer.is_valid():
