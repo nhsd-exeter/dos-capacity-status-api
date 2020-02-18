@@ -1,9 +1,3 @@
-from .serializers.model_serializers import CapacityStatusModelSerializer
-from .serializers.payload_serializer import CapacityStatusRequestPayloadSerializer
-from .serializers.response_serializer import CapacityStatusResponseSerializer
-
-from .models import ServiceCapacities
-
 from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.response import Response
@@ -13,6 +7,13 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework_api_key.permissions import HasAPIKey
 
+from .serializers.model_serializers import CapacityStatusModelSerializer
+from .serializers.payload_serializer import CapacityStatusRequestPayloadSerializer
+from .serializers.response_serializer import CapacityStatusResponseSerializer
+
+from .models import ServiceCapacities
+from api.capacityauth.permissions import HasDosUserAPIKey
+
 from .documentation import description_get, description_post, service_uid_path_param
 
 import logging
@@ -21,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class CapacityStatusView(RetrieveUpdateAPIView):
-    permission_classes = [HasAPIKey]
+    permission_classes = [HasAPIKey|HasDosUserAPIKey]
     queryset = ServiceCapacities.objects.db_manager("dos").all()
     serializer_class = CapacityStatusModelSerializer
     lookup_field = "service__uid"
