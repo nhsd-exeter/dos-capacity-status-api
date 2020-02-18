@@ -19,10 +19,10 @@ class DosUserAPIKeyModelAdmin(APIKeyModelAdmin):
     is_change_view_call = False
 
     def get_exclude(self, request, obj=None):
-        if self.exclude == None:
-            self.exclude = ["dosuserid", "name"]
+        if self.exclude:
+            self.exclude += ["dosuserid", "name"]
         else :
-            self.exclude = self.exclude + ["dosuserid", "name"]
+            self.exclude = ["dosuserid", "name"]
 
         return super().get_exclude(request, obj)
 
