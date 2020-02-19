@@ -15,6 +15,7 @@ from .models import ServiceCapacities
 from api.capacityauth.permissions import HasDosUserAPIKey
 
 from .documentation import description_get, description_post, service_uid_path_param
+from api.capacityauth.authorise import can_dos_user_api_key_edit_service
 
 import logging
 
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 class CapacityStatusView(RetrieveUpdateAPIView):
-    permission_classes = [HasAPIKey|HasDosUserAPIKey]
+    permission_classes = [HasDosUserAPIKey]
     queryset = ServiceCapacities.objects.db_manager("dos").all()
     serializer_class = CapacityStatusModelSerializer
     lookup_field = "service__uid"
@@ -83,9 +84,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
     Returns a JSON response containing service status details for the service specified via the
     service UID.
     """
-
     def _process_service_status_retrieval(self, request, service__uid):
-
         service_status = ServiceCapacities.objects.db_manager("dos").get(
             service__uid=service__uid
         )
@@ -109,6 +108,10 @@ class CapacityStatusView(RetrieveUpdateAPIView):
     """
 
     def _process_service_status_update(self, request, service__uid):
+        api_key = self.get_permissions()[0].get_key_model(request)
+        if not can_dos_user_api_key_edit_service(api_key, str(service__uid)):
+            return Response("Given DoS user forbidden access to edit", status=status.HTTP_403_FORBIDDEN)
+
         payloadSerializer = CapacityStatusRequestPayloadSerializer(data=request.data)
         if payloadSerializer.is_valid():
             modelData = payloadSerializer.convertToModel(data=request.data)

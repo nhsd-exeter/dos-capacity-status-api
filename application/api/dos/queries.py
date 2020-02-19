@@ -1,4 +1,5 @@
 from django.db import connections
+from .models import Users
 
 
 can_user_edit_service_sql = """SELECT EXISTS(SELECT 1 FROM users u
@@ -24,3 +25,6 @@ def can_user_edit_service(dos_user_id, service_uid):
         row = cursor.fetchone()
 
     return row[0]
+
+def get_dos_user_for_username(dos_username):
+    return Users.objects.db_manager("dos").get(username=dos_username)

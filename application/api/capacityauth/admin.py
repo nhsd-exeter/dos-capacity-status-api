@@ -7,22 +7,22 @@ from django.http.request import HttpRequest
 from rest_framework_api_key.admin import APIKeyModelAdmin
 from .models import DosUserAPIKey
 
-class DosUserAPIKeyAdminForm(ModelForm):
-    def clean_dosusername(self):
-        #TODO dos user validation
-        return self.cleaned_data["dosusername"] + "-INTERCEPTED"
+# class DosUserAPIKeyAdminForm(ModelForm):
+#     def clean_dosusername(self):
+#         #TODO dos user validation
+#         return self.cleaned_data["dos_username"] + "-INTERCEPTED"
 
 @admin.register(DosUserAPIKey)
 class DosUserAPIKeyModelAdmin(APIKeyModelAdmin):
 
-    form = DosUserAPIKeyAdminForm
+    # form = DosUserAPIKeyAdminForm
     is_change_view_call = False
 
     def get_exclude(self, request, obj=None):
         if self.exclude:
-            self.exclude += ["dosuserid", "name"]
+            self.exclude += ["dos_user_id", "name"]
         else :
-            self.exclude = ["dosuserid", "name"]
+            self.exclude = ["dos_user_id", "name"]
 
         return super().get_exclude(request, obj)
 
@@ -30,7 +30,7 @@ class DosUserAPIKeyModelAdmin(APIKeyModelAdmin):
     obj: models.Model = None) -> typing.Tuple[str, ...]:
         fields = super().get_readonly_fields(request, obj)
         if self.is_change_view_call:
-            fields += ("dosusername",)
+            fields += ("dos_username",)
         return fields
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
@@ -38,9 +38,3 @@ class DosUserAPIKeyModelAdmin(APIKeyModelAdmin):
         return_value = super().change_view(request, object_id, form_url, extra_context)
         self.is_change_view_call = False
         return return_value
-
-
-    def save_model(self, request, obj, form, change):
-        obj.name = obj.dosusername
-        obj.dosuserid = 2
-        return super().save_model(request, obj, form, change)
