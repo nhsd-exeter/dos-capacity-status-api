@@ -84,11 +84,12 @@ class CapacityStatusView(RetrieveUpdateAPIView):
     Returns a JSON response containing service status details for the service specified via the
     service UID.
     """
+
     def _process_service_status_retrieval(self, request, service__uid):
         service_status = ServiceCapacities.objects.db_manager("dos").get(
             service__uid=service__uid
         )
-
+        logger.info("In status retrieval")
         modelSerializer = CapacityStatusModelSerializer(service_status)
 
         responseData = CapacityStatusResponseSerializer.convertModelToResponse(
@@ -110,7 +111,10 @@ class CapacityStatusView(RetrieveUpdateAPIView):
     def _process_service_status_update(self, request, service__uid):
         api_key = self.get_permissions()[0].get_key_model(request)
         if not can_dos_user_api_key_edit_service(api_key, str(service__uid)):
-            return Response("Given DoS user forbidden access to edit", status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                "Given DoS user forbidden access to edit",
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         payloadSerializer = CapacityStatusRequestPayloadSerializer(data=request.data)
         if payloadSerializer.is_valid():
