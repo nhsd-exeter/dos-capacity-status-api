@@ -1,9 +1,3 @@
-from .serializers.model_serializers import CapacityStatusModelSerializer
-from .serializers.payload_serializer import CapacityStatusRequestPayloadSerializer
-from .serializers.response_serializer import CapacityStatusResponseSerializer
-
-from .models import ServiceCapacities
-
 from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.response import Response
@@ -13,7 +7,15 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework_api_key.permissions import HasAPIKey
 
+from .serializers.model_serializers import CapacityStatusModelSerializer
+from .serializers.payload_serializer import CapacityStatusRequestPayloadSerializer
+from .serializers.response_serializer import CapacityStatusResponseSerializer
+
+from .models import ServiceCapacities
+from api.capacityauth.permissions import HasDosUserAPIKey
+
 from .documentation import description_get, description_post, service_uid_path_param
+from api.capacityauth.authorise import can_dos_user_api_key_edit_service
 
 import logging
 
@@ -21,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 class CapacityStatusView(RetrieveUpdateAPIView):
-    permission_classes = [HasAPIKey]
+    permission_classes = [HasDosUserAPIKey]
     queryset = ServiceCapacities.objects.db_manager("dos").all()
     serializer_class = CapacityStatusModelSerializer
     lookup_field = "service__uid"
@@ -84,11 +86,10 @@ class CapacityStatusView(RetrieveUpdateAPIView):
     """
 
     def _process_service_status_retrieval(self, request, service__uid):
-
         service_status = ServiceCapacities.objects.db_manager("dos").get(
             service__uid=service__uid
         )
-
+        logger.info("In status retrieval")
         modelSerializer = CapacityStatusModelSerializer(service_status)
 
         responseData = CapacityStatusResponseSerializer.convertModelToResponse(
@@ -108,6 +109,13 @@ class CapacityStatusView(RetrieveUpdateAPIView):
     """
 
     def _process_service_status_update(self, request, service__uid):
+        api_key = self.get_permissions()[0].get_key_model(request)
+        if not can_dos_user_api_key_edit_service(api_key, str(service__uid)):
+            return Response(
+                "Given DoS user forbidden access to edit",
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         payloadSerializer = CapacityStatusRequestPayloadSerializer(data=request.data)
         if payloadSerializer.is_valid():
             modelData = payloadSerializer.convertToModel(data=request.data)
