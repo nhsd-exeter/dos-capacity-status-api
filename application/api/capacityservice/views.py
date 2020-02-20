@@ -78,7 +78,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
     def patch(self, request, service__uid, partial=True):
         logger.info("Request sent from host: %s", request.META["HTTP_HOST"])
         logger.info("Payload: %s", request.data)
-        self._process_service_status_update(request, service__uid)
+        return self._process_service_status_update(request, service__uid)
 
     """
     Returns a JSON response containing service status details for the service specified via the
