@@ -67,6 +67,11 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
 
     def to_internal_value(self, data):
         data["capacityStatus"] = data["capacityStatus"].upper()
+
+        # Set resetStatusIn to zero if we are transitioning into a GREEN capacity state.
+        if data["capacityStatus"] == "GREEN":
+            data["resetStatusIn"] = 0
+
         return super().to_internal_value(data)
 
     """
