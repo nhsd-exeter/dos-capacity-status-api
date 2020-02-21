@@ -8,11 +8,10 @@ from ...serializers.payload_serializer import CapacityStatusRequestPayloadSerial
 class TestPayloadSerializer(unittest.TestCase):
     "Tests for the PayloadSerializer class"
 
-    api_user = "API user"
-
     capacity_status = "RED"
     reset_status_in = 10
     notes = "Additional notes"
+    api_username = "capApi"
 
     def test_reset_time(self):
         "Test reset_time method"
@@ -41,6 +40,7 @@ class TestPayloadSerializer(unittest.TestCase):
             "capacityStatus": self.capacity_status,
             "resetStatusIn": self.reset_status_in,
             "notes": self.notes,
+            "apiUsername": self.api_username,
         }
 
         request_payload_serializer = CapacityStatusRequestPayloadSerializer(
@@ -83,7 +83,7 @@ class TestPayloadSerializer(unittest.TestCase):
 
         self.assertEqual(
             model_data["modifiedby"],
-            self.api_user,
+            self.api_username,
             "Model modified by data incorrectly set",
         )
 

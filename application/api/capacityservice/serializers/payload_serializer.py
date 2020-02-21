@@ -99,11 +99,7 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
             notes = notes + " - " + data["notes"]
         data["notes"] = notes
 
-        # Set modified by - At the moment hardcoded, but this will eventually come from
-        # the request header.
-        data["modifiedby"] = "API user"
-
-        # Set modified date.
+        data["modifiedby"] = data["apiUsername"]
         data["modifieddate"] = (
             datetime.now().astimezone().strftime("%Y-%m-%dT%H:%M:%SZ")
         )
