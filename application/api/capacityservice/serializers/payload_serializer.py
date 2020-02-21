@@ -21,17 +21,10 @@ This is the request payload serializer. It is responsible for:
 
 class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
 
-    # The choice of capacity status that are expected.
     CAPACITY_STATUS_CHOICES = (
         "RED",
-        "Red",
-        "red",
         "AMBER",
-        "Amber",
-        "amber",
         "GREEN",
-        "Green",
-        "green",
     )
 
     capacityStatus = serializers.ChoiceField(
@@ -66,6 +59,15 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
             "max_value": validation_rules[4]["error_msg_max_value"],
         },
     )
+
+    """
+    Overriding the default implementation so we always uppercase the capacity status in the
+    request data before applying serializer validation rules.
+    """
+
+    def to_internal_value(self, data):
+        data["capacityStatus"] = data["capacityStatus"].upper()
+        return super().to_internal_value(data)
 
     """
     Converts the JSON payload (provided for PUT and PATCH requests) into the correct format

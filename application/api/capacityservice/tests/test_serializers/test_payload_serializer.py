@@ -8,7 +8,7 @@ from ...serializers.payload_serializer import CapacityStatusRequestPayloadSerial
 class TestPayloadSerializer(unittest.TestCase):
     "Tests for the PayloadSerializer class"
 
-    capacity_status = "RED"
+    capacity_status = "Red"
     reset_status_in = 10
     notes = "Additional notes"
     api_username = "capApi"
