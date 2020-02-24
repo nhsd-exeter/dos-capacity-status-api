@@ -119,28 +119,3 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
             reset_time = current_date + timedelta(minutes=payload_data["resetStatusIn"])
             new_reset_dt = reset_time.astimezone().strftime("%Y-%m-%dT%H:%M:%SZ")
         return new_reset_dt
-
-
-"""
-This is the standard definition of the validation response from Django, with our validation
-fields added in. This is used for defining the validation response for the API documentation
-"""
-
-
-class CapacityValidationErrorReponseSerializer(serializers.Serializer):
-
-    capacityStatus = serializers.ListField(
-        required=False,
-        help_text="A list of validation errors associated with the capacityStatus payload field. \
-            Refer to Request Validation in the endpoint description",
-    )
-    resetStatusIn = serializers.ListField(
-        required=False,
-        help_text="A list of validation errors associated with the resetStatusIn payload field. \
-            Refer to Request Validation in the endpoint description",
-    )
-    notes = serializers.ListField(
-        required=False,
-        help_text="A list of validation errors associated with the notes payload field. \
-            Refer to Request Validation in the endpoint description",
-    )
