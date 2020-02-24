@@ -13,18 +13,23 @@ class TestPayloadSerializer(unittest.TestCase):
     notes = "Additional notes"
     api_username = "capApi"
 
-    def test_reset_time(self):
-        "Test reset_time method"
+    def test_reset_time_1(self):
+        "Test reset_time method for RED status update"
 
+        payload_data = {
+            "capacityStatus": self.capacity_status,
+            "resetStatusIn": 300,
+        }
         current_time = datetime.now()
-        reset_time_in = 300
-        expected_reset_time = current_time + timedelta(minutes=reset_time_in)
+        expected_reset_time = current_time + timedelta(
+            minutes=payload_data["resetStatusIn"]
+        )
         expected_reset_time_str = expected_reset_time.astimezone().strftime(
             "%Y-%m-%dT%H:%M:%SZ"
         )
 
         returned_reset_time = CapacityStatusRequestPayloadSerializer._resetTime(
-            self, current_time, reset_time_in
+            self, current_time, payload_data
         )
 
         self.assertEqual(
@@ -33,8 +38,50 @@ class TestPayloadSerializer(unittest.TestCase):
             "Returned reset data time is not as expected.",
         )
 
+    def test_reset_time_2(self):
+        "Test reset_time method for AMBER status update"
+
+        payload_data = {
+            "capacityStatus": "AMBER",
+            "resetStatusIn": 300,
+        }
+        current_time = datetime.now()
+        expected_reset_time = current_time + timedelta(
+            minutes=payload_data["resetStatusIn"]
+        )
+        expected_reset_time_str = expected_reset_time.astimezone().strftime(
+            "%Y-%m-%dT%H:%M:%SZ"
+        )
+
+        returned_reset_time = CapacityStatusRequestPayloadSerializer._resetTime(
+            self, current_time, payload_data
+        )
+
+        self.assertEqual(
+            returned_reset_time,
+            expected_reset_time_str,
+            "Returned reset data time is not as expected.",
+        )
+
+    def test_reset_time_3(self):
+        "Test reset_time method for GREEN status update"
+
+        payload_data = {
+            "capacityStatus": "GREEN",
+            "resetStatusIn": 300,
+        }
+        current_time = datetime.now()
+
+        returned_reset_time = CapacityStatusRequestPayloadSerializer._resetTime(
+            self, current_time, payload_data
+        )
+
+        self.assertIsNone(
+            returned_reset_time, "Returned reset data time is not None.",
+        )
+
     def test_convert_to_model_1(self):
-        "Test serializer with full and valid payload"
+        "Test serializer with full and valid payload turning to red status"
 
         full_payload_data = {
             "capacityStatus": self.capacity_status,
@@ -100,95 +147,3 @@ class TestPayloadSerializer(unittest.TestCase):
             current_time + timedelta(minutes=-1),
             "Model modified date is a value less than expected",
         )
-
-    def test_to_internal_value_green_1(self):
-        "Test serializer with a GREEN capacity status and a set resetStatusIn time"
-
-        payload = {
-            "capacityStatus": "green",
-            "resetStatusIn": 500,
-        }
-
-        request_payload_serializer = CapacityStatusRequestPayloadSerializer(
-            data=payload
-        )
-        request_payload_serializer.is_valid()
-        validated_data = request_payload_serializer.validated_data
-
-        self.assertEqual(
-            validated_data["resetStatusIn"],
-            0,
-            "The resetStatusIn value should be 0 for a GREEN capacity status",
-        )
-        self.assertEqual(
-            validated_data["capacityStatus"],
-            "GREEN",
-            "The capacity status should be GREEN",
-        )
-
-    def test_to_internal_value_green_2(self):
-        "Test serializer with a GREEN capacity status and no resetStatusIn time"
-
-        payload = {"capacityStatus": "green"}
-
-        request_payload_serializer = CapacityStatusRequestPayloadSerializer(
-            data=payload
-        )
-        request_payload_serializer.is_valid()
-        validated_data = request_payload_serializer.validated_data
-
-        self.assertEqual(
-            validated_data["resetStatusIn"],
-            0,
-            "The resetStatusIn value should be 0 for a GREEN capacity status",
-        )
-        self.assertEqual(
-            validated_data["capacityStatus"],
-            "GREEN",
-            "The capacity status should be GREEN",
-        )
-
-    def test_to_internal_value_red_1(self):
-        "Test serializer with a RED capacity status and a set resetStatusIn time"
-
-        payload = {"capacityStatus": "red", "resetStatusIn": 500}
-
-        request_payload_serializer = CapacityStatusRequestPayloadSerializer(
-            data=payload
-        )
-        request_payload_serializer.is_valid()
-        validated_data = request_payload_serializer.validated_data
-
-        self.assertEqual(
-            validated_data["resetStatusIn"],
-            500,
-            "The resetStatusIn value should be 500 for a RED capacity status",
-        )
-        self.assertEqual(
-            validated_data["capacityStatus"],
-            "RED",
-            "The capacity status should be RED",
-        )
-
-    def test_to_internal_value_red_2(self):
-        "Test serializer with a RED capacity status and no resetStatusIn time"
-
-        payload = {"capacityStatus": "red"}
-
-        request_payload_serializer = CapacityStatusRequestPayloadSerializer(
-            data=payload
-        )
-        request_payload_serializer.is_valid()
-        validated_data = request_payload_serializer.validated_data
-
-        self.assertEqual(
-            validated_data["resetStatusIn"],
-            240,
-            "The resetStatusIn value should be 240 for a RED capacity status",
-        )
-        self.assertEqual(
-            validated_data["capacityStatus"],
-            "RED",
-            "The capacity status should be RED",
-        )
-
