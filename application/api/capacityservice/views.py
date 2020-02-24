@@ -8,13 +8,20 @@ from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework_api_key.permissions import HasAPIKey
 
 from .serializers.model_serializers import CapacityStatusModelSerializer
-from .serializers.payload_serializer import CapacityStatusRequestPayloadSerializer
+from .serializers.payload_serializer import (
+    CapacityStatusRequestPayloadSerializer,
+    CapacityValidationErrorReponseSerializer,
+)
 from .serializers.response_serializer import CapacityStatusResponseSerializer
 
 from .models import ServiceCapacities
 from api.capacityauth.permissions import HasDosUserAPIKey
 
-from .documentation import description_get, description_post, service_uid_path_param
+from .documentation import (
+    description_get,
+    description_post,
+    service_uid_path_param,
+)
 from api.capacityauth.authorise import can_dos_user_api_key_edit_service
 
 import logging
@@ -33,9 +40,8 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         manual_parameters=[service_uid_path_param],
         responses={
             200: CapacityStatusResponseSerializer,
-            404: "The capacity status for the requested service was not found.",
-            400: "Bad Request - upon receiving a corrupt request or a request which fails API validation rules.",
             401: "Unauthorized - when a user is unauthorized to use this API.",
+            404: "Not Found - when the requested service to retrieve could not be found in DoS.",
         },
     )
     def get(self, request, service__uid):
@@ -47,7 +53,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         manual_parameters=[service_uid_path_param],
         responses={
             200: CapacityStatusResponseSerializer,
-            400: "Bad Request - upon receiving a corrupt request or a request which fails API validation rules.",
+            400: CapacityValidationErrorReponseSerializer,
             401: "Unauthorized - when a user is unauthorized to use this API.",
             403: "Forbidden - when a user is not authorized to update the status of the requested service.",
             404: "Not Found - when the requested service to update could not be found in DoS.",
@@ -66,7 +72,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         manual_parameters=[service_uid_path_param],
         responses={
             200: CapacityStatusResponseSerializer,
-            400: "Bad Request - upon receiving a corrupt request or a request which fails API validation rules.",
+            400: CapacityValidationErrorReponseSerializer,
             401: "Unauthorized - when a user is unauthorized to use this API.",
             403: "Forbidden - when a user is not authorized to update the status of the requested service.",
             404: "Not Found - when the requested service to update could not be found in DoS.",
@@ -116,8 +122,13 @@ class CapacityStatusView(RetrieveUpdateAPIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        request.data["apiUsername"] = api_key.dos_username
-        payloadSerializer = CapacityStatusRequestPayloadSerializer(data=request.data)
+        context = {
+            "apiUsername": api_key.dos_username,
+            "apiUserId": api_key.dos_user_id,
+        }
+        payloadSerializer = CapacityStatusRequestPayloadSerializer(
+            data=request.data, context=context
+        )
         if payloadSerializer.is_valid():
             modelData = payloadSerializer.convertToModel(data=request.data)
             modelSerializer = CapacityStatusModelSerializer(data=modelData)
