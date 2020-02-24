@@ -1,8 +1,8 @@
 # 002 - Shared Database
 
-* Date: 2020/01/02
-* Status: Proposed
-* Deciders: Daniel Stefaniuk, Matthew Begley, Jonathan Pearce
+- Date: 2020/01/02
+- Status: Accepted
+- Deciders: Daniel Stefaniuk, Matthew Begley, Jonathan Pearce
 
 ## Context
 
@@ -14,10 +14,7 @@ The relevant content of the database is shared between the Core DoS application 
 
 ## Consequences
 
-* The Capacity Status API depends on the Core DoS table structure and is sensitive to any changes in the upstream project (Core DoS).
-
-* In the course of developing the API if there is a need to store additional information. A choice will need to be made about whether to store this information in the DoS database or in a new API specific database.
-
-* The decision to use the DoS database is a pragmatic approach to simplify the architecture, and will be reviewed in the future.
-
-* As a result of this decision a selective copy of the Core DoS database has been created for development purposes, with only the services, servicecapacities, and capacitystatuses tables populated.
+- The Capacity Status API depends on the Core DoS table structure and is sensitive to any changes in the upstream project (Core DoS).
+- In the course of developing the API if there is a need to store additional information. A choice will need to be made about whether to store this information in the DoS database or in a new API specific database.
+- The decision to use the DoS database is a pragmatic approach to simplify the architecture, and will be reviewed in the future.
+- As a result of this decision a selective copy of the Core DoS database has been created for development purposes, with only the `services`, `servicecapacities`, and `capacitystatuses` tables populated.
