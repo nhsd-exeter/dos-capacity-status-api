@@ -75,8 +75,17 @@ class TestCanUserEditService(TestCase):
         user_can_edit = can_user_edit_service(dos_user_id, service_uid)
         self.assertFalse(user_can_edit)
 
+    def test_can_user_edit_service__for_inactive_parent_service(self):
+        "Test sql can_user_edit_service method, return false when the parent of the given service (by uid) does not have an active status id (1)"
+        self.set_service_status(service_uid="149198", status_id=0)
+        service_uid = "149198"
+        dos_user_id = 1000000001
+        user_can_edit = can_user_edit_service(dos_user_id, service_uid)
+        self.assertFalse(user_can_edit)
+
     # Re-activate users & services
     def tearDown(self):
         self.set_user_status(user_id=1000000001)
         self.set_service_status(service_uid="153455")
+        self.set_service_status(service_uid="149198")
 
