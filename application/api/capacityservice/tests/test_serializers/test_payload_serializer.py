@@ -12,12 +12,13 @@ class TestPayloadSerializer(unittest.TestCase):
     reset_status_in = 10
     notes = "Additional notes"
     api_username = "capApi"
+    api_user_id = 1234
 
-    def test_reset_time_1(self):
+    def test_reset_time_red(self):
         "Test reset_time method for RED status update"
 
         payload_data = {
-            "capacityStatus": self.capacity_status,
+            "capacityStatus": "RED",
             "resetStatusIn": 300,
         }
         current_time = datetime.now()
@@ -38,7 +39,7 @@ class TestPayloadSerializer(unittest.TestCase):
             "Returned reset data time is not as expected.",
         )
 
-    def test_reset_time_2(self):
+    def test_reset_time_amber(self):
         "Test reset_time method for AMBER status update"
 
         payload_data = {
@@ -63,7 +64,7 @@ class TestPayloadSerializer(unittest.TestCase):
             "Returned reset data time is not as expected.",
         )
 
-    def test_reset_time_3(self):
+    def test_reset_time_green(self):
         "Test reset_time method for GREEN status update"
 
         payload_data = {
@@ -80,18 +81,22 @@ class TestPayloadSerializer(unittest.TestCase):
             returned_reset_time, "Returned reset data time is not None.",
         )
 
-    def test_convert_to_model_1(self):
+    def test_convert_to_model(self):
         "Test serializer with full and valid payload turning to red status"
 
         full_payload_data = {
             "capacityStatus": self.capacity_status,
             "resetStatusIn": self.reset_status_in,
             "notes": self.notes,
+        }
+
+        context = {
             "apiUsername": self.api_username,
+            "apiUserId": self.api_user_id,
         }
 
         request_payload_serializer = CapacityStatusRequestPayloadSerializer(
-            data=full_payload_data
+            data=full_payload_data, context=context
         )
         request_payload_serializer.is_valid()
         model_data = request_payload_serializer.convertToModel(full_payload_data)
@@ -126,6 +131,12 @@ class TestPayloadSerializer(unittest.TestCase):
             model_data["notes"],
             "RAG status set by Capacity Service API - Additional notes",
             "Model notes data incorrectly set",
+        )
+
+        self.assertEqual(
+            model_data["modifiedbyid"],
+            self.api_user_id,
+            "Model modified by id incorrectly set",
         )
 
         self.assertEqual(
