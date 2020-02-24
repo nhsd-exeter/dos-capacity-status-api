@@ -85,9 +85,7 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
 
         payload_data = super().validated_data
 
-        data["resetdatetime"] = self._resetTime(
-            datetime.now(), payload_data["resetStatusIn"]
-        )
+        data["resetdatetime"] = self._resetTime(datetime.now(), payload_data)
 
         # Set capacity status
         data["capacitystatus"] = {"color": payload_data["capacityStatus"]}
@@ -112,7 +110,9 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
 
         return data
 
-    def _resetTime(self, current_date, reset_time_in):
-        reset_time = current_date + timedelta(minutes=reset_time_in)
-        new_reset_dt = reset_time.astimezone().strftime("%Y-%m-%dT%H:%M:%SZ")
+    def _resetTime(self, current_date, payload_data):
+        new_reset_dt = None
+        if payload_data["capacityStatus"] != "GREEN":
+            reset_time = current_date + timedelta(minutes=payload_data["resetStatusIn"])
+            new_reset_dt = reset_time.astimezone().strftime("%Y-%m-%dT%H:%M:%SZ")
         return new_reset_dt

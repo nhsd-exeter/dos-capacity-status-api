@@ -13,18 +13,23 @@ class TestPayloadSerializer(unittest.TestCase):
     notes = "Additional notes"
     api_username = "capApi"
 
-    def test_reset_time(self):
-        "Test reset_time method"
+    def test_reset_time_red(self):
+        "Test reset_time method for RED status update"
 
+        payload_data = {
+            "capacityStatus": "RED",
+            "resetStatusIn": 300,
+        }
         current_time = datetime.now()
-        reset_time_in = 300
-        expected_reset_time = current_time + timedelta(minutes=reset_time_in)
+        expected_reset_time = current_time + timedelta(
+            minutes=payload_data["resetStatusIn"]
+        )
         expected_reset_time_str = expected_reset_time.astimezone().strftime(
             "%Y-%m-%dT%H:%M:%SZ"
         )
 
         returned_reset_time = CapacityStatusRequestPayloadSerializer._resetTime(
-            self, current_time, reset_time_in
+            self, current_time, payload_data
         )
 
         self.assertEqual(
@@ -33,8 +38,50 @@ class TestPayloadSerializer(unittest.TestCase):
             "Returned reset data time is not as expected.",
         )
 
-    def test_convert_to_model_1(self):
-        "Test serializer with full and valid payload"
+    def test_reset_time_amber(self):
+        "Test reset_time method for AMBER status update"
+
+        payload_data = {
+            "capacityStatus": "AMBER",
+            "resetStatusIn": 300,
+        }
+        current_time = datetime.now()
+        expected_reset_time = current_time + timedelta(
+            minutes=payload_data["resetStatusIn"]
+        )
+        expected_reset_time_str = expected_reset_time.astimezone().strftime(
+            "%Y-%m-%dT%H:%M:%SZ"
+        )
+
+        returned_reset_time = CapacityStatusRequestPayloadSerializer._resetTime(
+            self, current_time, payload_data
+        )
+
+        self.assertEqual(
+            returned_reset_time,
+            expected_reset_time_str,
+            "Returned reset data time is not as expected.",
+        )
+
+    def test_reset_time_green(self):
+        "Test reset_time method for GREEN status update"
+
+        payload_data = {
+            "capacityStatus": "GREEN",
+            "resetStatusIn": 300,
+        }
+        current_time = datetime.now()
+
+        returned_reset_time = CapacityStatusRequestPayloadSerializer._resetTime(
+            self, current_time, payload_data
+        )
+
+        self.assertIsNone(
+            returned_reset_time, "Returned reset data time is not None.",
+        )
+
+    def test_convert_to_model(self):
+        "Test serializer with full and valid payload turning to red status"
 
         full_payload_data = {
             "capacityStatus": self.capacity_status,
