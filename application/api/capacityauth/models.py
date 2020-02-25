@@ -21,7 +21,7 @@ class DosUserAPIKey(AbstractAPIKey):
             user = get_dos_user_for_username(str(value))
             logger.debug("DoS user exists with values: %s", user)
             if user.status != "ACTIVE":
-                raise ValidationError
+                raise ValidationError(
                     "Username '%(value)s' is not an 'ACTIVE' DoS user",
                     params={"value": value},
                 )
