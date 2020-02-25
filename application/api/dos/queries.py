@@ -1,5 +1,6 @@
 from django.db import connections
-from .models import Users
+from django.core.exceptions import ObjectDoesNotExist
+from .models import Users, Services
 
 # presumes active services only (statusid 1) for a user with 'Active' status
 can_user_edit_service_sql = """SELECT EXISTS(SELECT 1 FROM users u
@@ -30,3 +31,18 @@ def can_user_edit_service(dos_user_id, service_uid):
 
 def get_dos_user_for_username(dos_username):
     return Users.objects.db_manager("dos").get(username=dos_username)
+
+
+def get_dos_user_for_user_id(dos_user_id):
+    return Users.objects.db_manager("dos").get(id=dos_user_id)
+
+
+def get_dos_service_for_uid(service_uid, throwDoesNotExist=True):
+    if throwDoesNotExist:
+        return Services.objects.db_manager("dos").get(uid=service_uid)
+    else:
+        try:
+            return Services.objects.db_manager("dos").get(uid=service_uid)
+        except ObjectDoesNotExist:
+            return None
+

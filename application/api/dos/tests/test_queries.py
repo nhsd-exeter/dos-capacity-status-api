@@ -88,4 +88,3 @@ class TestCanUserEditService(TestCase):
         self.set_user_status(user_id=1000000001)
         self.set_service_status(service_uid="153455")
         self.set_service_status(service_uid="149198")
-

@@ -15,7 +15,11 @@ from .models import ServiceCapacities
 from api.capacityauth.permissions import HasDosUserAPIKey
 
 from .documentation import description_get, description_post, service_uid_path_param
-from api.capacityauth.authorise import can_dos_user_api_key_edit_service
+from api.capacityauth.authorise import (
+    can_dos_user_api_key_edit_service,
+    get_user_for_key,
+)
+from api.dos.queries import get_dos_service_for_uid
 
 import logging
 
@@ -103,6 +107,27 @@ class CapacityStatusView(RetrieveUpdateAPIView):
 
         return Response(responseSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def _handle_cannot_edit_service_response(self, api_key, service_uid):
+        user = get_user_for_key(api_key)
+        if user is None:
+            msg = "Given DoS user does not exists"
+            status_code = status.HTTP_401_UNAUTHORIZED
+        elif user.status != "ACTIVE":
+            msg = "Given DoS user is inactive"
+            status_code = status.HTTP_401_UNAUTHORIZED
+        else:
+            service = get_dos_service_for_uid(service_uid, throwDoesNotExist=False)
+            if service is None:
+                msg = "Given service does not exist"
+                status_code = status.HTTP_404_NOT_FOUND
+            elif service.statusid != 1:
+                msg = "Given service is not an active service"
+                status_code = status.HTTP_404_NOT_FOUND
+            else:
+                msg = ("Given DoS user does not have authority to edit the service",)
+                status_code = status.HTTP_403_FORBIDDEN
+        return Response(msg, status=status_code)
+
     """
     Updates capacity status details for a service specified by the service UID and returns
     a JSON response containing the newly updated capacity status details for the service.
@@ -111,10 +136,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
     def _process_service_status_update(self, request, service__uid):
         api_key = self.get_permissions()[0].get_key_model(request)
         if not can_dos_user_api_key_edit_service(api_key, str(service__uid)):
-            return Response(
-                "Given DoS user forbidden access to edit",
-                status=status.HTTP_403_FORBIDDEN,
-            )
+            return self._handle_cannot_edit_service_response(api_key, str(service__uid))
 
         request.data["apiUsername"] = api_key.dos_username
         payloadSerializer = CapacityStatusRequestPayloadSerializer(data=request.data)
