@@ -1,6 +1,35 @@
 from .validation import validation_rules
 from drf_yasg import openapi
 
+capacity_service_api_desc = "This is the Capacity Service API. </BR> \
+    </BR> \
+    The API will enable UEC service providers and DoS Leads to change the RAG status \
+    (also known as the Capacity Status) of their active services in DoS by means of a collection \
+    of restful endpoints that can be called from third party systems. </BR> \
+    Upon successful retrieval or update of capacity information, this API will respond \
+    with the current (updated) capacity information for the active service. All required fields \
+    will be returned, but optional fields will not be returned in the cases where no \
+    data is present for them. For example, if there is no reset date/time for an active service \
+    (in the cases where active services are in a GREEN capacity state) the reset date/time field \
+    will not be included in the response. Refer to the endpoint specifications below for \
+    API response details. </BR> \
+    </BR> \
+    <B>API Authentication</B></BR> \
+    </BR> \
+    The API is protected by means of an API Key authentication mechanism. Clients interested \
+    in using the API will need to obtain an API Key from NHSD, and this key will need to be \
+    sent through as part of the request in the call to the API endpoints. </BR> \
+    As part of the API Key creation process, clients will be required to specify a valid and active DoS \
+    user account (username) that the API Key will be associated with. This will be used for \
+    the API's authorisation process (see below). </BR> \
+    </BR> \
+    <B>API Authorisation</B></BR> \
+    </BR> \
+    The endpoints provided by this API that update service capacity information are additionally \
+    protected by an authorisation mechanism which confirms that the DoS user, associated with the \
+    API Key, has the correct permissions configured in DoS to be able to update the target service."
+
+
 response_entities_desc = {
     "rag_status": "<li><B>RAG status</B> - this is the capacity status of the service, and will be updated to the service status defined \
         in the request payload. The API will allow an authenticated and authorised user to update the status of a service to Red, Amber, or Green.</li>",
@@ -54,7 +83,7 @@ description_post = (
     + validation_rules[4]["desc"]
     + "</li><li>"
     + validation_rules[5]["desc"]
-    + "</li></ul> </BR> <B><U>Response Formats</B></U></BR> </BR> Please refer to the models section of this document for the response formats."
+    + "</li></ul> </BR> <B><U>Response Formats</B></U></BR> </BR> Please refer to the Response section of this document for the response formats."
 )
 description_get = (
     description_model["get__firstline"]

@@ -9,7 +9,11 @@ from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework_api_key.permissions import HasAPIKey
 
 from .serializers.model_serializers import CapacityStatusModelSerializer
-from .serializers.payload_serializer import CapacityStatusRequestPayloadSerializer
+from .serializers.payload_serializer import (
+    CapacityStatusRequestPayloadSerializer,
+    CapacityValidationErrorReponseSerializer,
+)
+
 from .serializers.response_serializer import CapacityStatusResponseSerializer
 
 from .models import ServiceCapacities
@@ -38,9 +42,8 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         manual_parameters=[service_uid_path_param],
         responses={
             200: CapacityStatusResponseSerializer,
-            404: "The capacity status for the requested service was not found.",
-            400: "Bad Request - upon receiving a corrupt request or a request which fails API validation rules.",
-            401: "Unauthorized - when a user is unauthorized to use this API.",
+            401: "Unauthorized - when a user is not authenticated to use this API.",
+            404: "Not Found - when the requested service is either not active or could not be found in DoS.",
         },
     )
     def get(self, request, service__uid):
@@ -61,11 +64,10 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         manual_parameters=[service_uid_path_param],
         responses={
             200: CapacityStatusResponseSerializer,
-            400: "Bad Request - upon receiving a corrupt request or a request which fails API validation rules.",
-            401: "Unauthorized - when a user is unauthorized to use this API.",
-            403: "Forbidden - when a user is not authorized to update the status of the requested service.",
-            404: "Not Found - when the requested service to update could not be found in DoS.",
-            408: "Request Timeout - when the server times out waiting for a request to be processed.",
+            400: CapacityValidationErrorReponseSerializer,
+            401: "Unauthorized - when a user is not authenticated to use this API.",
+            403: "Forbidden - when a user is either not active, or does not have permissions to update capacity information for the requested service.",
+            404: "Not Found - when the requested service to update is either not active, or could not be found in DoS.",
             500: "Internal Server Error - when an unexpected error is encountered whilst processing the request.",
         },
         request_body=CapacityStatusRequestPayloadSerializer,
@@ -85,11 +87,10 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         manual_parameters=[service_uid_path_param],
         responses={
             200: CapacityStatusResponseSerializer,
-            400: "Bad Request - upon receiving a corrupt request or a request which fails API validation rules.",
-            401: "Unauthorized - when a user is unauthorized to use this API.",
-            403: "Forbidden - when a user is not authorized to update the status of the requested service.",
-            404: "Not Found - when the requested service to update could not be found in DoS.",
-            408: "Request Timeout - when the server times out waiting for a request to be processed.",
+            400: CapacityValidationErrorReponseSerializer,
+            401: "Unauthorized - when a user is not authenticated to use this API.",
+            403: "Forbidden - when a user is either not active, or does not have permissions to update capacity information for the requested service.",
+            404: "Not Found - when the requested service to update is either not active, or could not be found in DoS.",
             500: "Internal Server Error - when an unexpected error is encountered whilst processing the request.",
         },
         request_body=CapacityStatusRequestPayloadSerializer,
