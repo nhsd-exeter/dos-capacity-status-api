@@ -116,8 +116,13 @@ class CapacityStatusView(RetrieveUpdateAPIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        request.data["apiUsername"] = api_key.dos_username
-        payloadSerializer = CapacityStatusRequestPayloadSerializer(data=request.data)
+        context = {
+            "apiUsername": api_key.dos_username,
+            "apiUserId": api_key.dos_user_id,
+        }
+        payloadSerializer = CapacityStatusRequestPayloadSerializer(
+            data=request.data, context=context
+        )
         if payloadSerializer.is_valid():
             modelData = payloadSerializer.convertToModel(data=request.data)
             modelSerializer = CapacityStatusModelSerializer(data=modelData)
