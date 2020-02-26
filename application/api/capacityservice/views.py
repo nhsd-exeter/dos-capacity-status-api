@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from rest_framework.response import Response
 
@@ -84,15 +85,59 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         logger.info("Payload: %s", request.data)
         return self._process_service_status_update(request, service__uid)
 
+    def _handle_check_dos_user(self, api_key):
+        user = get_user_for_key(api_key)
+        if user is None:
+            is_valid_user = False
+            status_msg = "Given DoS user does not exists"
+            status_code = status.HTTP_401_UNAUTHORIZED
+        elif user.status != "ACTIVE":
+            is_valid_user = False
+            status_msg = "Given DoS user is inactive"
+            status_code = status.HTTP_401_UNAUTHORIZED
+        else:
+            is_valid_user = True
+            status_msg = None
+            status_code = None
+        return is_valid_user, status_msg, status_code
+
+    def _handle_check_dos_service(self, service):
+        if service is None:
+            is_valid_service = False
+            status_msg = "Given service does not exist"
+            status_code = status.HTTP_404_NOT_FOUND
+        elif service.statusid != 1:
+            is_valid_service = False
+            status_msg = "Given service is not an active service"
+            status_code = status.HTTP_404_NOT_FOUND
+        else:
+            is_valid_service = True
+            status_msg = None
+            status_code = None
+        return is_valid_service, status_msg, status_code
+
     """
     Returns a JSON response containing service status details for the service specified via the
     service UID.
     """
 
     def _process_service_status_retrieval(self, request, service__uid):
-        service_status = ServiceCapacities.objects.db_manager("dos").get(
-            service__uid=service__uid
-        )
+        api_key = self.get_permissions()[0].get_key_model(request)
+        is_valid_user, msg, sc = self._handle_check_dos_user(api_key)
+        if not is_valid_user:
+            return Response(msg, status=sc)
+
+        try:
+            capacitiesManager = ServiceCapacities.objects.db_manager("dos")
+            service_status = capacitiesManager.get(service__uid=service__uid)
+            service = service_status.service
+        except ObjectDoesNotExist:
+            service = None
+
+        is_valid_service, msg, sc = self._handle_check_dos_service(service)
+        if not is_valid_service:
+            return Response(msg, status=sc)
+
         logger.info("In status retrieval")
         modelSerializer = CapacityStatusModelSerializer(service_status)
 
@@ -108,25 +153,14 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         return Response(responseSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def _handle_cannot_edit_service_response(self, api_key, service_uid):
-        user = get_user_for_key(api_key)
-        if user is None:
-            msg = "Given DoS user does not exists"
-            status_code = status.HTTP_401_UNAUTHORIZED
-        elif user.status != "ACTIVE":
-            msg = "Given DoS user is inactive"
-            status_code = status.HTTP_401_UNAUTHORIZED
-        else:
+        is_valid_user, msg, sc = self._handle_check_dos_user(api_key)
+        if is_valid_user:
             service = get_dos_service_for_uid(service_uid, throwDoesNotExist=False)
-            if service is None:
-                msg = "Given service does not exist"
-                status_code = status.HTTP_404_NOT_FOUND
-            elif service.statusid != 1:
-                msg = "Given service is not an active service"
-                status_code = status.HTTP_404_NOT_FOUND
-            else:
-                msg = ("Given DoS user does not have authority to edit the service",)
-                status_code = status.HTTP_403_FORBIDDEN
-        return Response(msg, status=status_code)
+            is_valid_service, msg, sc = self._handle_check_dos_service(service)
+            if is_valid_service:
+                msg = "Given DoS user does not have authority to edit the service"
+                sc = status.HTTP_403_FORBIDDEN
+        return Response(msg, status=sc)
 
     """
     Updates capacity status details for a service specified by the service UID and returns
