@@ -14,7 +14,6 @@ can_user_edit_service_sql = """SELECT EXISTS(SELECT 1 FROM users u
             union
             select s.id, s.parentid from services s
             join service_ancestry d on d.parentid = s.id
-            where s.statusid = 1
         )
         select id from service_ancestry)
     );"""
