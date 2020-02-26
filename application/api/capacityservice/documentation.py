@@ -1,18 +1,21 @@
 from .validation import validation_rules
 from drf_yasg import openapi
 
-capacity_service_api_desc = "This is the Capacity Service API. </BR> \
+capacity_service_api_desc = "This is the Capacity Status API. </BR> \
     </BR> \
-    The API will enable UEC service providers and DoS Leads to change the RAG status \
-    (also known as the Capacity Status) of their active services in DoS by means of a collection \
+    The API will enable UEC service providers and DoS Leads to change the Capacity Status \
+    (also known as the RAG Status) of their active services in DoS by means of a collection \
     of restful endpoints that can be called from third party systems. </BR> \
     Upon successful retrieval or update of capacity information, this API will respond \
     with the current (updated) capacity information for the active service. All required fields \
     will be returned, but optional fields will not be returned in the cases where no \
     data is present for them. For example, if there is no reset date/time for an active service \
-    (in the cases where active services are in a GREEN capacity state) the reset date/time field \
+    (in the case where the active service is in a GREEN capacity state) the reset date/time field \
     will not be included in the response. Refer to the endpoint specifications below for \
     API response details. </BR> \
+    All endpoints of this API require that the UID of the service to retrieve/update is given in \
+    the URL. If no such active service can be found in DoS for the given UID an HTTP-404 error code \
+    will be returned. </BR>\
     </BR> \
     <B>API Authentication</B></BR> \
     </BR> \
@@ -21,51 +24,53 @@ capacity_service_api_desc = "This is the Capacity Service API. </BR> \
     sent through as part of the request in the call to the API endpoints. </BR> \
     As part of the API Key creation process, clients will be required to specify a valid and active DoS \
     user account (username) that the API Key will be associated with. This will be used for \
-    the API's authorisation process (see below). </BR> \
+    the API's authorisation process. </BR> \
     </BR> \
     <B>API Authorisation</B></BR> \
     </BR> \
     The endpoints provided by this API that update service capacity information are additionally \
-    protected by an authorisation mechanism which confirms that the DoS user, associated with the \
-    API Key, has the correct permissions configured in DoS to be able to update the target service."
+    protected by an authorisation mechanism which confirms that the DoS user (associated with the \
+    API Key) has the correct permissions configured in DoS to be able to update the target service. \
+    In the event that a DoS User does not have permissions to update the capacity status of a service, \
+    an HTTP-403 error code will be returned and the capacity status information of the service will \
+    not be updated."
 
 
 response_entities_desc = {
-    "rag_status": "<li><B>RAG status</B> - this is the capacity status of the service, and will be updated to the service status defined \
-        in the request payload. The API will allow an authenticated and authorised user to update the status of a service to Red, Amber, or Green.</li>",
-    "reset_status_in": "<li><B>Reset status in</B> - this is the time when the service will go back into a Green status having been set to either \
-        Amber or Red by the request. The reset time will be set to the date and time when the service status is updated (or maintained) plus the amount \
-        of time in minutes as defined by the reset time value in the request payload. If this value is 0 or not provided, the reset time will default to \
-        4 hours from the time the service status is updated. A status change to Red or Amber for a service will persist for a maximum period of 24 hours \
+    "rag_status": "<li><B>Capacity status</B> - the capacity status of the service that is updated to the capacity status given \
+        in the request payload. The capacity status can be set to Red, Amber, or Green.</li>",
+    "reset_status_in": "<li><B>Reset time</B> - the date and time when the service will automatically transition back to a Green capacity status having been set to either \
+        Amber or Red by the request. The reset time will be set to the date and time when the capacity status is updated (or maintained) plus the amount \
+        of time in minutes as defined by the resetStatusIn value given in the request payload. If this value is not provided, the reset time will default to \
+        4 hours from the time the capacity status is updated. A capacity status change to Red or Amber for a service can be set to persist for a maximum period of 24 hours \
         per request before automatically being reset back to Green. This means that if a service needs to be Red or Amber for over 24 hours, multiple \
         requests through this API for that service will be required. </li>",
-    "notes": "<li><B>Notes</B> - a free text field providing the opportunity for any additional ad-hoc notes to be added regarding the status change. \
-        Notes defined in the request payload will be appended to the text: RAG status set by the Capacity Service API -. </li>",
-    "last_updated": "<li><B>Last updated date/time</B> - this is a timestamp of when the service was last updated and will be set to the date and time \
-        that the service was updated. </li>",
-    "by": "<li><B>By</B> - this is a record of who last updated the service, and will be updated to the user identifier for the user that posted the \
-        request to the API.</li>",
+    "notes": "<li><B>Notes</B> - a free text field providing the opportunity for any additional notes to be logged regarding the capacity status change. \
+        Notes given in the request payload will be appended to the text: Capacity status set by the Capacity Service API -. </li>",
+    "last_updated": "<li><B>Last updated date/time</B> - a timestamp of when the service was updated by the API.</li>",
+    "by": "<li><B>Modified by</B> - the name of the DoS User (associated with the API key) who last updated the capacity information of the service.</li>",
 }
 description_model = {
     "post__firstline": "This endpoint will update the capacity (RAG) status of a single service in DoS as specified in the request body JSON payload. \
         The format of the JSON payload is described further down in this document.",
     "business_logic_header": "</BR></BR> <B><U>Business Logic</B></U></BR></BR>",
     "request_validation_header": "</BR> </BR> <B><U>Request Validation</B></U></BR></BR>",
-    "post__business_logic_content": "Upon processing a successful request, the API will return the success response (see below for the format of the \
-        success response) and will update DoS with the following information: </BR> <ul>"
+    "post__business_logic_content": "Upon processing a successful request, the API will return a success \
+        response containing the capacity status information for the given service and will update DoS with \
+        the following information: </BR> <ul>"
     + response_entities_desc["rag_status"]
     + response_entities_desc["reset_status_in"]
     + response_entities_desc["notes"]
     + response_entities_desc["last_updated"]
     + response_entities_desc["by"]
-    + "</ul></BR> Requests that fail the request validation rules will not be processed and will return the validation error response (see below for \
-        the validation rules and the format of the validation error response). </BR></BR> Requests that fail to be processed due to an error or failure \
-        will return an error response (see below for the format of the error response)",
-    "get__firstline": "This endpoint will return capacity status information for the service specified for an authenticated user.",
-    "get__business_logic_content": "Upon processing a successful request, the API will return the success service status response (see below for the format \
-        of this response.) </BR> Requests that fail the request validation rules will not be processed and will return the validation error response (see \
-        below for the validation rules and the format of the validation error response). </BR></BR> Requests that fail to be processed due to an error or \
-        failure will return an error response (see below for the format of the error response)",
+    + "</ul></BR> Requests that fail the request validation rules will not be processed and will return a validation error response (see below for \
+        the validation rules). </BR></BR> Requests that fail to be processed due to an error or failure \
+        will return an error response. The format of the responses are defined below",
+    "get__firstline": "This endpoint will return capacity status information for the service specified for an authenticated and authorised user.",
+    "get__business_logic_content": "Upon processing a successful request, the API will return a success service status response \
+        containing the capacity status information for the given service. </BR> \
+        Requests that fail to be processed due to an error or \
+        failure will return an error response. The format of the responses are defined below.",
 }
 description_post = (
     description_model["post__firstline"]
@@ -86,7 +91,7 @@ description_post = (
     + "</li></ul> </BR> <B><U>Response Formats</B></U></BR> </BR> Please refer to the Response section of this document for the response formats."
 )
 description_get = (
-    description_model["get__firstline"]
+    "This endpoint will return capacity status information for the service specified for an authenticated user."
     + description_model["business_logic_header"]
     + description_model["get__business_logic_content"]
 )
@@ -94,6 +99,8 @@ description_get = (
 service_uid_path_param = openapi.Parameter(
     "service__uid",
     in_="path",
-    description="The UID which identifies the service",
+    description="The service UID identifying the service to retrieve/update its capacity status information.",
     type=openapi.TYPE_STRING,
 )
+
+validation_error_response = '<td class="response-col_description"><div class="response-col_description__inner"><div class="markdown"><div class="response-col_description__inner"></div><div class="model-example"><ul class="tab"><li class="tabitem active"><a data-name="example" class="tablinks">Model and example</a></li></ul><div><div class="model-box"><span class="model"><span class=""><span style="cursor: pointer;"><span class="model-title"><span class="model-hint">http://localhost:8000/api/v0.0.1/capacity/apidoc/?format=openapi#/definitions/CapacityValidationErrorReponse</span><span class="model-title__text">CapacityValidationErrorReponse</span></span></span><span style="cursor: pointer;"><span class="model-toggle"></span></span><span class="brace-open object">{</span><span class="model-jump-to-path"></span><span class="inner-object">&nbsp;<table class="model"><tbody><tr class="false"><td style="vertical-align: top; padding-right: 0.2em;">capacityStatus</td><td style="vertical-align: top;"><span class="model"><span class=""><span style="cursor: pointer;"><span class="model-toggle"></span></span>[<div class="markdown"><p>A list of validation errors associated with the capacityStatus payload field.             Refer to Request Validation in the endpoint description</p> </div><span><span class="model"><span class="prop"><span class="prop-type">string</span></span></span></span>]</span></span></td></tr><tr class="false"><td style="vertical-align: top; padding-right: 0.2em;">resetStatusIn</td><td style="vertical-align: top;"><span class="model"><span class=""><span style="cursor: pointer;"><span class="model-toggle"></span></span>[<div class="markdown"><p>A list of validation errors associated with the resetStatusIn payload field.             Refer to Request Validation in the endpoint description</p> </div><span><span class="model"><span class="prop"><span class="prop-type">string</span></span></span></span>]</span></span></td></tr><tr class="false"><td style="vertical-align: top; padding-right: 0.2em;">notes</td><td style="vertical-align: top;"><span class="model"><span class=""><span style="cursor: pointer;"><span class="model-toggle"></span></span>[<div class="markdown"><p>A list of validation errors associated with the notes payload field.             Refer to Request Validation in the endpoint description</p> </div><span><span class="model"><span class="prop"><span class="prop-type">string</span></span></span></span>]</span></span></td></tr><tr></tr></tbody></table></span><span class="brace-close">}</span><span><br></span><span><br></span><span style="">{</span><span>"capacityStatus"</span><span style="">:</span><span style="">[</span><span style="color: #0;">"VAL-0001 - A Capacity Status (capacityStatus) has not been given"</span><span style="">]</span><span style="">}</span></span></span></div><div><br></div></div></div></div></div></td>'

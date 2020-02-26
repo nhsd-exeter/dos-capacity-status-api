@@ -9,22 +9,24 @@ from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework_api_key.permissions import HasAPIKey
 
 from .serializers.model_serializers import CapacityStatusModelSerializer
-from .serializers.payload_serializer import (
-    CapacityStatusRequestPayloadSerializer,
-    CapacityValidationErrorReponseSerializer,
-)
+from .serializers.payload_serializer import CapacityStatusRequestPayloadSerializer
 
 from .serializers.response_serializer import CapacityStatusResponseSerializer
 
 from .models import ServiceCapacities
 from api.capacityauth.permissions import HasDosUserAPIKey
 
-from .documentation import description_get, description_post, service_uid_path_param
 from api.capacityauth.authorise import (
     can_dos_user_api_key_edit_service,
     get_user_for_key,
 )
 from api.dos.queries import get_dos_service_for_uid
+from .documentation import (
+    description_get,
+    description_post,
+    service_uid_path_param,
+    validation_error_response,
+)
 
 import logging
 
@@ -42,7 +44,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         manual_parameters=[service_uid_path_param],
         responses={
             200: CapacityStatusResponseSerializer,
-            401: "Unauthorized - when a user is not authenticated to use this API.",
+            401: "Unauthorized - when a user is either no longer active in DoS or is not authenticated to use this API.",
             404: "Not Found - when the requested service is either not active or could not be found in DoS.",
         },
     )
@@ -64,9 +66,9 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         manual_parameters=[service_uid_path_param],
         responses={
             200: CapacityStatusResponseSerializer,
-            400: CapacityValidationErrorReponseSerializer,
-            401: "Unauthorized - when a user is not authenticated to use this API.",
-            403: "Forbidden - when a user is either not active, or does not have permissions to update capacity information for the requested service.",
+            400: validation_error_response,
+            401: "Unauthorized - when a user is either no longer active in DoS or is not authenticated to use this API.",
+            403: "Forbidden - when a user does not have permissions to update capacity information for the requested service.",
             404: "Not Found - when the requested service to update is either not active, or could not be found in DoS.",
             500: "Internal Server Error - when an unexpected error is encountered whilst processing the request.",
         },
@@ -87,9 +89,9 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         manual_parameters=[service_uid_path_param],
         responses={
             200: CapacityStatusResponseSerializer,
-            400: CapacityValidationErrorReponseSerializer,
-            401: "Unauthorized - when a user is not authenticated to use this API.",
-            403: "Forbidden - when a user is either not active, or does not have permissions to update capacity information for the requested service.",
+            400: validation_error_response,
+            401: "Unauthorized - when a user is either no longer active in DoS or is not authenticated to use this API.",
+            403: "Forbidden - when a user does not have permissions to update capacity information for the requested service.",
             404: "Not Found - when the requested service to update is either not active, or could not be found in DoS.",
             500: "Internal Server Error - when an unexpected error is encountered whilst processing the request.",
         },

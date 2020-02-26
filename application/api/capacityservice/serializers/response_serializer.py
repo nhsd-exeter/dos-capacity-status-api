@@ -35,7 +35,8 @@ class CapacityStatusResponseSerializer(serializers.Serializer):
     )
 
     notes = serializers.CharField(
-        required=False, help_text="Notes associated with the service.",
+        required=False,
+        help_text="Notes associated with the capacity status of the service.",
     )
 
     modifiedBy = serializers.CharField(
@@ -45,7 +46,7 @@ class CapacityStatusResponseSerializer(serializers.Serializer):
 
     modifiedDate = serializers.DateTimeField(
         required=False,
-        help_text="The date and time when the capacity status was last updated.",
+        help_text="The date and time of when the capacity status of the service was last updated.",
     )
 
     def convertModelToResponse(data):

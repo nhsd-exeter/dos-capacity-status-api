@@ -30,7 +30,7 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
     capacityStatus = serializers.ChoiceField(
         required=True,
         choices=CAPACITY_STATUS_CHOICES,
-        help_text="The RAG status to set the service to.",
+        help_text="The capacity status (RAG status) to set the service to. This value is not case sensitive.",
         error_messages={
             "required": validation_rules[1]["error_msg"],
             "invalid_choice": validation_rules[2]["error_msg"],
@@ -39,9 +39,9 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
     notes = serializers.CharField(
         required=False,
         max_length=900,
-        default="RAG status set by Capacity Service API",
+        default="Capacity status set by Capacity Service API",
         help_text="Optional field of up to 900 characters to add ad-hoc notes to this status update action. Any \
-            notes provided will be appended to the end of the default notes set by the API, e.g. RAG status set \
+            notes provided will be appended to the end of the default notes set by the API, e.g. Capacity status set \
                 by the Capacity Service API - additional notes here.",
         error_messages={"max_length": validation_rules[5]["error_msg"]},
     )
@@ -51,7 +51,7 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
         min_value=0,
         max_value=1440,
         help_text="The amount of time, specified in 1 minute blocks up to and including 24 hours (1440 minutes), \
-            from the time the service status is updated by the request to reset the RAG status of the service back \
+            from the time the capacity status is updated by the request to reset the capacity status of the service back \
                 to GREEN. If no value or 0 is provided, the reset time will default to 4 hours (240 minutes).",
         error_messages={
             "invalid": validation_rules[3]["error_msg"],
@@ -119,28 +119,3 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
             reset_time = current_date + timedelta(minutes=payload_data["resetStatusIn"])
             new_reset_dt = reset_time.astimezone().strftime("%Y-%m-%dT%H:%M:%SZ")
         return new_reset_dt
-
-
-"""
-This is the standard definition of the validation response from Django, with our validation
-fields added in. This is used for defining the validation response for the API documentation
-"""
-
-
-class CapacityValidationErrorReponseSerializer(serializers.Serializer):
-
-    capacityStatus = serializers.ListField(
-        required=False,
-        help_text="A list of validation errors associated with the capacityStatus payload field. \
-            Refer to Request Validation in the endpoint description",
-    )
-    resetStatusIn = serializers.ListField(
-        required=False,
-        help_text="A list of validation errors associated with the resetStatusIn payload field. \
-            Refer to Request Validation in the endpoint description",
-    )
-    notes = serializers.ListField(
-        required=False,
-        help_text="A list of validation errors associated with the notes payload field. \
-            Refer to Request Validation in the endpoint description",
-    )
