@@ -45,7 +45,14 @@ class CapacityStatusView(RetrieveUpdateAPIView):
     )
     def get(self, request, service__uid):
         logger.info("Request sent from host: %s", request.META["HTTP_HOST"])
-        return self._process_service_status_retrieval(request, service__uid)
+        is_user_valid, msg, sc = self._handle_check_dos_user(request)
+        if is_user_valid:
+            service_capacity = self._get_service_capcitystatus(service__uid)
+            service = self._get_service_or_none_from_capacity(service_capacity)
+            is_valid_service, msg, sc = self._handle_check_service(service)
+            if is_valid_service:
+                return self._serialized_get_capacity_response(service_capacity)
+        return Response(msg, status=sc)
 
     @swagger_auto_schema(
         operation_description=description_post,
@@ -64,6 +71,14 @@ class CapacityStatusView(RetrieveUpdateAPIView):
     def put(self, request, service__uid):
         logger.info("Request sent from host: %s", request.META["HTTP_HOST"])
         logger.info("Payload: %s", request.data)
+        # TODO Replace refactor scaffolding with implementation
+        # check_user() - -_handle_check_dos_user
+        # service_capacity_info = retrieve_service() - -_process_service_status_retrieval
+        # check_service_active(service_capacity_info.service) - -_handle_check_dos_service
+        # check_user_permissions()
+        # update()
+        # retrieve_service()
+        # respond(service_capacity_info) - -_process_service_status_retrieval
         return self._process_service_status_update(request, service__uid)
 
     @swagger_auto_schema(
@@ -85,11 +100,12 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         logger.info("Payload: %s", request.data)
         return self._process_service_status_update(request, service__uid)
 
-    def _handle_check_dos_user(self, api_key):
+    def _handle_check_dos_user(self, request):
+        api_key = self.get_permissions()[0].get_key_model(request)
         user = get_user_for_key(api_key)
         if user is None:
             is_valid_user = False
-            status_msg = "Given DoS user does not exists"
+            status_msg = "Given DoS user does not exist"
             status_code = status.HTTP_401_UNAUTHORIZED
         elif user.status != "ACTIVE":
             is_valid_user = False
@@ -101,7 +117,12 @@ class CapacityStatusView(RetrieveUpdateAPIView):
             status_code = None
         return is_valid_user, status_msg, status_code
 
-    def _handle_check_dos_service(self, service):
+    def _get_service_or_none_from_capacity(self, service_capacity):
+        if service_capacity:
+            return service_capacity.service
+        return None
+
+    def _handle_check_service(self, service):
         if service is None:
             is_valid_service = False
             status_msg = "Given service does not exist"
@@ -115,6 +136,23 @@ class CapacityStatusView(RetrieveUpdateAPIView):
             status_msg = None
             status_code = None
         return is_valid_service, status_msg, status_code
+
+    def _get_service_capcitystatus(self, service_uid):
+        try:
+            capacitiesManager = ServiceCapacities.objects.db_manager("dos")
+            service_status = capacitiesManager.get(service__uid=service_uid)
+            return service_status
+        except ObjectDoesNotExist:
+            return None
+
+    def _serialized_get_capacity_response(self, service_capacity):
+        logger.info("In status retrieval")
+        model_data = CapacityStatusModelSerializer(service_capacity).data
+        response = CapacityStatusResponseSerializer.convertModelToResponse(model_data)
+        responseSerializer = CapacityStatusResponseSerializer(data=response)
+        if responseSerializer.is_valid():
+            return Response(responseSerializer.data)
+        return Response(responseSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     """
     Returns a JSON response containing service status details for the service specified via the
