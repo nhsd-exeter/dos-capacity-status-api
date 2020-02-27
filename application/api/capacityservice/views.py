@@ -71,15 +71,12 @@ class CapacityStatusView(RetrieveUpdateAPIView):
     def put(self, request, service__uid):
         logger.info("Request sent from host: %s", request.META["HTTP_HOST"])
         logger.info("Payload: %s", request.data)
-        # TODO Replace refactor scaffolding with implementation
-        # check_user() - -_handle_check_dos_user
-        # service_capacity_info = retrieve_service() - -_process_service_status_retrieval
-        # check_service_active(service_capacity_info.service) - -_handle_check_dos_service
-        # check_user_permissions()
-        # update()
-        # retrieve_service()
-        # respond(service_capacity_info) - -_process_service_status_retrieval
-        return self._process_service_status_update(request, service__uid)
+        if self._can_edit_service(request, str(service__uid)):
+            error_response = self._update_service_capacity(request, service__uid)
+            if not error_response:
+                return self._serialized_update_capacity_response(service__uid)
+            return error_response
+        return self._handle_cannot_edit_service_response(request, str(service__uid))
 
     @swagger_auto_schema(
         operation_description=description_post,
@@ -98,7 +95,12 @@ class CapacityStatusView(RetrieveUpdateAPIView):
     def patch(self, request, service__uid, partial=True):
         logger.info("Request sent from host: %s", request.META["HTTP_HOST"])
         logger.info("Payload: %s", request.data)
-        return self._process_service_status_update(request, service__uid)
+        if self._can_edit_service(request, str(service__uid)):
+            error_response = self._update_service_capacity(request, service__uid)
+            if not error_response:
+                return self._serialized_update_capacity_response(service__uid)
+            return error_response
+        return self._handle_cannot_edit_service_response(request, str(service__uid))
 
     def _handle_check_dos_user(self, request):
         api_key = self.get_permissions()[0].get_key_model(request)
@@ -129,7 +131,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
             status_code = status.HTTP_404_NOT_FOUND
         elif service.statusid != 1:
             is_valid_service = False
-            status_msg = "Given service is not an active service"
+            status_msg = "Given service is not active service"
             status_code = status.HTTP_404_NOT_FOUND
         else:
             is_valid_service = True
@@ -153,6 +155,37 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         if responseSerializer.is_valid():
             return Response(responseSerializer.data)
         return Response(responseSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def _can_edit_service(self, request, service_uid):
+        api_key = self.get_permissions()[0].get_key_model(request)
+        return can_dos_user_api_key_edit_service(api_key, service_uid)
+
+    def _update_service_capacity(self, request, service__uid):
+        api_key = self.get_permissions()[0].get_key_model(request)
+        request.data["apiUsername"] = api_key.dos_username
+        payload_serializer = CapacityStatusRequestPayloadSerializer(data=request.data)
+        if payload_serializer.is_valid():
+            model_data = payload_serializer.convertToModel(data=request.data)
+            model_serializer = CapacityStatusModelSerializer(data=model_data)
+            if model_serializer.is_valid():
+                self.partial_update(request, service__uid, partial=True)
+                return None
+            return Response(model_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(payload_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def _serialized_update_capacity_response(self, service_uid):
+        service_capacity = self._get_service_capcitystatus(service_uid)
+        return self._serialized_get_capacity_response(service_capacity)
+
+    def _handle_cannot_edit_service_response(self, request, service_uid):
+        is_valid_user, msg, sc = self._handle_check_dos_user(request)
+        if is_valid_user:
+            service = get_dos_service_for_uid(service_uid, throwDoesNotExist=False)
+            is_valid_service, msg, sc = self._handle_check_service(service)
+            if is_valid_service:
+                msg = "Given DoS user does not have authority to edit the service"
+                sc = status.HTTP_403_FORBIDDEN
+        return Response(msg, status=sc)
 
     """
     Returns a JSON response containing service status details for the service specified via the
@@ -189,16 +222,6 @@ class CapacityStatusView(RetrieveUpdateAPIView):
             return Response(responseSerializer.data)
 
         return Response(responseSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def _handle_cannot_edit_service_response(self, api_key, service_uid):
-        is_valid_user, msg, sc = self._handle_check_dos_user(api_key)
-        if is_valid_user:
-            service = get_dos_service_for_uid(service_uid, throwDoesNotExist=False)
-            is_valid_service, msg, sc = self._handle_check_dos_service(service)
-            if is_valid_service:
-                msg = "Given DoS user does not have authority to edit the service"
-                sc = status.HTTP_403_FORBIDDEN
-        return Response(msg, status=sc)
 
     """
     Updates capacity status details for a service specified by the service UID and returns
