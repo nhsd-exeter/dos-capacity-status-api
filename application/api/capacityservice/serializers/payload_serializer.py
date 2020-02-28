@@ -66,7 +66,8 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
     """
 
     def to_internal_value(self, data):
-        data["capacityStatus"] = data["capacityStatus"].upper()
+        if "capacityStatus" in data:
+            data["capacityStatus"] = data["capacityStatus"].upper()
         return super().to_internal_value(data)
 
     """
@@ -84,6 +85,7 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
         )
 
         payload_data = super().validated_data
+        context = super().context
 
         data["resetdatetime"] = self._resetTime(datetime.now(), payload_data)
 
@@ -99,7 +101,8 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
             notes = notes + " - " + data["notes"]
         data["notes"] = notes
 
-        data["modifiedby"] = data["apiUsername"]
+        data["modifiedbyid"] = context["apiUserId"]
+        data["modifiedby"] = context["apiUsername"]
         data["modifieddate"] = (
             datetime.now().astimezone().strftime("%Y-%m-%dT%H:%M:%SZ")
         )
