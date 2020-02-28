@@ -67,8 +67,8 @@ description_model = {
         the validation rules). </BR></BR> Requests that fail to be processed due to an error or failure \
         will return an error response. The format of the responses are defined below",
     "get__firstline": "This endpoint will return capacity status information for the service specified for an authenticated and authorised user.",
-    "get__business_logic_content": "Upon processing a successful request, the API will return a success service status response \
-        containing the capacity status information for the given service. </BR> \
+    "get__business_logic_content": "Upon processing a successful request, the API will return a success response \
+        containing the capacity status information of the given service. </BR> \
         Requests that fail to be processed due to an error or \
         failure will return an error response. The format of the responses are defined below.",
 }
