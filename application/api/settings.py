@@ -183,10 +183,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
 
-REST_FRAMEWORK = {
-    "EXCEPTION_HANDLER": "api.capacityservice.exception_handler.custom_exception_handler"
-}
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/

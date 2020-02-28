@@ -103,4 +103,30 @@ service_uid_path_param = openapi.Parameter(
     type=openapi.TYPE_STRING,
 )
 
-validation_error_response = '<td class="response-col_description"><div class="response-col_description__inner"><div class="markdown"><div class="response-col_description__inner"></div><div class="model-example"><ul class="tab"><li class="tabitem active"><a data-name="example" class="tablinks">Model and example</a></li></ul><div><div class="model-box"><span class="model"><span class=""><span style="cursor: pointer;"><span class="model-title"><span class="model-hint">http://localhost:8000/api/v0.0.1/capacity/apidoc/?format=openapi#/definitions/CapacityValidationErrorReponse</span><span class="model-title__text">CapacityValidationErrorReponse</span></span></span><span style="cursor: pointer;"><span class="model-toggle"></span></span><span class="brace-open object">{</span><span class="model-jump-to-path"></span><span class="inner-object">&nbsp;<table class="model"><tbody><tr class="false"><td style="vertical-align: top; padding-right: 0.2em;">capacityStatus</td><td style="vertical-align: top;"><span class="model"><span class=""><span style="cursor: pointer;"><span class="model-toggle"></span></span>[<div class="markdown"><p>A list of validation errors associated with the capacityStatus payload field.             Refer to Request Validation in the endpoint description</p> </div><span><span class="model"><span class="prop"><span class="prop-type">string</span></span></span></span>]</span></span></td></tr><tr class="false"><td style="vertical-align: top; padding-right: 0.2em;">resetStatusIn</td><td style="vertical-align: top;"><span class="model"><span class=""><span style="cursor: pointer;"><span class="model-toggle"></span></span>[<div class="markdown"><p>A list of validation errors associated with the resetStatusIn payload field.             Refer to Request Validation in the endpoint description</p> </div><span><span class="model"><span class="prop"><span class="prop-type">string</span></span></span></span>]</span></span></td></tr><tr class="false"><td style="vertical-align: top; padding-right: 0.2em;">notes</td><td style="vertical-align: top;"><span class="model"><span class=""><span style="cursor: pointer;"><span class="model-toggle"></span></span>[<div class="markdown"><p>A list of validation errors associated with the notes payload field.             Refer to Request Validation in the endpoint description</p> </div><span><span class="model"><span class="prop"><span class="prop-type">string</span></span></span></span>]</span></span></td></tr><tr></tr></tbody></table></span><span class="brace-close">}</span><span><br></span><span><br></span><span style="">{</span><span>"capacityStatus"</span><span style="">:</span><span style="">[</span><span style="color: #0;">"VAL-0001 - A Capacity Status (capacityStatus) has not been given"</span><span style="">]</span><span style="">}</span></span></span></div><div><br></div></div></div></div></div></td>'
+validation_error_response = '<td class="response-col_description"><div class="response-col_description__inner">\
+    <div class="markdown"><div class="response-col_description__inner"></div><div class="model-example">\
+    <ul class="tab"><li class="tabitem active"><a data-name="example" class="tablinks">Model and example</a>\
+    </li></ul><div><div class="model-box"><span class="model"><span class=""><span style="cursor: pointer;">\
+    <span class="model-title"><span class="model-hint">http://localhost:8000/api/v0.0.1/capacity/apidoc/?format=openapi#/definitions/CapacityValidationErrorReponse</span>\
+    <span class="model-title__text">CapacityValidationErrorReponse</span></span></span><span style="cursor: pointer;">\
+    <span class="model-toggle"></span></span><span class="brace-open object">{</span><span class="model-jump-to-path">\
+    </span><span class="inner-object">&nbsp;<table class="model"><tbody><tr class="false">\
+    <td style="vertical-align: top; padding-right: 0.2em;">capacityStatus</td><td style="vertical-align: top;">\
+    <span class="model"><span class=""><span style="cursor: pointer;"><span class="model-toggle"></span>\
+    </span>[<div class="markdown"><p>A list of validation errors associated with the capacityStatus payload field.             \
+    Refer to Request Validation in the endpoint description</p> </div><span><span class="model"><span class="prop">\
+    <span class="prop-type">string</span></span></span></span>]</span></span></td></tr><tr class="false">\
+    <td style="vertical-align: top; padding-right: 0.2em;">resetStatusIn</td><td style="vertical-align: top;">\
+    <span class="model"><span class=""><span style="cursor: pointer;"><span class="model-toggle"></span>\
+    </span>[<div class="markdown"><p>A list of validation errors associated with the resetStatusIn payload field.             \
+    Refer to Request Validation in the endpoint description</p> </div><span><span class="model"><span class="prop">\
+    <span class="prop-type">string</span></span></span></span>]</span></span></td></tr><tr class="false">\
+    <td style="vertical-align: top; padding-right: 0.2em;">notes</td><td style="vertical-align: top;">\
+    <span class="model"><span class=""><span style="cursor: pointer;"><span class="model-toggle"></span>\
+    </span>[<div class="markdown"><p>A list of validation errors associated with the notes payload field.             \
+    Refer to Request Validation in the endpoint description</p> </div><span><span class="model"><span class="prop">\
+    <span class="prop-type">string</span></span></span></span>]</span></span></td></tr><tr></tr></tbody>\
+    </table></span><span class="brace-close">}</span><span><br></span><span><br></span><span style="">{</span>\
+    <span>"capacityStatus"</span><span style="">:</span><span style="">[</span>\
+    <span style="color: #0;">"VAL-0001 - A Capacity Status (capacityStatus) has not been given"</span>\
+    <span style="">]</span><span style="">}</span></span></span></div><div><br></div></div></div></div></div></td>'
