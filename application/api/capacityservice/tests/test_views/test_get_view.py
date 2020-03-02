@@ -23,7 +23,7 @@ class TestGetView(unittest.TestCase):
     def test_unauthorised_user_invalid_creds(self):
         client = Client()
         auth_headers = {
-            "HTTP_AUTHORIZATION": "Api-Key xsEe8gfN.udOR2hw5P17gAXGAsMF9Q8HS45tN6naa",
+            "HTTP_AUTHORIZATION": "xxxxxx",
         }
 
         response = client.get(
