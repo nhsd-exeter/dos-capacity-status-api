@@ -165,7 +165,9 @@ LOGGING = {
 SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {
         "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"},
-    }
+    },
+    # May need this set to true when running over HTTPS.
+    "USE_SESSION_AUTH": False,
 }
 
 

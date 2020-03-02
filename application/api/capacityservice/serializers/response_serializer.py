@@ -8,25 +8,24 @@ logger = logging.getLogger(__name__)
 
 """
 This is the response serializer. It is responsible for:
-    defining the correct format of the response model 
+    defining the correct format of the response model
     validating the response data
     converting model data to response data format
 """
+
+
 class CapacityStatusResponseSerializer(serializers.Serializer):
 
     serviceUid = serializers.IntegerField(
-        required=True,
-        help_text="The UID identifier of the service.",
+        required=True, help_text="The UID identifier of the service.",
     )
 
     serviceName = serializers.CharField(
-        required=True,
-        help_text="The name of the service.",
+        required=True, help_text="The name of the service.",
     )
 
     capacityStatus = serializers.CharField(
-        required=True,
-        help_text="The current capacity status of the service.",
+        required=True, help_text="The current capacity status of the service.",
     )
 
     resetDateTime = serializers.DateTimeField(
@@ -37,7 +36,7 @@ class CapacityStatusResponseSerializer(serializers.Serializer):
 
     notes = serializers.CharField(
         required=False,
-        help_text="Notes associated with the service.",
+        help_text="Notes associated with the capacity status of the service.",
     )
 
     modifiedBy = serializers.CharField(
@@ -47,12 +46,14 @@ class CapacityStatusResponseSerializer(serializers.Serializer):
 
     modifiedDate = serializers.DateTimeField(
         required=False,
-        help_text="The date and time when the capacity status was last updated.",
+        help_text="The date and time of when the capacity status of the service was last updated.",
     )
 
     def convertModelToResponse(data):
 
-        logger.debug("Data in CapacityStatusResponseSerializer for response conversion: %s", data)
+        logger.debug(
+            "Data in CapacityStatusResponseSerializer for response conversion: %s", data
+        )
 
         response_data = data
 
@@ -73,6 +74,8 @@ class CapacityStatusResponseSerializer(serializers.Serializer):
         response_data.pop("service")
         response_data.pop("capacitystatus")
 
-        logger.debug("Converted data from CapacityStatusResponseSerializer: %s", response_data)
+        logger.debug(
+            "Converted data from CapacityStatusResponseSerializer: %s", response_data
+        )
 
         return response_data

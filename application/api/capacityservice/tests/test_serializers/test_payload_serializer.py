@@ -129,7 +129,7 @@ class TestPayloadSerializer(unittest.TestCase):
 
         self.assertEqual(
             model_data["notes"],
-            "RAG status set by Capacity Service API - Additional notes",
+            "Capacity status set by Capacity Status API - Additional notes",
             "Model notes data incorrectly set",
         )
 

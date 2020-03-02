@@ -9,6 +9,8 @@ from drf_yasg import openapi
 from rest_framework import routers, permissions
 from rest_framework.documentation import include_docs_urls
 
+from .capacityservice.documentation import capacity_service_api_desc
+
 
 """
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -29,7 +31,7 @@ schema_view = get_schema_view(
     openapi.Info(
         title="Capacity Status API",
         default_version="0.0.1",
-        description="This is the Capacity Service API.",
+        description=capacity_service_api_desc,
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
