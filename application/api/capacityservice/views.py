@@ -26,6 +26,7 @@ from .documentation import (
     description_post,
     service_uid_path_param,
     validation_error_response,
+    authentication_error_response,
 )
 
 import logging
@@ -44,7 +45,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         manual_parameters=[service_uid_path_param],
         responses={
             200: CapacityStatusResponseSerializer,
-            401: "Unauthorized - when a user is either no longer active in DoS or is not authenticated to use this API.",
+            401: authentication_error_response,
             404: "Not Found - when the requested service is either not active or could not be found in DoS.",
         },
     )
@@ -67,7 +68,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         responses={
             200: CapacityStatusResponseSerializer,
             400: validation_error_response,
-            401: "Unauthorized - when a user is either no longer active in DoS or is not authenticated to use this API.",
+            401: authentication_error_response,
             403: "Forbidden - when a user does not have permissions to update capacity information for the requested service.",
             404: "Not Found - when the requested service to update is either not active, or could not be found in DoS.",
             500: "Internal Server Error - when an unexpected error is encountered whilst processing the request.",
@@ -90,7 +91,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         responses={
             200: CapacityStatusResponseSerializer,
             400: validation_error_response,
-            401: "Unauthorized - when a user is either no longer active in DoS or is not authenticated to use this API.",
+            401: authentication_error_response,
             403: "Forbidden - when a user does not have permissions to update capacity information for the requested service.",
             404: "Not Found - when the requested service to update is either not active, or could not be found in DoS.",
             500: "Internal Server Error - when an unexpected error is encountered whilst processing the request.",
