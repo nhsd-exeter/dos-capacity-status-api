@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.authentication import TokenAuthentication
 
 from drf_yasg.utils import swagger_auto_schema
 
@@ -14,6 +15,7 @@ from .serializers.payload_serializer import CapacityStatusRequestPayloadSerializ
 from .serializers.response_serializer import CapacityStatusResponseSerializer
 
 from .models import ServiceCapacities
+from api.capacityauth.authentication import DosUserAPIKeyAuthentication
 from api.capacityauth.permissions import HasDosUserAPIKey
 
 from api.capacityauth.authorise import (
@@ -35,6 +37,7 @@ logger = logging.getLogger(__name__)
 
 
 class CapacityStatusView(RetrieveUpdateAPIView):
+    authentication_classes = [DosUserAPIKeyAuthentication]
     permission_classes = [HasDosUserAPIKey]
     queryset = ServiceCapacities.objects.db_manager("dos").all()
     serializer_class = CapacityStatusModelSerializer
