@@ -6,6 +6,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class ServicesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Services
@@ -17,6 +18,7 @@ class CapacitystatusesSerializer(serializers.ModelSerializer):
         model = Capacitystatuses
         fields = ("color",)
 
+
 """
 This is the database model serializer. It models the DoS database tables
 and provides a flattend representation of the data model for capacity status
@@ -26,6 +28,8 @@ It is responsible for:
     database level validation
     capacity status update
 """
+
+
 class CapacityStatusModelSerializer(serializers.ModelSerializer):
 
     service = ServicesSerializer(read_only=True)
@@ -48,13 +52,12 @@ class CapacityStatusModelSerializer(serializers.ModelSerializer):
     Updates the data model. We are overiding the default method provided by the ModelSerializer
     class because we need to set the capacity status of the instance to a CapacityStatus instance.
     """
+
     def update(self, instance, validated_data):
 
         logger.debug("Data passed into CapacityStatusModelSerializer for update: %s", validated_data)
 
-        ragStatusColor = validated_data.get("capacitystatus", instance.capacitystatus)[
-            "color"
-        ]
+        ragStatusColor = validated_data.get("capacitystatus", instance.capacitystatus)["color"]
         capStatus = Capacitystatuses.objects.db_manager("dos").get(color=ragStatusColor)
 
         # Adapted from the super class's update method

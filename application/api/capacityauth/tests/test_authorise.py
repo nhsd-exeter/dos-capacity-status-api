@@ -23,9 +23,7 @@ class TestConvertApiUserToDosUserId(TestCase):
         mock_filter.assert_called_with(apiuserid=api_user.id)
 
     @mock.patch.object(ApiDosUserAssociations.objects, "filter")
-    def test_convert_api_user_to_dos_user_id__fail_api_user_does_not_exist(
-        self, mock_filter
-    ):
+    def test_convert_api_user_to_dos_user_id__fail_api_user_does_not_exist(self, mock_filter):
         "Test convert api user to dos user id method, fail api user does not exist"
         api_user = User(id=99)
         expected_dos_user_id = None
@@ -42,9 +40,7 @@ class TestConvertApiUserToDosUserId(TestCase):
         api_user = None
         try:
             dos_user_id = convert_api_user_to_dos_user_id(api_user)
-            self.fail(
-                "An AttributeError should have been throw for given 'None' api user"
-            )
+            self.fail("An AttributeError should have been throw for given 'None' api user")
         except AttributeError:
             "Success"
 
@@ -94,9 +90,6 @@ class TestCanApiUserEdit_service(TestCase):
         service = None
         try:
             result = can_api_user_edit_service(api_user, service)
-            self.fail(
-                "An AttributeError should have been throw for given 'None' service"
-            )
+            self.fail("An AttributeError should have been throw for given 'None' service")
         except:
             "Success"
-

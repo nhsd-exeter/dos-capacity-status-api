@@ -22,23 +22,17 @@ class DosUserAPIKey(AbstractAPIKey):
             logger.debug("DoS user exists with values: %s", user)
             if user.status != "ACTIVE":
                 raise ValidationError(
-                    "Username '%(value)s' is not an 'ACTIVE' DoS user",
-                    params={"value": value},
+                    "Username '%(value)s' is not an 'ACTIVE' DoS user", params={"value": value},
                 )
         except ObjectDoesNotExist:
-            raise ValidationError(
-                "Username '%(value)s' does not exist in DoS", params={"value": value}
-            )
+            raise ValidationError("Username '%(value)s' does not exist in DoS", params={"value": value})
         except MultipleObjectsReturned:
             raise ValidationError(
-                "Unexpected multiple DoS users with given username '%(value)s'",
-                params={"value": value},
+                "Unexpected multiple DoS users with given username '%(value)s'", params={"value": value},
             )
 
     dos_user_id = models.IntegerField(blank=False, null=False)
-    dos_username = models.CharField(
-        unique=True, max_length=255, validators=[validate_dos_username_exists]
-    )
+    dos_username = models.CharField(unique=True, max_length=255, validators=[validate_dos_username_exists])
 
     def save(self):
         self.name = self.dos_username

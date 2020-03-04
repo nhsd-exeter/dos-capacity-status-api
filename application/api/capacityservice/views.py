@@ -162,9 +162,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
             "apiUsername": api_key.dos_username,
             "apiUserId": api_key.dos_user_id,
         }
-        payload_serializer = CapacityStatusRequestPayloadSerializer(
-            data=request.data, context=context
-        )
+        payload_serializer = CapacityStatusRequestPayloadSerializer(data=request.data, context=context)
         if payload_serializer.is_valid():
             model_data = payload_serializer.convertToModel(data=request.data)
             model_serializer = CapacityStatusModelSerializer(data=model_data)

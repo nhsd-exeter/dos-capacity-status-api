@@ -145,27 +145,19 @@ LOGGING = {
         },
     },
     "loggers": {
-        "django": {
-            "handlers": ["console", "file"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
-        },
+        "django": {"handlers": ["console", "file"], "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),},
         "django.server": {
             # Nothing particularly interesting, so just return warning and above
             # to reduce log clutter.
             "handlers": ["console", "file"],
             "level": "WARNING",
         },
-        "api": {
-            "handlers": ["console", "file"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG"),
-        },
+        "api": {"handlers": ["console", "file"], "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG"),},
     },
 }
 
 SWAGGER_SETTINGS = {
-    "SECURITY_DEFINITIONS": {
-        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"},
-    },
+    "SECURITY_DEFINITIONS": {"Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"},},
     # May need this set to true when running over HTTPS.
     "USE_SESSION_AUTH": False,
 }
@@ -175,9 +167,7 @@ SWAGGER_SETTINGS = {
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},

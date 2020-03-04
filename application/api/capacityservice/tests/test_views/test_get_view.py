@@ -1,5 +1,6 @@
 import unittest
 
+
 class TestGetView(unittest.TestCase):
     "Tests for the GET view"
 

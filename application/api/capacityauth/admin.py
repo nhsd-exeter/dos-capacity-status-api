@@ -23,9 +23,7 @@ class DosUserAPIKeyModelAdmin(APIKeyModelAdmin):
 
         return super().get_exclude(request, obj)
 
-    def get_readonly_fields(
-        self, request: HttpRequest, obj: models.Model = None
-    ) -> typing.Tuple[str, ...]:
+    def get_readonly_fields(self, request: HttpRequest, obj: models.Model = None) -> typing.Tuple[str, ...]:
         fields = super().get_readonly_fields(request, obj)
         if self.is_change_view_call:
             fields += ("dos_username",)
