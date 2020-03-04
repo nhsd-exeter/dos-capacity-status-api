@@ -55,8 +55,6 @@ class AbstractAPIKeyAuthentication(BaseAuthentication, ABC):
 
     def authenticate_credentials(self, key):
         model = self.get_model()
-        print("KEY:" + key)
-        print("IS VALID KEY: " + str(model.objects.is_valid(key)))
         if not model.objects.is_valid(key):
             raise exceptions.AuthenticationFailed("Invalid API key.")
 
