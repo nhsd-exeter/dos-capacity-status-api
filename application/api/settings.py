@@ -170,6 +170,8 @@ SWAGGER_SETTINGS = {
     "USE_SESSION_AUTH": False,
 }
 
+TEST_RUNNER = "api.capacityservice.tests.runtests.TestRunner"
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators

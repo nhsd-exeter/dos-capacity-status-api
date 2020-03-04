@@ -67,7 +67,7 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
 
     def to_internal_value(self, data):
         if "capacityStatus" in data:
-            data["capacityStatus"] = data["capacityStatus"].upper()
+            data["capacityStatus"] = str(data["capacityStatus"]).upper()
         return super().to_internal_value(data)
 
     """
@@ -98,7 +98,7 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
         notesdefault = notesfield.to_representation(notesfield.get_default())
         notes = notesdefault
         if "notes" in data:
-            notes = notes + " - " + data["notes"]
+            notes = notes + " - " + str(data["notes"])
         data["notes"] = notes
 
         data["modifiedbyid"] = context["apiUserId"]
