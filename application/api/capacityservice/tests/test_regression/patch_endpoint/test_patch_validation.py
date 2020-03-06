@@ -1,23 +1,23 @@
 import unittest
 import json
 from django.test import Client
-from ..test_utils import TestUtils
+from ..test_env import TestEnv
 
 
-class TestPutValidationVal0001(unittest.TestCase):
-    "Tests for the VAL-0001 validation code for the PUT endpoint"
+class TestPatchValidationVal0001(unittest.TestCase):
+    "Tests for the VAL-0001 validation code for the Patch endpoint"
 
     def test_invalid_capacity_status_given_none(self):
         client = Client()
 
         data = "{}"
 
-        response = client.put(
-            TestUtils.api_url,
+        response = client.patch(
+            TestEnv.api_url,
             content_type="application/json",
             data=data,
             HTTP_HOST="127.0.0.1",
-            **TestUtils.auth_headers,
+            **TestEnv.auth_headers,
         )
 
         self.assertEqual(
@@ -30,20 +30,20 @@ class TestPutValidationVal0001(unittest.TestCase):
         )
 
 
-class TestPutValidationVal0002(unittest.TestCase):
-    "Tests for the VAL-0002 validation code for the PUT endpoint"
+class TestPatchValidationVal0002(unittest.TestCase):
+    "Tests for the VAL-0002 validation code for the Patch endpoint"
 
     def test_invalid_capacity_status_given_number(self):
         client = Client()
 
         data = '{"capacityStatus":30}'
 
-        response = client.put(
-            TestUtils.api_url,
+        response = client.patch(
+            TestEnv.api_url,
             content_type="application/json",
             data=data,
             HTTP_HOST="127.0.0.1",
-            **TestUtils.auth_headers,
+            **TestEnv.auth_headers,
         )
 
         self.assertEqual(
@@ -60,12 +60,12 @@ class TestPutValidationVal0002(unittest.TestCase):
 
         data = '{"capacityStatus":"PINK"}'
 
-        response = client.put(
-            TestUtils.api_url,
+        response = client.patch(
+            TestEnv.api_url,
             content_type="application/json",
             data=data,
             HTTP_HOST="127.0.0.1",
-            **TestUtils.auth_headers,
+            **TestEnv.auth_headers,
         )
 
         self.assertEqual(
@@ -82,12 +82,12 @@ class TestPutValidationVal0002(unittest.TestCase):
 
         data = '{"capacityStatus":""}'
 
-        response = client.put(
-            TestUtils.api_url,
+        response = client.patch(
+            TestEnv.api_url,
             content_type="application/json",
             data=data,
             HTTP_HOST="127.0.0.1",
-            **TestUtils.auth_headers,
+            **TestEnv.auth_headers,
         )
 
         self.assertEqual(
@@ -100,8 +100,8 @@ class TestPutValidationVal0002(unittest.TestCase):
         )
 
 
-class TestPutValidationVal0003(unittest.TestCase):
-    "Tests for the VAL-0003 validation code for the PUT endpoint"
+class TestPatchValidationVal0003(unittest.TestCase):
+    "Tests for the VAL-0003 validation code for the Patch endpoint"
 
     def test_invalid_reset_status_text(self):
         client = Client()
@@ -109,12 +109,12 @@ class TestPutValidationVal0003(unittest.TestCase):
         data = '{"capacityStatus":"red",\
             "resetStatusIn": "Text"}'
 
-        response = client.put(
-            TestUtils.api_url,
+        response = client.patch(
+            TestEnv.api_url,
             content_type="application/json",
             data=data,
             HTTP_HOST="127.0.0.1",
-            **TestUtils.auth_headers,
+            **TestEnv.auth_headers,
         )
 
         self.assertEqual(
@@ -127,8 +127,8 @@ class TestPutValidationVal0003(unittest.TestCase):
         )
 
 
-class TestPutValidationVal0004(unittest.TestCase):
-    "Tests for the VAL-0004 validation code for the PUT endpoint"
+class TestPatchValidationVal0004(unittest.TestCase):
+    "Tests for the VAL-0004 validation code for the Patch endpoint"
 
     def test_invalid_reset_status_in_given_too_low(self):
         client = Client()
@@ -136,12 +136,12 @@ class TestPutValidationVal0004(unittest.TestCase):
         data = '{"capacityStatus":"red",\
             "resetStatusIn": -1}'
 
-        response = client.put(
-            TestUtils.api_url,
+        response = client.patch(
+            TestEnv.api_url,
             content_type="application/json",
             data=data,
             HTTP_HOST="127.0.0.1",
-            **TestUtils.auth_headers,
+            **TestEnv.auth_headers,
         )
 
         self.assertEqual(
@@ -159,12 +159,12 @@ class TestPutValidationVal0004(unittest.TestCase):
         data = '{"capacityStatus":"red",\
             "resetStatusIn": 2345}'
 
-        response = client.put(
-            TestUtils.api_url,
+        response = client.patch(
+            TestEnv.api_url,
             content_type="application/json",
             data=data,
             HTTP_HOST="127.0.0.1",
-            **TestUtils.auth_headers,
+            **TestEnv.auth_headers,
         )
 
         self.assertEqual(
@@ -177,13 +177,13 @@ class TestPutValidationVal0004(unittest.TestCase):
         )
 
 
-class TestPutValidationVal0005(unittest.TestCase):
-    "Tests for the VAL-0005 validation code for the PUT endpoint"
+class TestPatchValidationVal0005(unittest.TestCase):
+    "Tests for the VAL-0005 validation code for the Patch endpoint"
 
     def test_invalid_notes_greater_than_900(self):
         client = Client()
 
-        too_many_notes = TestUtils.max_notes + "a"
+        too_many_notes = TestEnv.max_notes + "a"
 
         data = (
             '{"capacityStatus":"red",\
@@ -192,12 +192,12 @@ class TestPutValidationVal0005(unittest.TestCase):
             + '"}'
         )
 
-        response = client.put(
-            TestUtils.api_url,
+        response = client.patch(
+            TestEnv.api_url,
             content_type="application/json",
             data=data,
             HTTP_HOST="127.0.0.1",
-            **TestUtils.auth_headers,
+            **TestEnv.auth_headers,
         )
 
         self.assertEqual(

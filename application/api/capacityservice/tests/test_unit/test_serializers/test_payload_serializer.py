@@ -2,7 +2,7 @@ import unittest
 
 from datetime import datetime, timedelta
 
-from ...serializers.payload_serializer import CapacityStatusRequestPayloadSerializer
+from ....serializers.payload_serializer import CapacityStatusRequestPayloadSerializer
 
 
 class TestPayloadSerializer(unittest.TestCase):

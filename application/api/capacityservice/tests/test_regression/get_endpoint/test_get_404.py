@@ -1,19 +1,19 @@
 import unittest
 from django.test import Client
 
-from ..test_utils import TestUtils
+from ..test_env import TestEnv
 
 
 class TestGet404(unittest.TestCase):
-    "Tests for the GET view"
+    "Tests the service not found scenario for the GET endpoint"
 
     client = Client()
 
     def test_no_service_found(self):
         response = self.client.get(
-            TestUtils.api_no_service_url,
+            TestEnv.api_no_service_url,
             HTTP_HOST="127.0.0.1",
-            **TestUtils.auth_headers,
+            **TestEnv.auth_headers,
         )
 
         self.assertEqual(

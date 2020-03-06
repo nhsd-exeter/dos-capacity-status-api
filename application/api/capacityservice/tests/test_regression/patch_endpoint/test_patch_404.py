@@ -1,17 +1,15 @@
 import unittest
 from django.test import Client
-from ..test_utils import TestUtils
+from ..test_env import TestEnv
 
 
-class TestPut404(unittest.TestCase):
-    "Tests for the PUT view"
+class TestPatch404(unittest.TestCase):
+    "Tests for handling service not found scenario for the PATCH endpoint"
 
     def test_no_service_found(self):
         client = Client()
-        response = client.put(
-            TestUtils.api_no_service_url,
-            HTTP_HOST="127.0.0.1",
-            **TestUtils.auth_headers
+        response = client.patch(
+            TestEnv.api_no_service_url, HTTP_HOST="127.0.0.1", **TestEnv.auth_headers
         )
 
         self.assertEqual(
