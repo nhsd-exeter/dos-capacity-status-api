@@ -1,5 +1,4 @@
 from unittest import TestCase, mock
-from django.db.models.query import QuerySet
 
 from ..authorise import User, Services, ApiDosUserAssociations
 from ..authorise import convert_api_user_to_dos_user_id
@@ -39,7 +38,7 @@ class TestConvertApiUserToDosUserId(TestCase):
         fail give api user is of none value"""
         api_user = None
         try:
-            dos_user_id = convert_api_user_to_dos_user_id(api_user)
+            convert_api_user_to_dos_user_id(api_user)
             self.fail("An AttributeError should have been throw for given 'None' api user")
         except AttributeError:
             "Success"
@@ -88,8 +87,10 @@ class TestCanApiUserEdit_service(TestCase):
         "Test can api user edit service, fail given service is of none value"
         api_user = User(id=1)
         service = None
+        # TODO: FIX THIS - see how to test for exceptions here:
+        # https://docs.python.org/3/library/unittest.html#unittest.TestCase.assertRaises
         try:
-            result = can_api_user_edit_service(api_user, service)
+            can_api_user_edit_service(api_user, service)
             self.fail("An AttributeError should have been throw for given 'None' service")
         except:
             "Success"

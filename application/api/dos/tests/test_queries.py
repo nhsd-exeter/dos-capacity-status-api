@@ -46,7 +46,10 @@ class TestCanUserEditService(TestCase):
         self.assertFalse(user_can_edit)
 
     def test_can_user_edit_service__does_not_exists(self):
-        "Test sql can_user_edit_service method, returns false when the service isn't linked to the user directly or by ancestry"
+        """
+        Test sql can_user_edit_service method, returns false when the service
+        isn't linked to the user directly or by ancestry
+        """
         service_uid = "133102"
         dos_user_id = 1000000001
         user_can_edit = can_user_edit_service(dos_user_id, service_uid)
@@ -68,7 +71,10 @@ class TestCanUserEditService(TestCase):
         self.assertFalse(user_can_edit)
 
     def test_can_user_edit_service__for_inactive_service(self):
-        "Test sql can_user_edit_service method, return false when given service (by uid) does not have an active status id (1)"
+        """
+        Test sql can_user_edit_service method, return false when given service
+        (by uid) does not have an active status id (1)
+        """
         self.set_service_status(service_uid="153455", status_id=0)
         service_uid = "153455"
         dos_user_id = 1000000001
@@ -76,7 +82,10 @@ class TestCanUserEditService(TestCase):
         self.assertFalse(user_can_edit)
 
     def test_can_user_edit_service__for_inactive_parent_service(self):
-        "Test sql can_user_edit_service method, return false when the parent of the given service (by uid) does not have an active status id (1)"
+        """
+        Test sql can_user_edit_service method, return false when the parent of
+        the given service (by uid) does not have an active status id (1)
+        """
         self.set_service_status(service_uid="149198", status_id=0)
         service_uid = "149198"
         dos_user_id = 1000000001

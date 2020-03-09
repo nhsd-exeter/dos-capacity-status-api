@@ -1,8 +1,6 @@
-from rest_framework import serializers
-
-from ..validation import validation_rules
-
 from datetime import datetime, timedelta
+from rest_framework import serializers
+from ..validation import validation_rules
 
 import logging
 
@@ -50,9 +48,12 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
         default=240,
         min_value=0,
         max_value=1440,
-        help_text="The amount of time, specified in 1 minute blocks up to and including 24 hours (1440 minutes), \
-            from the time the capacity status is updated by the request to reset the capacity status of the service back \
-                to GREEN. If no value or 0 is provided, the reset time will default to 4 hours (240 minutes).",
+        help_text=("The amount of time, specified in 1 minute blocks up to "
+                   "and including 24 hours (1440 minutes), from the time the "
+                   "capacity status is updated by the request to reset the "
+                   "capacity status of the service back to GREEN. If no value "
+                   "or 0 is provided, the reset time will default to 4 hours "
+                   "(240 minutes)."),
         error_messages={
             "invalid": validation_rules[3]["error_msg"],
             "min_value": validation_rules[4]["error_msg_min_value"],

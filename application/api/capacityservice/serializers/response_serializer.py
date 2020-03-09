@@ -1,20 +1,17 @@
 from rest_framework import serializers
-
-from ..validation import validation_rules
-
 import logging
+
 
 logger = logging.getLogger(__name__)
 
-"""
-This is the response serializer. It is responsible for:
+
+class CapacityStatusResponseSerializer(serializers.Serializer):
+    """
+    This is the response serializer. It is responsible for:
     defining the correct format of the response model
     validating the response data
     converting model data to response data format
-"""
-
-
-class CapacityStatusResponseSerializer(serializers.Serializer):
+    """
 
     serviceUid = serializers.IntegerField(required=True, help_text="The UID identifier of the service.",)
 
@@ -52,13 +49,13 @@ class CapacityStatusResponseSerializer(serializers.Serializer):
         response_data["serviceUid"] = service_data["uid"]
         response_data["serviceName"] = service_data["name"]
         response_data["capacityStatus"] = capacitystatus_data["color"]
-        if data["resetdatetime"] != None:
+        if data["resetdatetime"] is not None:
             response_data["resetDateTime"] = data["resetdatetime"]
-        if data["modifiedby"] != None:
+        if data["modifiedby"] is not None:
             response_data["modifiedBy"] = data["modifiedby"]
-        if data["modifieddate"] != None:
+        if data["modifieddate"] is not None:
             response_data["modifiedDate"] = data["modifieddate"]
-        if data["notes"] == None:
+        if data["notes"] is None:
             response_data.pop("notes")
         response_data.pop("service")
         response_data.pop("capacitystatus")

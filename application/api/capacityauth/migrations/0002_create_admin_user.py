@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         DJANGO_SU_NAME = "admin"
         DJANGO_SU_PASSWORD = os.environ.get("APP_ADMIN_PASSWORD")
 
-        if (DJANGO_SU_PASSWORD) == None:
+        if (DJANGO_SU_PASSWORD) is None:
             raise Exception("Admin password in APP_ADMIN_PASSWORD environment variable has not been specified")
 
         superuser = User.objects.create_superuser(username=DJANGO_SU_NAME, password=DJANGO_SU_PASSWORD,)

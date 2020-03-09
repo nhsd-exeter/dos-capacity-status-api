@@ -1,4 +1,3 @@
-from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from rest_framework.response import Response
@@ -6,7 +5,6 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
 from rest_framework.generics import RetrieveUpdateAPIView
-from rest_framework_api_key.permissions import HasAPIKey
 
 from .serializers.model_serializers import CapacityStatusModelSerializer
 from .serializers.payload_serializer import CapacityStatusRequestPayloadSerializer

@@ -6,8 +6,7 @@ from django.conf.urls.static import static
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
-from rest_framework import routers, permissions
-from rest_framework.documentation import include_docs_urls
+from rest_framework import permissions
 
 from .capacityservice.documentation import capacity_service_api_desc
 
@@ -40,7 +39,7 @@ urlpatterns = [
     path(APP_PATH, include("api.capacityauth.urls")),
     path(APP_PATH + "apidoc/", include("rest_framework.urls", namespace="rest_framework"),),
     url(
-        r"^" + APP_PATH + "apidoc(?P<format>\.json|\.yaml)$",
+        r"^" + APP_PATH + r"apidoc(?P<format>\.json|\.yaml)$",
         schema_view.without_ui(cache_timeout=0),
         name="schema-json",
     ),
