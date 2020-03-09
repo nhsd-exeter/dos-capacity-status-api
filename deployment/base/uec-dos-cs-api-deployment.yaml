@@ -1,0 +1,39 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: uec-dos-cs-api
+  name: uec-dos-cs-api
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1 # how many pods we can add at a time
+      maxUnavailable: 0 # maxUnavailable define how many pods can be unavailable during the rolling update
+  template:
+    metadata:
+      labels:
+        app: uec-dos-cs-api
+    spec:
+      containers:
+        - name: uec-dos-cs-api
+          image: 461183108257.dkr.ecr.eu-west-2.amazonaws.com/uec/uec-dos-cs-api/api:IMAGE_TAG
+          envFrom:
+            - configMapRef:
+                name: uec-dos-cs-api-configmap
+          readinessProbe:
+            tcpSocket:
+              port: 8443
+            initialDelaySeconds: 40
+            periodSeconds: 60
+          ports:
+            - containerPort: 8443
+              protocol: TCP
+          resources:
+            requests:
+              memory: "0Mi"
+              cpu: "0m"
+            limits:
+              memory: "2048Mi"
+              cpu: "1000m"
+          imagePullPolicy: Always

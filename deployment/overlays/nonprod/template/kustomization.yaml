@@ -1,0 +1,10 @@
+bases:
+  - ../../base
+
+patchesStrategicMerge:
+  - uec-dos-cs-api-service-customisation.yaml
+
+namespace: uec-dos-cs-api
+
+commonLabels:
+  env: PROFILE_TO_REPLACE
