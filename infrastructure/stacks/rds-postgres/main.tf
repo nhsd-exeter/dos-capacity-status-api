@@ -19,11 +19,9 @@ data "terraform_remote_state" "security-groups-k8s" {
   }
 }
 
-
 ##################
 #  Parameter Group
 ##################
-
 resource "aws_db_parameter_group" "parameter_group" {
   name   = "${var.service_prefix}-pg"
   family = "postgres11"
@@ -99,6 +97,12 @@ resource "aws_db_instance" "db_instance" {
   backup_window           = "${var.backup_window}"
   backup_retention_period = "${var.backup_retention_period}"
 
+  final_snapshot_identifier  = "${var.db_identifier}-final"
+  publicly_accessible        = "${var.publicly_accessible}"
+  auto_minor_version_upgrade = "${var.db_auto_minor_version_upgrade}"
+  copy_tags_to_snapshot      = "${var.db_copy_tags_to_snapshot}"
+  apply_immediately          = "${var.apply_immediately}"
+
   tags = {
     Name        = "${var.service_prefix}-${var.db_identifier}"
     BillingCode = "${var.billing_code_tag}"
@@ -109,11 +113,6 @@ resource "aws_db_instance" "db_instance" {
     Terraform   = "true"
     Service     = "${var.service_name}"
   }
-  final_snapshot_identifier  = "${var.db_identifier}-final"
-  publicly_accessible        = "${var.publicly_accessible}"
-  auto_minor_version_upgrade = "${var.db_auto_minor_version_upgrade}"
-  copy_tags_to_snapshot      = "${var.db_copy_tags_to_snapshot}"
-  apply_immediately          = "${var.apply_immediately}"
 }
 
 resource "aws_security_group" "rds-postgres-sg" {

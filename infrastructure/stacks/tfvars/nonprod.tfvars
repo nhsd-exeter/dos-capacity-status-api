@@ -19,10 +19,10 @@ aws_region  = "eu-west-2"
 ####################################################################################
 billing_code_tag   = "k8s-nonprod.texasplatform.uk"
 environment_tag    = "lk8s-nonprod.texasplatform.uk"
-nhs_programme_name = ""
-nhs_project_name   = ""
-service_name       = ""
-service_prefix     = ""
+nhs_programme_name = "uec-dos-api-cs"
+nhs_project_name   = "uec-dos-api-cs"
+service_name       = "uec-dos-api-cs"
+service_prefix     = "uec-dos-api-cs"
 
 ####################################################################################
 # SERVICE COMMON
@@ -42,20 +42,20 @@ vpc_terraform_state_key = "vpc/terraform.tfstate"
 ####################################################################################
 # SERVICE RDS POSTGRES
 ####################################################################################
-db_identifier                 = "core-dos-db-uet"
+db_identifier                 = "uec-dos-api-cs-nonprod-db"
 db_name                       = "postgres"
 db_master_username            = "postgres"
-db_size                       = "db.m4.large"
-db_engine_version             = "9.6.14"
-db_max_connections            = 100
+db_size                       = "db.t3.micro"
+db_engine_version             = "11.6"
+db_max_connections            = "100"
 db_engine                     = "postgres"
 db_storage                    = "gp2"
 db_port                       = "5432"
-db_parameter_group_name       = "core-dos-db-uet-rds-pg"
-db_sg_name_suffix             = "core-dos-db-uet-rds-postgres-sg"
-db_subnet_group_name          = "core-dos-db-uet"
-allocated_storage             = 100
-enable_backup                 = false
+db_parameter_group_name       = "uec-dos-api-cs-nonprod-pg"
+db_sg_name_suffix             = "uec-dos-api-cs-nonprod-db-sg"
+db_subnet_group_name          = "uec-dos-api-cs-nonprod-db"
+allocated_storage             = 1
+enable_backup                 = true
 backup_retention_period       = "4"
 backup_window                 = "01:00-02:00"
 maintenance_window            = "Tue:02:30-Tue:03:30"
