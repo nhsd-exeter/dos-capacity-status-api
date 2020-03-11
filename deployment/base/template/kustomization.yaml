@@ -8,8 +8,15 @@ resources:
 configMapGenerator:
   - name: uec-dos-cs-api-configmap
     literals:
-      - PROFILE=PROFILE_TO_REPLACE
+      - PIP_TARGET=/tmp/.packages
+      - PYTHONPATH=/tmp/.packages
+      - XDG_CACHE_HOME=/tmp/.cache
+      - DB_HOST=uec-dos-api-cs-nonprod-db.cqger35bxcwy.eu-west-2.rds.amazonaws.com
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=password
+      - APP_ADMIN_PASSWORD=admin
 
 images:
   - name: 461183108257.dkr.ecr.eu-west-2.amazonaws.com/uec/uec-dos-cs-api/api
-    newTag: UEC_DOS_CS_API_IMAGE_TAG_TO_REPLACE
+    newTag: "1.0"

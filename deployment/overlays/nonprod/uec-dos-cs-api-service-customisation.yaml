@@ -4,10 +4,11 @@ metadata:
   name: uec-dos-cs-api
   namespace: uec-dos-cs-api
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:eu-west-2:730319765130:certificate/76e2c1fd-37d0-42e9-9c45-2411f411da5e
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:eu-west-2:730319765130:certificate/c0718115-4e22-4f48-a4aa-8c16ea86c5e6
     service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
 spec:
   type: LoadBalancer
   loadBalancerSourceRanges:
     - 194.101.83.23/24 # GovWifi
     - 51.140.225.142/24 # VPN
+    - 86.138.244.44/24 # JP

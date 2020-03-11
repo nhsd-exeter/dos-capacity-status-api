@@ -4,7 +4,7 @@ metadata:
   namespace: uec-dos-cs-api
   name: uec-dos-cs-api
 spec:
-  replicas: 3
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -17,17 +17,17 @@ spec:
     spec:
       containers:
         - name: uec-dos-cs-api
-          image: 461183108257.dkr.ecr.eu-west-2.amazonaws.com/uec/uec-dos-cs-api/api:IMAGE_TAG
+          image: 461183108257.dkr.ecr.eu-west-2.amazonaws.com/uec/uec-dos-cs-api/api:1.0
           envFrom:
             - configMapRef:
                 name: uec-dos-cs-api-configmap
           readinessProbe:
             tcpSocket:
-              port: 8443
-            initialDelaySeconds: 40
+              port: 8000
+            initialDelaySeconds: 30
             periodSeconds: 60
           ports:
-            - containerPort: 8443
+            - containerPort: 8000
               protocol: TCP
           resources:
             requests:

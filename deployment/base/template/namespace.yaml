@@ -3,5 +3,5 @@ kind: Namespace
 metadata:
   name: uec-dos-cs-api
   labels:
-    ttl: TTL_TO_REPLACE
-    project-group: PROJECT_GROUP_SHORT_TO_REPLACE
+    ttl: 2
+    project-group: uec-dos-cs-api

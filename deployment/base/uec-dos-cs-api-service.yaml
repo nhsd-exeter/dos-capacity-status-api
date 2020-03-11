@@ -9,6 +9,7 @@ metadata:
     service.beta.kubernetes.io/aws-load-balancer-connection-draining-enabled: "true"
     service.beta.kubernetes.io/aws-load-balancer-connection-draining-timeout: "60"
     service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "Service=uec-dos-cs-api"
+    #service.beta.kubernetes.io/do-loadbalancer-healthcheck-path: "/"
   labels:
     app: uec-dos-cs-api
 spec:
@@ -16,7 +17,7 @@ spec:
   ports:
     - name: https
       protocol: TCP
-      port: 443
+      port: 8443
       targetPort: 8443
   selector:
     app: uec-dos-cs-api
