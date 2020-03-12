@@ -126,7 +126,7 @@ test-docker-image-start:
 	docker rm --force postgres-$(BUILD_HASH)-$(BUILD_ID) 2> /dev/null ||:
 	make docker-image NAME=postgres
 	# act
-	make docker-image-start NAME=postgres
+	make docker-image-start NAME=postgres ARGS="--env POSTGRES_HOST_AUTH_METHOD=trust"
 	sleep 1
 	# assert
 	mk_test $(@) 1 -eq $$(docker ps | grep postgres-$(BUILD_HASH)-$(BUILD_ID) | wc -l)
@@ -135,7 +135,7 @@ test-docker-image-stop:
 	# arrange
 	docker rm --force postgres-$(BUILD_HASH)-$(BUILD_ID) 2> /dev/null ||:
 	make docker-image NAME=postgres
-	make docker-image-start NAME=postgres
+	make docker-image-start NAME=postgres ARGS="--env POSTGRES_HOST_AUTH_METHOD=trust"
 	sleep 1
 	# act
 	make docker-image-stop NAME=postgres
@@ -200,7 +200,7 @@ test-docker-get-variables-from-file:
 	# act
 	vars=$$(make _docker-get-variables-from-file VARS_FILE=$(VAR_DIR)/project.mk.default)
 	# assert
-	mk_test $(@) "PROJECT_NAME=make-devops" = $$(echo "$$vars" | grep PROJECT_NAME=make-devops)
+	mk_test $(@) "PROJECT_NAME=" = $$(echo "$$vars" | grep -o PROJECT_NAME=)
 
 test-docker-run-data:
 	# arrange
@@ -317,10 +317,10 @@ test-docker-run-tools-single-cmd:
 	# act
 	output=$$(
 		make docker-run-tools \
-			CMD="apk info" \
-		| grep -E -- '^(curl|jq)' | wc -l)
+			CMD="apt list --installed" \
+		| sed 's/\x1b\[[0-9;]*m//g' | grep -E -- '^curl/now' | wc -l)
 	# assert
-	mk_test $(@) 0 -lt "$$output"
+	mk_test $(@) 1 -eq "$$output"
 
 test-docker-run-tools-multiple-cmd:
 	# arrange
@@ -328,10 +328,10 @@ test-docker-run-tools-multiple-cmd:
 	# act
 	output=$$(
 		make docker-run-tools SH=y \
-			CMD="apk info; apk info" \
-		| grep -E -- '^(curl|jq)' | wc -l)
+			CMD="cat /etc/issue && apt list --installed" \
+		| sed 's/\x1b\[[0-9;]*m//g' | grep -Ei -- '^(debian gnu/linux|curl/now)' | wc -l)
 	# assert
-	mk_test $(@) 0 -lt "$$output"
+	mk_test $(@) 2 -eq "$$output"
 
 test-docker-run-pass-variables:
 	# arrange
