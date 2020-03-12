@@ -24,7 +24,6 @@ services:
     ports:
       - "8443:8443"
     command: sh -c "pip install -r requirements.txt && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8443 --certfile /project/certificate/localhost.crt --keyfile /project/certificate/localhost.key --ssl-version 5 api.wsgi"
-    #command: sh -c "pip install -r requirements.txt && sleep 10000000s"
   db-dos:
     image: $DOCKER_REGISTRY/postgres:latest
     container_name: dos-db

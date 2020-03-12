@@ -4,5 +4,4 @@ django-request-logging
 django-rest-framework
 djangorestframework-api-key
 drf-yasg
-psycopg2-binary
-psycopg2
+psycopg2-binary==2.8.4

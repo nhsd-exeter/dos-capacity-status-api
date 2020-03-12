@@ -35,14 +35,14 @@ project-clean:
 # ==============================================================================
 
 api-build:
-	#make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
-	#	DIR=application \
-	#	CMD="pip install -r requirements.txt && python manage.py collectstatic --noinput" SH=true
-
+	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+		DIR=application \
+		CMD="pip install -r requirements.txt && python manage.py collectstatic --noinput" SH=true
 	cd $(APPLICATION_DIR)
 	tar -czf $(PROJECT_DIR)/build/docker/api/assets/api-app.tar.gz \
 		api \
 		logs \
+		static \
 		manage.py \
 		requirements.txt
 
