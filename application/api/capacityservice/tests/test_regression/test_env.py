@@ -7,6 +7,7 @@ from ....capacityauth.models import DosUserAPIKey
 class TestEnv:
     api_url = "/api/v0.0.1/capacity/services/149198/capacitystatus/"
     api_no_service_url = "/api/v0.0.1/capacity/services/1491981234/capacitystatus/"
+    api_inactive_service_url = "/api/v0.0.1/capacity/services/133102/capacitystatus/"
     api_unauthorised_url = "/api/v0.0.1/capacity/services/110798/capacitystatus/"
     api_key = None
     auth_headers = None

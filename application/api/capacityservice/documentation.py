@@ -88,6 +88,8 @@ description_post = (
     + validation_rules[4]["desc"]
     + "</li><li>"
     + validation_rules[5]["desc"]
+    + "</li><li>"
+    + validation_rules[6]["desc"]
     + "</li></ul> </BR> <B><U>Response Formats</B></U></BR> </BR> Please refer to the Response section of this document for the response formats."
 )
 description_get = (

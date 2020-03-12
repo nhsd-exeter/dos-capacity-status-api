@@ -43,7 +43,10 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
         help_text="Optional field of up to 900 characters to add ad-hoc notes to this status update action. Any \
             notes provided will be appended to the end of the default notes set by the API, e.g. Capacity status set \
                 by the Capacity Status API - additional notes here.",
-        error_messages={"max_length": validation_rules[5]["error_msg"]},
+        error_messages={
+            "max_length": validation_rules[5]["error_msg"],
+            "blank": validation_rules[6]["error_msg"],
+        },
     )
     resetStatusIn = serializers.IntegerField(
         required=False,

@@ -126,6 +126,29 @@ class TestPatchValidationVal0003(unittest.TestCase):
             "Response message is not as expected.",
         )
 
+    def test_invalid_reset_status_blank(self):
+        client = Client()
+
+        data = '{"capacityStatus":"red",\
+            "resetStatusIn": ""}'
+
+        response = client.patch(
+            TestEnv.api_url,
+            content_type="application/json",
+            data=data,
+            HTTP_HOST="127.0.0.1",
+            **TestEnv.auth_headers,
+        )
+
+        self.assertEqual(
+            response.status_code, 400, "Response status code is not as expected."
+        )
+
+        self.assertTrue(
+            (str(response.content).find("VAL-0003") > 0),
+            "Response message is not as expected.",
+        )
+
 
 class TestPatchValidationVal0004(unittest.TestCase):
     "Tests for the VAL-0004 validation code for the Patch endpoint"
@@ -209,3 +232,67 @@ class TestPatchValidationVal0005(unittest.TestCase):
             "Response message is not as expected.",
         )
 
+
+class TestPatchValidationVal0006(unittest.TestCase):
+    "Tests for the VAL-0006 validation code for the Patch endpoint"
+
+    def test_invalid_notes_blank(self):
+        client = Client()
+
+        data = '{"capacityStatus":"red",\
+            "notes":""}'
+
+        response = client.patch(
+            TestEnv.api_url,
+            content_type="application/json",
+            data=data,
+            HTTP_HOST="127.0.0.1",
+            **TestEnv.auth_headers,
+        )
+
+        self.assertEqual(
+            response.status_code, 400, "Response status code is not as expected."
+        )
+
+        self.assertTrue(
+            (str(response.content).find("VAL-0006") > 0),
+            "Response message is not as expected.",
+        )
+
+
+class TestPatchValidationMultipleVals(unittest.TestCase):
+    "Tests for multiple validation warnings being raised"
+
+    def test_multiple_invalid_inputs(self):
+        client = Client()
+
+        data = '{"capacityStatus":"pink",\
+            "resetStatusIn":-1,\
+            "notes":""}'
+
+        response = client.patch(
+            TestEnv.api_url,
+            content_type="application/json",
+            data=data,
+            HTTP_HOST="127.0.0.1",
+            **TestEnv.auth_headers,
+        )
+
+        self.assertEqual(
+            response.status_code, 400, "Response status code is not as expected."
+        )
+
+        self.assertTrue(
+            (str(response.content).find("VAL-0002") > 0),
+            "Response message is not as expected, no VAL-0002.",
+        )
+
+        self.assertTrue(
+            (str(response.content).find("VAL-0004") > 0),
+            "Response message is not as expected, no VAL-0004.",
+        )
+
+        self.assertTrue(
+            (str(response.content).find("VAL-0006") > 0),
+            "Response message is not as expected, no VAL-0006.",
+        )
