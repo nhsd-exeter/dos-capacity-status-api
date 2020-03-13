@@ -1,6 +1,6 @@
 import unittest
 
-from ...serializers.model_serializers import CapacityStatusModelSerializer
+from ....serializers.model_serializers import CapacityStatusModelSerializer
 
 
 class TestModelSerializers(unittest.TestCase):

@@ -31,4 +31,9 @@ given.",
             CapacityStatusRequestPayload model.",
         "error_msg": "VAL-0005 - Given notes are outside of the maximum character limit (%(limit_value)s characters) as defined by the CapacityStatusRequestPayload model.",
     },
+    6: {
+        "name": "VAL-0006",
+        "desc": "<B> VAL-0006</B> - Notes are blank - returned when the notes provided are blank.",
+        "error_msg": "VAL-0006 - Given notes are blank.",
+    },
 }
