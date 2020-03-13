@@ -25,14 +25,16 @@ SECRET_KEY = "=tapo65h_g^cf4sxjawp-tl&z@1@5*&)p5gn2kax!^udtvs27c"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = [
+    "ace16b804651711ea982e0277ad65c07-1090173710.eu-west-2.elb.amazonaws.com"
+]
 
 # TODO [Needs Reviewing Start] Added as part of enabling https with gunicorn need to review if the following is needed
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-#if os.getenv("PROFILE", "prod") == "local":
+# if os.getenv("PROFILE", "prod") == "local":
 #    SESSION_COOKIE_SECURE = False
 #    CSRF_COOKIE_SECURE = False
-#else:
+# else:
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
