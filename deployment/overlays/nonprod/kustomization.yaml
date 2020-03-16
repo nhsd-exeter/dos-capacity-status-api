@@ -1,0 +1,10 @@
+bases:
+  - ../../base
+
+patchesStrategicMerge:
+  - uec-dos-api-cs-service-customisation.yaml
+
+namespace: uec-dos-api-cs
+
+commonLabels:
+  env: dev
