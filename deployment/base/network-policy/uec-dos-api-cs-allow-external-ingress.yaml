@@ -1,11 +1,11 @@
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
 metadata:
-  name: uec-dos-cs-api-allow-external-ingress
+  name: uec-dos-api-cs-allow-external-ingress
 spec:
   podSelector:
     matchLabels:
-      app: uec-dos-cs-api
+      app: uec-dos-api-cs
   ingress:
     - from: []
       ports:

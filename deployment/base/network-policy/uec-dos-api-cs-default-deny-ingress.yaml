@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: uec-dos-cs-api-default-deny-ingress
+  name: uec-dos-api-cs-default-deny-ingress
 spec:
   podSelector:
     matchLabels: {}

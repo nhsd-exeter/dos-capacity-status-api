@@ -1,12 +1,12 @@
 resources:
   - namespace.yaml
-  - uec-dos-cs-api-deployment.yaml
-  - uec-dos-cs-api-service.yaml
-  - network-policy/uec-dos-cs-api-default-deny-ingress.yaml
-  - network-policy/uec-dos-cs-api-allow-external-ingress.yaml
+  - uec-dos-api-cs-deployment.yaml
+  - uec-dos-api-cs-service.yaml
+  - network-policy/uec-dos-api-cs-default-deny-ingress.yaml
+  - network-policy/uec-dos-api-cs-allow-external-ingress.yaml
 
 configMapGenerator:
-  - name: uec-dos-cs-api-configmap
+  - name: uec-dos-api-cs-configmap
     literals:
       - PIP_TARGET=/tmp/.packages
       - PYTHONPATH=/tmp/.packages
@@ -18,5 +18,5 @@ configMapGenerator:
       - APP_ADMIN_PASSWORD=admin
 
 images:
-  - name: 461183108257.dkr.ecr.eu-west-2.amazonaws.com/uec/uec-dos-cs-api/api
+  - name: 461183108257.dkr.ecr.eu-west-2.amazonaws.com/uec/uec-dos-api-cs/api
     newTag: "1.0"

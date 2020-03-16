@@ -26,7 +26,8 @@ SECRET_KEY = "=tapo65h_g^cf4sxjawp-tl&z@1@5*&)p5gn2kax!^udtvs27c"
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "ace16b804651711ea982e0277ad65c07-1090173710.eu-west-2.elb.amazonaws.com"
+    "a7ad07894678111ea982e0277ad65c07-697536195.eu-west-2.elb.amazonaws.com",
+    "localhost",
 ]
 
 # TODO [Needs Reviewing Start] Added as part of enabling https with gunicorn need to review if the following is needed

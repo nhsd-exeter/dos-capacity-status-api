@@ -33,4 +33,4 @@ RUN set -ex && \
     pip install -r requirements.txt && \
     pip install gunicorn==20.0.4
 
-CMD python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8443 --certfile /certificate/localhost.crt --keyfile /certificate/localhost.key --ssl-version 5 api.wsgi
+CMD python manage.py collectstatic --noinput && gunicorn -w 8 --bind 0.0.0.0:8443 --certfile /certificate/localhost.crt --keyfile /certificate/localhost.key --ssl-version 5 api.wsgi
