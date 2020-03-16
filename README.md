@@ -2,16 +2,23 @@
 
 ## Table of Contents
 
-* [Table of Contents](#table-of-contents)
-* [Quick Start](#quick-start)
-  * [Prepare Development Environment](#prepare-development-environment)
-    * [Minimum setup](#minimum-setup)
-    * [Full setup](#full-setup)
-  * [Recommendations](#recommendations)
-  * [Run the Project](#run-the-project)
-    * [Dev Routine](#dev-routine)
-    * [Ops Routine](#ops-routine)
-* [Todo](#todo)
+- [Capacity Status API](#capacity-status-api)
+  - [Table of Contents](#table-of-contents)
+  - [Quick Start](#quick-start)
+    - [Prepare Development Environment](#prepare-development-environment)
+      - [Minimum setup](#minimum-setup)
+      - [Full setup](#full-setup)
+    - [Recommendations](#recommendations)
+    - [Run the Project](#run-the-project)
+    - [Ops Routine](#ops-routine)
+      - [Dev Routine](#dev-routine)
+        - [Pre-requisites](#pre-requisites)
+        - [Configuring the development environment](#configuring-the-development-environment)
+        - [Running the application in the development environment](#running-the-application-in-the-development-environment)
+  - [Unit testing](#unit-testing)
+    - [Creating unit tests](#creating-unit-tests)
+    - [Running the unit tests](#running-the-unit-tests)
+  - [Todo](#todo)
 
 ## Quick Start
 
@@ -112,5 +119,6 @@ The unit tests can be run by executing the following command in the root directo
 
 ## Todo
 
+* `application/Makefile` needs to be refactored
 * The `api` image weights more than 300MB. Can we drop the build dependencies but still keep `pg_config` binary?
 * Fix the packages versions in the `application/requirements.txt` or do `pip freeze > requirements-lock.txt`

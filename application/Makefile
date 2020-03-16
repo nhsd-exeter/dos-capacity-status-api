@@ -1,18 +1,13 @@
+# TODO: This file has to be refactored
+# 1) Wrap python/flake8/black/coverage commands in a Docker container
+# 2) Integrate it with vscode and git
+# 3) If the targets are genric enough move them to the `make-devops` repository
+
 XARGS := xargs -0 $(shell test $$(uname) = Linux && echo -r)
 GREP_T_FLAG := $(shell test $$(uname) = Linux && echo -T)
 export PYFLAKES_BUILTINS=_
 
-all:
-	@echo "\nThere is no default Makefile target right now. Try:\n"
-	@echo "make clean - reset the project and remove auto-generated assets."
-	@echo "make flake8 - run the flake8 code checker."
-	@echo "make test - run the test suite."
-	@echo "make coverage - view a report on test coverage."
-	@echo "make tidy - tidy code with the 'black' formatter."
-	@echo "make check - run all the checkers and tests."
-	@echo "make docs - run sphinx to create project documentation."
-
-clean:
+clean: # Reset the project and remove auto-generated assets
 	rm -rf build
 	rm -rf dist
 	rm -rf .coverage
@@ -23,24 +18,24 @@ clean:
 	find . \( -name '*.tgz' -o -name dropin.cache \) -delete
 	find . | grep -E "(__pycache__)" | xargs rm -rf
 
-flake8:
+flake8: # Run the flake8 code checker
 	flake8 --max-line-length=119 api
 
-test: clean
+test: clean # Run the test suite
 	python manage.py test api/capacityservice/ api/dos/
 
-coverage: clean
+coverage: clean # View a report on test coverage
 	coverage run --source='.' manage.py test api/capacityservice/ api/dos/
 	coverage report -m
 	coverage erase
 
-tidy: clean
+tidy: clean # Tidy code with the 'black' formatte
 	@echo "\nTidying code with black..."
 	black -l 119 api
 
-check: clean tidy flake8 coverage
+check: clean tidy flake8 coverage # Run all the checkers and tests
 
-docs: clean
+docs: clean # Run sphinx to create project documentation
 	$(MAKE) -C docs html
 	@echo "\nDocumentation can be found here:"
 	@echo file://`pwd`/docs/_build/html/index.html
