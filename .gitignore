@@ -3,3 +3,4 @@
 *.code-workspace
 *.mypy_cache
 *.log
+*.swp
