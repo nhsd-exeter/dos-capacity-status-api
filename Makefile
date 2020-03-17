@@ -7,8 +7,17 @@ project-config:
 	make docker-config
 
 project-build: project-config project-stop
-	make docker-image NAME=api
-	make docker-image NAME=postgres
+	make docker-image NAME=api VERSION=0.0.1
+	make docker-image NAME=postgres VERSION=0.0.1 NAME_AS=db
+
+project-create-ecr:
+	make docker-create-repository NAME=api
+	make docker-create-repository NAME=db
+
+project-push-images: # Push Docker images to the ECR
+	make docker-login
+	make docker-push NAME=api VERSION=0.0.1
+	make docker-push NAME=db VERSION=0.0.1
 
 project-migrate:
 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \

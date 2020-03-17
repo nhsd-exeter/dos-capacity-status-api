@@ -19,5 +19,5 @@ configMapGenerator:
       - DB_PASSWORD=password
 
 images:
-  - name: 461183108257.dkr.ecr.eu-west-2.amazonaws.com/uec/uec-dos-api-cs/api
-    newTag: "0.2"
+  - name: 461183108257.dkr.ecr.eu-west-2.amazonaws.com/uec/dos-api/capacity-status
+    newTag: "0.0.1"

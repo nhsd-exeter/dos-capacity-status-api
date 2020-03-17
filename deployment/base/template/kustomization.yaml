@@ -18,5 +18,5 @@ configMapGenerator:
       - APP_ADMIN_PASSWORD=admin
 
 images:
-  - name: 461183108257.dkr.ecr.eu-west-2.amazonaws.com/uec/uec-dos-api-cs/api
-    newTag: "1.0"
+  - name: 461183108257.dkr.ecr.eu-west-2.amazonaws.com/uec/dos-api/capacity-status
+    newTag: "0.0.1"

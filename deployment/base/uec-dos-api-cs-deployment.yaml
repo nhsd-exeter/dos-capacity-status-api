@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: uec-dos-api-cs
-          image: 461183108257.dkr.ecr.eu-west-2.amazonaws.com/uec/uec-dos-api-cs/api:0.2
+          image: 461183108257.dkr.ecr.eu-west-2.amazonaws.com/uec/dos-api/capacity-status/api:0.0.1
           envFrom:
             - configMapRef:
                 name: uec-dos-api-cs-configmap
