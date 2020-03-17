@@ -50,6 +50,7 @@ SECURE_HSTS_SECONDS = 30  # Set low for development (original 3600)
 
 INSTALLED_APPS = [
     "rest_framework",
+    "rest_framework_api_key",
     "rest_framework.authtoken",
     "django.contrib.admin",
     "django.contrib.auth",
