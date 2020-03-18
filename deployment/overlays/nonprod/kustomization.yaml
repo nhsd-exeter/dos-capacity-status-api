@@ -7,4 +7,4 @@ patchesStrategicMerge:
 namespace: uec-dos-api-cs
 
 commonLabels:
-  env: dev
+  env: non-prod

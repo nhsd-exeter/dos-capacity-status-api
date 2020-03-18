@@ -3,8 +3,8 @@ version: "3.7"
 services:
   api:
     image: $DOCKER_REGISTRY/api:latest
-    container_name: api
-    hostname: api
+    container_name: uec-dos-api-cs
+    hostname: uec-dos-api-cs
     environment:
       PROFILE: $PROFILE
       PIP_TARGET: /tmp/.packages
@@ -37,6 +37,16 @@ services:
     ports:
       - "5432:5432"
     command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+  proxy:
+    depends_on:
+      - api
+    image: $DOCKER_REGISTRY/proxy:latest
+    container_name: proxy
+    hostname: proxy
+    ports:
+      - "443:443"
+      - "8060:8060"
+    #command: sh -c "exec nginx -g 'daemon off;'"
 
 networks:
   default:

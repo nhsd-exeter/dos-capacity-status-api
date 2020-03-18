@@ -2,8 +2,11 @@ resources:
   - namespace.yaml
   - uec-dos-api-cs-deployment.yaml
   - uec-dos-api-cs-service.yaml
+  - uec-dos-api-cs-proxy-deployment.yaml
+  - uec-dos-api-cs-proxy-service.yaml
   - network-policy/uec-dos-api-cs-default-deny-ingress.yaml
   - network-policy/uec-dos-api-cs-allow-external-ingress.yaml
+  - network-policy/uec-dos-api-cs-proxy-allow-external-ingress.yaml
 
 configMapGenerator:
   - name: uec-dos-api-cs-configmap
@@ -17,6 +20,9 @@ configMapGenerator:
       - DB_NAME=postgres
       - DB_USERNAME=postgres
       - DB_PASSWORD=password
+  - name: uec-dos-api-cs-proxy-configmap
+    literals:
+      - PROFILE=dev
 
 images:
   - name: 461183108257.dkr.ecr.eu-west-2.amazonaws.com/uec/dos-api/capacity-status

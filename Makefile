@@ -9,15 +9,18 @@ project-config:
 project-build: project-config project-stop
 	make docker-image NAME=api VERSION=0.0.1
 	make docker-image NAME=postgres VERSION=0.0.1 NAME_AS=db
+	make docker-image NAME=proxy VERSION=0.0.1
 
 project-create-ecr:
 	make docker-create-repository NAME=api
 	make docker-create-repository NAME=db
+	make docker-create-repository NAME=proxy
 
 project-push-images: # Push Docker images to the ECR
 	make docker-login
 	make docker-push NAME=api VERSION=0.0.1
 	make docker-push NAME=db VERSION=0.0.1
+	make docker-push NAME=proxy VERSION=0.0.1
 
 project-migrate:
 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
@@ -58,8 +61,8 @@ api-build:
 api-start:
 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
 		DIR=application \
-		CMD="python manage.py runserver 0.0.0.0:8443" \
-		ARGS="--publish 8443:8443"
+		CMD="python manage.py runserver 0.0.0.0:8000" \
+		ARGS="--publish 8000:8000"
 
 # ==============================================================================
 

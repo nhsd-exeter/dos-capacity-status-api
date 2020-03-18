@@ -1,0 +1,33 @@
+FROM nginx:1.17.9
+
+COPY assets/nginx.conf /etc/nginx/nginx.conf
+COPY assets/certificate/localhost.key /etc/nginx/localhost.key
+COPY assets/certificate/localhost.pem /etc/nginx/localhost.pem
+
+EXPOSE 8060
+EXPOSE 443
+
+CMD exec nginx -g 'daemon off;'
+
+### METADATA ###################################################################
+
+ARG IMAGE
+ARG VERSION
+ARG BUILD_ID
+ARG BUILD_DATE
+ARG BUILD_HASH
+ARG BUILD_REPO
+LABEL \
+    name=$IMAGE \
+    version=$VERSION \
+    build-id=$BUILD_ID \
+    build-date=$BUILD_DATE \
+    build-hash=$BUILD_HASH \
+    build-repo=$BUILD_REPO
+ENV \
+    IMAGE_NAME=$IMAGE \
+    IMAGE_VERSION=$VERSION \
+    BUILD_ID=$BUILD_ID \
+    BUILD_DATE=$BUILD_DATE \
+    BUILD_HASH=$BUILD_HASH \
+    BUILD_REPO=$BUILD_REPO

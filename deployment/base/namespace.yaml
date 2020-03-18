@@ -3,5 +3,5 @@ kind: Namespace
 metadata:
   name: uec-dos-api-cs
   labels:
-    ttl: "19-Mar-2020"
+    ttl: "20-Mar-2020"
     project-group: uec-dos-api-cs
