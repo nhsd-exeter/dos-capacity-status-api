@@ -6,5 +6,12 @@ patchesStrategicMerge:
 
 namespace: uec-dos-api-cs
 
+configMapGenerator:
+  - name: uec-dos-api-cs-configmap
+    behavior: merge
+    literals:
+      - DJANGO_DB_HOST=uec-dos-api-cs-nonprod-db.cqger35bxcwy.eu-west-2.rds.amazonaws.com
+      - DOS_DB_HOST=uec-dos-api-cs-nonprod-db.cqger35bxcwy.eu-west-2.rds.amazonaws.com
+
 commonLabels:
   env: non-prod
