@@ -37,6 +37,7 @@ dev-install-essential:: ## Install essential development dependencies - optional
 	brew tap buo/cask-upgrade
 	brew tap homebrew/cask-fonts
 	brew tap homebrew/cask-versions
+	brew tap johanhaleby/kubetail
 	brew $$install ack ||:
 	brew $$install aws-iam-authenticator ||:
 	brew $$install awscli ||:
@@ -59,6 +60,7 @@ dev-install-essential:: ## Install essential development dependencies - optional
 	brew $$install jenv ||:
 	brew $$install jq ||:
 	brew $$install kns ||:
+	brew $$install kubetail ||:
 	brew $$install kustomize ||:
 	brew $$install make ||:
 	brew $$install mas ||:
@@ -163,6 +165,7 @@ dev-check:: ## Check if the development dependencies are installed
 	brew list jenv ||:
 	brew list jq ||:
 	brew list kns ||:
+	brew list kubetail ||:
 	brew list kustomize ||:
 	brew list make ||:
 	brew list mas ||:
@@ -206,10 +209,10 @@ dev-config:: ## Configure development dependencies
 		_dev-config-mac \
 		_dev-config-zsh \
 		_dev-config-oh-my-zsh \
+		_dev-config-command-line \
 		_dev-config-iterm2 \
 		_dev-config-visual-studio-code \
-		_dev-config-firefox \
-		_dev-config-command-line
+		_dev-config-firefox
 	make dev-info
 
 dev-fix:: ## Fix development dependencies
@@ -235,6 +238,7 @@ _dev-config-mac:
 	networksetup -setdnsservers Wi-Fi 8.8.8.8
 	defaults write -g com.apple.trackpad.scaling -float 5.0
 	defaults write -g com.apple.mouse.scaling -float 5.0
+	# defaults write -g com.apple.mouse.scaling -1 # Disable mouse scaling
 	defaults write -g InitialKeyRepeat -int 15
 	defaults write -g KeyRepeat -int 2
 	sudo mdutil -i off /
@@ -278,104 +282,13 @@ _dev-config-oh-my-zsh:
 	echo "POWERLEVEL9K_CUSTOM_TEXAS_FOREGROUND=yellow" >> ~/.zshrc
 	echo "POWERLEVEL9K_MODE=nerdfont-complete" >> ~/.zshrc
 	echo "POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(context dir vcs)" >> ~/.zshrc
+	echo "POWERLEVEL9K_SHORTEN_DIR_LENGTH=3" >> ~/.zshrc
 	echo "POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status custom_texas virtualenv root_indicator background_jobs time)" >> ~/.zshrc
 	echo "POWERLEVEL9K_PROMPT_ON_NEWLINE=true" >> ~/.zshrc
 	echo "POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true" >> ~/.zshrc
 	echo "ZSH_THEME=powerlevel10k/powerlevel10k" >> ~/.zshrc
 	echo "source \$$ZSH/oh-my-zsh.sh" >> ~/.zshrc
 	echo "# END: Custom configuration" >> ~/.zshrc
-
-_dev-config-iterm2:
-	curl -fsSL https://raw.githubusercontent.com/stefaniuk/dotfiles/master/lib/resources/iterm/com.googlecode.iterm2.plist -o /tmp/com.googlecode.iterm2.plist
-	defaults import com.googlecode.iterm2 /tmp/com.googlecode.iterm2.plist
-	rm /tmp/com.googlecode.iterm2.plist
-
-_dev-config-visual-studio-code:
-	# Install extensions
-	code --force --install-extension alefragnani.bookmarks
-	code --force --install-extension alexkrechik.cucumberautocomplete
-	code --force --install-extension ban.spellright
-	code --force --install-extension christian-kohler.npm-intellisense
-	code --force --install-extension christian-kohler.path-intellisense
-	code --force --install-extension coenraads.bracket-pair-colorizer
-	code --force --install-extension davidanson.vscode-markdownlint
-	code --force --install-extension dbaeumer.vscode-eslint
-	code --force --install-extension donjayamanne.githistory
-	code --force --install-extension dsznajder.es7-react-js-snippets
-	code --force --install-extension eamodio.gitlens
-	code --force --install-extension editorconfig.editorconfig
-	code --force --install-extension eg2.vscode-npm-script
-	code --force --install-extension emeraldwalk.runonsave
-	code --force --install-extension esbenp.prettier-vscode
-	code --force --install-extension gabrielbb.vscode-lombok
-	code --force --install-extension humao.rest-client
-	code --force --install-extension johnpapa.vscode-peacock
-	code --force --install-extension mauve.terraform
-	code --force --install-extension mhutchie.git-graph
-	code --force --install-extension ms-azuretools.vscode-docker
-	code --force --install-extension ms-python.anaconda-extension-pack
-	code --force --install-extension ms-python.python
-	code --force --install-extension ms-vsliveshare.vsliveshare-pack
-	code --force --install-extension msjsdiag.debugger-for-chrome
-	code --force --install-extension msjsdiag.vscode-react-native
-	code --force --install-extension oderwat.indent-rainbow
-	code --force --install-extension pivotal.vscode-spring-boot
-	code --force --install-extension redhat.java
-	code --force --install-extension streetsidesoftware.code-spell-checker
-	code --force --install-extension techer.open-in-browser
-	code --force --install-extension timonwong.shellcheck
-	code --force --install-extension tomoki1207.pdf
-	code --force --install-extension visualstudioexptteam.vscodeintellicode
-	code --force --install-extension vscjava.vscode-java-pack
-	code --force --install-extension vscjava.vscode-spring-boot-dashboard
-	code --force --install-extension vscjava.vscode-spring-initializr
-	code --force --install-extension vscode-icons-team.vscode-icons
-	code --force --install-extension wayou.vscode-todo-highlight
-	code --force --install-extension xabikos.javascriptsnippets
-	code --force --install-extension yzhang.markdown-all-in-one
-	# Install themes
-	code --force --install-extension ahmadawais.shades-of-purple
-	code --force --install-extension akamud.vscode-theme-onedark
-	code --force --install-extension arcticicestudio.nord-visual-studio-code
-	code --force --install-extension dracula-theme.theme-dracula
-	code --force --install-extension equinusocio.vsc-material-theme
-	code --force --install-extension ginfuru.ginfuru-better-solarized-dark-theme
-	code --force --install-extension johnpapa.winteriscoming
-	code --force --install-extension liviuschera.noctis
-	code --force --install-extension ryanolsonx.solarized
-	code --force --install-extension sdras.night-owl
-	code --force --install-extension smlombardi.slime
-	code --force --install-extension vangware.dark-plus-material
-	code --force --install-extension wesbos.theme-cobalt2
-	code --force --install-extension zhuangtongfa.material-theme
-	# List them all
-	code --list-extensions --show-versions
-
-_dev-config-firefox:
-	function firefox_install_extension {
-		url=$$1
-		file=$$2
-		(
-			cd ~/tmp
-			curl -L $$url --output $$file
-			mv $$file $$file.zip
-			mkdir -p $$file
-			mv $$file.zip $$file
-			cd $$file
-			unzip $$file.zip
-			id=$$(jq -r '.applications.gecko.id' manifest.json)
-			profile=$$(ls -1 ~/Library/Application\ Support/Firefox/Profiles/ | grep dev-edition-default)
-			cp $$file.zip ~/Library/Application\ Support/Firefox/Profiles/$$profile/extensions/$$id.xpi
-			cd ~/tmp
-			rm -rf $$file
-		)
-	}
-	firefox_install_extension \
-		https://addons.mozilla.org/firefox/downloads/file/3478747/react_developer_tools-4.4.0-fx.xpi \
-		react_developer_tools.xpi ||:
-	firefox_install_extension \
-		https://addons.mozilla.org/firefox/downloads/file/1509811/redux_devtools-2.17.1-fx.xpi \
-		redux_devtools.xpi ||:
 
 _dev-config-command-line:
 	sudo chown -R $$(id -u) $$(brew --prefix)/*
@@ -461,6 +374,100 @@ _dev-config-command-line:
 	if [ -f $(PROJECT_DIR)/*.code-workspace.template ] && [ ! -f $(PROJECT_DIR)/$(PROJECT_NAME).code-workspace ]; then
 		cp $(PROJECT_DIR)/*.code-workspace.template $(PROJECT_DIR)/$(PROJECT_NAME).code-workspace
 	fi
+
+_dev-config-iterm2:
+	curl -fsSL https://raw.githubusercontent.com/stefaniuk/dotfiles/master/lib/resources/iterm/com.googlecode.iterm2.plist -o /tmp/com.googlecode.iterm2.plist
+	defaults import com.googlecode.iterm2 /tmp/com.googlecode.iterm2.plist
+	rm /tmp/com.googlecode.iterm2.plist
+
+_dev-config-visual-studio-code:
+	# Install extensions
+	code --force --install-extension alefragnani.bookmarks
+	code --force --install-extension alexkrechik.cucumberautocomplete
+	code --force --install-extension ban.spellright
+	code --force --install-extension christian-kohler.npm-intellisense
+	code --force --install-extension christian-kohler.path-intellisense
+	code --force --install-extension coenraads.bracket-pair-colorizer
+	code --force --install-extension davidanson.vscode-markdownlint
+	code --force --install-extension dbaeumer.vscode-eslint
+	code --force --install-extension donjayamanne.githistory
+	code --force --install-extension dsznajder.es7-react-js-snippets
+	code --force --install-extension eamodio.gitlens
+	code --force --install-extension editorconfig.editorconfig
+	code --force --install-extension eg2.vscode-npm-script
+	code --force --install-extension emeraldwalk.runonsave
+	code --force --install-extension esbenp.prettier-vscode
+	code --force --install-extension felixfbecker.php-debug
+	code --force --install-extension felixfbecker.php-intellisense
+	code --force --install-extension gabrielbb.vscode-lombok
+	code --force --install-extension humao.rest-client
+	code --force --install-extension johnpapa.vscode-peacock
+	code --force --install-extension mauve.terraform
+	code --force --install-extension mhutchie.git-graph
+	code --force --install-extension ms-azuretools.vscode-docker
+	code --force --install-extension ms-python.anaconda-extension-pack
+	code --force --install-extension ms-python.python
+	code --force --install-extension ms-vsliveshare.vsliveshare-pack
+	code --force --install-extension msjsdiag.debugger-for-chrome
+	code --force --install-extension msjsdiag.vscode-react-native
+	code --force --install-extension oderwat.indent-rainbow
+	code --force --install-extension pivotal.vscode-spring-boot
+	code --force --install-extension redhat.java
+	code --force --install-extension streetsidesoftware.code-spell-checker
+	code --force --install-extension techer.open-in-browser
+	code --force --install-extension timonwong.shellcheck
+	code --force --install-extension tomoki1207.pdf
+	code --force --install-extension visualstudioexptteam.vscodeintellicode
+	code --force --install-extension vscjava.vscode-java-pack
+	code --force --install-extension vscjava.vscode-spring-boot-dashboard
+	code --force --install-extension vscjava.vscode-spring-initializr
+	code --force --install-extension vscode-icons-team.vscode-icons
+	code --force --install-extension wayou.vscode-todo-highlight
+	code --force --install-extension xabikos.javascriptsnippets
+	code --force --install-extension yzhang.markdown-all-in-one
+	# Install themes
+	code --force --install-extension ahmadawais.shades-of-purple
+	code --force --install-extension akamud.vscode-theme-onedark
+	code --force --install-extension arcticicestudio.nord-visual-studio-code
+	code --force --install-extension dracula-theme.theme-dracula
+	code --force --install-extension equinusocio.vsc-material-theme
+	code --force --install-extension ginfuru.ginfuru-better-solarized-dark-theme
+	code --force --install-extension johnpapa.winteriscoming
+	code --force --install-extension liviuschera.noctis
+	code --force --install-extension ryanolsonx.solarized
+	code --force --install-extension sdras.night-owl
+	code --force --install-extension smlombardi.slime
+	code --force --install-extension vangware.dark-plus-material
+	code --force --install-extension wesbos.theme-cobalt2
+	code --force --install-extension zhuangtongfa.material-theme
+	# List them all
+	code --list-extensions --show-versions
+
+_dev-config-firefox:
+	function firefox_install_extension {
+		url=$$1
+		file=$$2
+		(
+			cd ~/tmp
+			curl -L $$url --output $$file
+			mv $$file $$file.zip
+			mkdir -p $$file
+			mv $$file.zip $$file
+			cd $$file
+			unzip $$file.zip
+			id=$$(jq -r '.applications.gecko.id' manifest.json)
+			profile=$$(ls -1 ~/Library/Application\ Support/Firefox/Profiles/ | grep dev-edition-default)
+			cp $$file.zip ~/Library/Application\ Support/Firefox/Profiles/$$profile/extensions/$$id.xpi
+			cd ~/tmp
+			rm -rf $$file
+		)
+	}
+	firefox_install_extension \
+		https://addons.mozilla.org/firefox/downloads/file/3478747/react_developer_tools-4.4.0-fx.xpi \
+		react_developer_tools.xpi ||:
+	firefox_install_extension \
+		https://addons.mozilla.org/firefox/downloads/file/1509811/redux_devtools-2.17.1-fx.xpi \
+		redux_devtools.xpi ||:
 
 _dev-fix-vagrant-virtualbox:
 	plugin=/opt/vagrant/embedded/gems/2.2.6/gems/vagrant-2.2.6/plugins/providers/virtualbox/plugin.rb
