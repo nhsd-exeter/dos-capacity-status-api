@@ -75,6 +75,7 @@ project-populate-application-variables:
 	echo "export DOS_DB_PASSWORD=$$(make -s aws-secret-get NAME=capacity-status-dev-dos-db-password)"
 	echo "export DOS_DB_PORT=5432"
 	echo "export DOS_DB_USERNAME=postgres"
+	echo "export LOG_LEVEL=INFO"
 
 
 
