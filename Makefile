@@ -62,14 +62,17 @@ project-deploy-prepare:
 	eval "$$(make k8s-kubeconfig-export)"
 
 project-populate-application-variables:
+	echo "export PROFILE=dev"
 	echo "export API_IMAGE_TAG=0.0.1"
 	echo "export PROXY_IMAGE_TAG=0.0.1"
+	echo "export DJANGO_DB_HOST=uec-dos-api-cs-nonprod-db.cqger35bxcwy.eu-west-2.rds.amazonaws.com"
+	echo "export DOS_DB_HOST=uec-dos-api-cs-nonprod-db.cqger35bxcwy.eu-west-2.rds.amazonaws.com"
 	echo "export DJANGO_DB_NAME=cap_status_api"
-	echo "export DJANGO_DB_PASSWORD=password"
+	echo "export DJANGO_DB_PASSWORD=$$(make -s aws-secret-get NAME=capacity-status-dev-api-db-password)"
 	echo "export DJANGO_DB_PORT=5432"
 	echo "export DJANGO_DB_USERNAME=postgres"
 	echo "export DOS_DB_NAME=postgres"
-	echo "export DOS_DB_PASSWORD=password"
+	echo "export DOS_DB_PASSWORD=$$(make -s aws-secret-get NAME=capacity-status-dev-dos-db-password)"
 	echo "export DOS_DB_PORT=5432"
 	echo "export DOS_DB_USERNAME=postgres"
 

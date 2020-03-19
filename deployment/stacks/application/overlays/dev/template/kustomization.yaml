@@ -12,8 +12,6 @@ configMapGenerator:
     literals:
       - DJANGO_DB_HOST=DJANGO_DB_HOST_TO_REPLACE
       - DOS_DB_HOST=DOS_DB_HOST_TO_REPLACE
-      # - DJANGO_DB_HOST=uec-dos-api-cs-nonprod-db.cqger35bxcwy.eu-west-2.rds.amazonaws.com
-      # - DOS_DB_HOST=uec-dos-api-cs-nonprod-db.cqger35bxcwy.eu-west-2.rds.amazonaws.com
 
 commonLabels:
   env: nonprod
