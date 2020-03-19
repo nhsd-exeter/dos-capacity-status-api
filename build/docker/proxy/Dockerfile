@@ -1,8 +1,8 @@
-FROM nginx:1.17.9
+FROM nginx:latest
 
-COPY assets/nginx.conf /etc/nginx/nginx.conf
-COPY assets/certificate/localhost.key /etc/nginx/localhost.key
-COPY assets/certificate/localhost.pem /etc/nginx/localhost.pem
+COPY assets/certificate/localhost.key /certificate/localhost.key
+COPY assets/certificate/localhost.pem /certificate/localhost.pem
+COPY assets/etc/nginx/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 8060
 EXPOSE 443

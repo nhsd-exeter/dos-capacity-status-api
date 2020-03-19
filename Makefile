@@ -9,6 +9,12 @@ project-config:
 project-build: project-config project-stop
 	make docker-image NAME=api VERSION=0.0.1
 	make docker-image NAME=postgres VERSION=0.0.1 NAME_AS=db
+	make project-build-proxy
+
+project-build-proxy:
+	cp -f \
+		$(PROJECT_DIR)/certificate/* \
+		$(DOCKER_DIR)/proxy/assets/certificate
 	make docker-image NAME=proxy VERSION=0.0.1
 
 project-create-ecr:
