@@ -1,10 +1,10 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  namespace: uec-dos-api-cs
-  name: uec-dos-api-cs
+  namespace: K8S_APP_NAMESPACE_TO_REPLACE
+  name: uec-dos-api-cs-proxy
 spec:
-  replicas: 3
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -13,16 +13,23 @@ spec:
   template:
     metadata:
       labels:
-        app: uec-dos-api-cs
+        app: uec-dos-api-cs-proxy
     spec:
       containers:
-        - name: uec-dos-api-cs
-          image: 461183108257.dkr.ecr.eu-west-2.amazonaws.com/uec/dos-api/capacity-status/api:0.0.1
+        - name: uec-dos-api-cs-proxy
+          image: DOCKER_REGISTRY_TO_REPLACE/proxy:PROXY_IMAGE_TAG_TO_REPLACE
           envFrom:
             - configMapRef:
-                name: uec-dos-api-cs-configmap
+                name: uec-dos-api-cs-proxy-configmap
+          readinessProbe:
+            tcpSocket:
+              port: 443
+            initialDelaySeconds: 10
+            periodSeconds: 60
           ports:
-            - containerPort: 8443
+            - containerPort: 443
+              protocol: TCP
+            - containerPort: 8060
               protocol: TCP
           resources:
             requests:

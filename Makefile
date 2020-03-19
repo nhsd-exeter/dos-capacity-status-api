@@ -50,6 +50,31 @@ project-log:
 project-clean:
 	make docker-image-clean NAME=postgres
 
+project-deploy:
+	make project-deploy-prepare
+	eval "$$(make project-populate-application-variables)"
+	make k8s-deploy STACK=application
+	echo "The URL is $(UI_URL)"
+
+project-deploy-prepare:
+	eval "$$(make aws-assume-role-export-variables)"
+	make k8s-kubeconfig-get
+	eval "$$(make k8s-kubeconfig-export)"
+
+project-populate-application-variables:
+	echo "export API_IMAGE_TAG=0.0.1"
+	echo "export PROXY_IMAGE_TAG=0.0.1"
+	echo "export DJANGO_DB_NAME=cap_status_api"
+	echo "export DJANGO_DB_PASSWORD=password"
+	echo "export DJANGO_DB_PORT=5432"
+	echo "export DJANGO_DB_USERNAME=postgres"
+	echo "export DOS_DB_NAME=postgres"
+	echo "export DOS_DB_PASSWORD=password"
+	echo "export DOS_DB_PORT=5432"
+	echo "export DOS_DB_USERNAME=postgres"
+
+
+
 # ==============================================================================
 
 api-build:

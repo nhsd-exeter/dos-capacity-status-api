@@ -1,0 +1,19 @@
+bases:
+  - ../../base
+
+patchesStrategicMerge:
+  - uec-dos-api-cs-service-customisation.yaml
+
+namespace: K8S_APP_NAMESPACE_TO_REPLACE
+
+configMapGenerator:
+  - name: uec-dos-api-cs-configmap
+    behavior: merge
+    literals:
+      - DJANGO_DB_HOST=DJANGO_DB_HOST_TO_REPLACE
+      - DOS_DB_HOST=DOS_DB_HOST_TO_REPLACE
+      # - DJANGO_DB_HOST=uec-dos-api-cs-nonprod-db.cqger35bxcwy.eu-west-2.rds.amazonaws.com
+      # - DOS_DB_HOST=uec-dos-api-cs-nonprod-db.cqger35bxcwy.eu-west-2.rds.amazonaws.com
+
+commonLabels:
+  env: nonprod

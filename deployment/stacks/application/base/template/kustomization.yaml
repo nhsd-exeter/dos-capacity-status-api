@@ -1,0 +1,41 @@
+resources:
+  - namespace.yaml
+  - api/uec-dos-api-cs-deployment.yaml
+  - api/uec-dos-api-cs-service.yaml
+  - proxy/uec-dos-api-cs-proxy-deployment.yaml
+  - proxy/uec-dos-api-cs-proxy-service.yaml
+  - network-policy/uec-dos-api-cs-default-deny-ingress.yaml
+  - network-policy/uec-dos-api-cs-allow-external-ingress.yaml
+  - network-policy/uec-dos-api-cs-proxy-allow-external-ingress.yaml
+
+configMapGenerator:
+  - name: uec-dos-api-cs-configmap
+    literals:
+      - PROFILE=PROFILE_TO_REPLACE
+      - PIP_TARGET=/tmp/.packages
+      - PYTHONPATH=/tmp/.packages
+      - XDG_CACHE_HOME=/tmp/.cache
+      - DJANGO_DB_PORT=DJANGO_DB_PORT_TO_REPLACE
+      - DJANGO_DB_NAME=DJANGO_DB_NAME_TO_REPLACE
+      - DJANGO_DB_USERNAME=DJANGO_DB_USERNAME_TO_REPLACE
+      - DJANGO_DB_PASSWORD=DJANGO_DB_PASSWORD_TO_REPLACE
+      - DOS_DB_PORT=DOS_DB_PORT_TO_REPLACE
+      - DOS_DB_NAME=DOS_DB_NAME_TO_REPLACE
+      - DOS_DB_USERNAME=DOS_DB_USERNAME_TO_REPLACE
+      - DOS_DB_PASSWORD=DOS_DB_PASSWORD_TO_REPLACE
+      - LOG_LEVEL=LOG_LEVEL_TO_REPLACE
+      #- DJANGO_DB_PORT=5432
+      #- DJANGO_DB_NAME=cap_status_api
+      #- DJANGO_DB_USERNAME=postgres
+      #- DJANGO_DB_PASSWORD=password
+      #- DOS_DB_PORT=5432
+      #- DOS_DB_NAME=postgres
+      #- DOS_DB_USERNAME=postgres
+      #- DOS_DB_PASSWORD=password
+      #- LOG_LEVEL=INFO
+  - name: uec-dos-api-cs-proxy-configmap
+    literals:
+      - PROFILE=PROFILE_TO_REPLACE
+#images:
+#  - name: 461183108257.dkr.ecr.eu-west-2.amazonaws.com/uec/dos-api/capacity-status
+#    newTag: "0.0.1"

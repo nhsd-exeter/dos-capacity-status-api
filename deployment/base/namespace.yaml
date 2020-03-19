@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: uec-dos-api-cs
-  labels:
-    ttl: "20-Mar-2020"
-    project-group: uec-dos-api-cs
