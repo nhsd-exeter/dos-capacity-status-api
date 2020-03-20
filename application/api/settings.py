@@ -103,20 +103,20 @@ WSGI_APPLICATION = "api.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "HOST": os.getenv("DJANGO_DB_HOST", "127.0.0.1"),
+        "HOST": os.getenv("DJANGO_DB_HOST", "db-dos"),
         "PORT": os.getenv("DJANGO_DB_PORT", "5432"),
         "NAME": os.getenv("DJANGO_DB_NAME", "cap_status_api"),
         "USER": os.getenv("DJANGO_DB_USERNAME", "postgres"),
-        "PASSWORD": os.getenv("DJANGO_DB_PASSWORD", "password"),
+        "PASSWORD": os.getenv("DJANGO_DB_PASSWORD", "postgres"),
     },
     "dos": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "OPTIONS": {"options": "-c search_path=pathwaysdos"},
-        "HOST": os.getenv("DOS_DB_HOST", "127.0.0.1"),
+        "HOST": os.getenv("DOS_DB_HOST", "db-dos"),
         "PORT": os.getenv("DOS_DB_PORT", "5432"),
         "NAME": os.getenv("DOS_DB_NAME", "postgres"),
         "USER": os.getenv("DOS_DB_USERNAME", "postgres"),
-        "PASSWORD": os.getenv("DOS_DB_PASSWORD", "password"),
+        "PASSWORD": os.getenv("DOS_DB_PASSWORD", "postgres"),
     },
 }
 
