@@ -6,6 +6,8 @@ include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 project-config:
 	make docker-config
 
+project-clean-build: project-clean project-build
+
 project-build: project-config project-stop
 	make project-build-api
 	make project-build-postgres
@@ -59,8 +61,10 @@ project-stop:
 project-log:
 	make docker-compose-log YML=$(DOCKER_COMPOSE_YML)
 
-project-clean:
+project-clean: project-stop
 	make docker-image-clean NAME=postgres
+	make docker-image-clean NAME=api
+	make docker-image-clean NAME=proxy
 
 project-deploy:
 	make project-deploy-prepare
