@@ -24,6 +24,7 @@ configMapGenerator:
       - DOS_DB_USERNAME=DOS_DB_USERNAME_TO_REPLACE
       - DOS_DB_PASSWORD=DOS_DB_PASSWORD_TO_REPLACE
       - LOG_LEVEL=LOG_LEVEL_TO_REPLACE
+      - DJANGO_LOG_LEVEL=DJANGO_LOG_LEVEL_TO_REPLACE
   - name: uec-dos-api-cs-proxy-configmap
     literals:
       - PROFILE=PROFILE_TO_REPLACE

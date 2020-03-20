@@ -32,12 +32,12 @@ ALLOWED_HOSTS = [
 
 # TODO [Needs Reviewing Start] Added as part of enabling https with gunicorn need to review if the following is needed
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-# if os.getenv("PROFILE", "prod") == "local":
-#    SESSION_COOKIE_SECURE = False
-#    CSRF_COOKIE_SECURE = False
-# else:
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+if os.getenv("PROFILE", "prod") == "local":
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+else:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # Security Headers
 SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -103,13 +103,8 @@ WSGI_APPLICATION = "api.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        # "HOST": "uec-dos-api-cs-nonprod-db.cqger35bxcwy.eu-west-2.rds.amazonaws.com",
         "HOST": os.getenv("DJANGO_DB_HOST", "127.0.0.1"),
-        # "PORT": "5432",
         "PORT": os.getenv("DJANGO_DB_PORT", "5432"),
-        # "NAME": "cap_status_api",
-        # "USER": "postgres",
-        # "PASSWORD": "password",
         "NAME": os.getenv("DJANGO_DB_NAME", "cap_status_api"),
         "USER": os.getenv("DJANGO_DB_USERNAME", "postgres"),
         "PASSWORD": os.getenv("DJANGO_DB_PASSWORD", "password"),
@@ -117,13 +112,8 @@ DATABASES = {
     "dos": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "OPTIONS": {"options": "-c search_path=pathwaysdos"},
-        # "HOST": "uec-dos-api-cs-nonprod-db.cqger35bxcwy.eu-west-2.rds.amazonaws.com",
         "HOST": os.getenv("DOS_DB_HOST", "127.0.0.1"),
-        # "PORT": "5432",
         "PORT": os.getenv("DOS_DB_PORT", "5432"),
-        # "NAME": "postgres",
-        # "USER": "postgres",
-        # "PASSWORD": "password",
         "NAME": os.getenv("DOS_DB_NAME", "postgres"),
         "USER": os.getenv("DOS_DB_USERNAME", "postgres"),
         "PASSWORD": os.getenv("DOS_DB_PASSWORD", "password"),

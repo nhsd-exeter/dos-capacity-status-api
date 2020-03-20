@@ -76,6 +76,7 @@ project-populate-application-variables:
 	echo "export DOS_DB_PORT=5432"
 	echo "export DOS_DB_USERNAME=postgres"
 	echo "export LOG_LEVEL=INFO"
+	echo "export DJANGO_LOG_LEVEL=INFO"
 
 
 
