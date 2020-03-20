@@ -3,9 +3,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-    dependencies = [
-        ("capacityauth", "0001_initial"),
-    ]
 
     def generate_superuser(apps, schema_editor):
         from django.contrib.auth.models import User
