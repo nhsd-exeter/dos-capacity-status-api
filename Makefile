@@ -7,9 +7,21 @@ project-config:
 	make docker-config
 
 project-build: project-config project-stop
-	make docker-image NAME=api VERSION=0.0.1
-	make docker-image NAME=postgres VERSION=0.0.1 NAME_AS=db
+	make project-build-api
+	make project-build-postgres
 	make project-build-proxy
+
+project-build-postgres:
+	cp -f \
+		$(PROJECT_DIR)/certificate/* \
+		$(DOCKER_DIR)/postgres/assets/etc/postgresql/certificate
+	make docker-image NAME=postgres VERSION=0.0.1 NAME_AS=db
+
+project-build-api:
+	cp -f \
+		$(PROJECT_DIR)/certificate/* \
+		$(DOCKER_DIR)/api/assets/certificate
+	make docker-image NAME=api VERSION=0.0.1
 
 project-build-proxy:
 	cp -f \
@@ -105,7 +117,30 @@ api-start:
 project-generate-certificate:
 	make ssl-generate-certificate \
 		DIR=$(PROJECT_DIR)/certificate \
-		NAME=localhost
+		NAME=certificate \
+		DOMAINS='localhost,DNS:*.k8s-prod.texasplatform.uk,DNS:*.k8s-nonprod.texasplatform.uk,DNS:proxy:443'
+
+project-trust-certificates: ## Trust the development certificates
+	sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain \
+		$(PROJECT_DIR)/certificate/$(SSL_CERTIFICATE_NAME).pem
+
+# ==============================================================================
+
+project-verify-email:
+	# TODO: The `AWS_ACCOUNT_ID_LIVE_PARENT` variables has to be set in Jenkins
+	AWS_ACCOUNT_ID_LIVE_PARENT=462131752500
+	if [ false == $$(make aws-account-check-id ID=$$AWS_ACCOUNT_ID_LIVE_PARENT) ]; then
+		echo "ERROR: You are not logged into the live parent account"
+		exit 1
+	fi
+	make aws-ses-verify-email-identity EMAIL=$(EMAIL_FROM)
+
+# ==============================================================================
+
+.SILENT: \
+	project-populate-application-variables \
+	project-populate-db-pu-job-variables
+
 
 project-trust-certificate:
 	make ssl-trust-certificate \
