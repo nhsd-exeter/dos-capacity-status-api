@@ -26,7 +26,7 @@ SECRET_KEY = "=tapo65h_g^cf4sxjawp-tl&z@1@5*&)p5gn2kax!^udtvs27c"
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    ".eu-west-2.elb.amazonaws.com",
+    ".amazonaws.com",
     "localhost",
 ]
 

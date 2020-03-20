@@ -19,9 +19,5 @@ spec:
       protocol: TCP
       port: 443
       targetPort: 443
-    - name: http
-      protocol: TCP
-      port: 8060
-      targetPort: 8060
   selector:
     app: uec-dos-api-cs-proxy

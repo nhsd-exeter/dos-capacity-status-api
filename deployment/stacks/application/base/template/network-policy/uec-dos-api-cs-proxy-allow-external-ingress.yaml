@@ -10,6 +10,4 @@ spec:
     - from: []
       ports:
         - protocol: TCP
-          port: 8060
-        - protocol: TCP
           port: 443

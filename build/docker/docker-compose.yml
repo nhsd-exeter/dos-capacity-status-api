@@ -45,8 +45,6 @@ services:
     hostname: proxy
     ports:
       - "443:443"
-      - "8060:8060"
-    #command: sh -c "exec nginx -g 'daemon off;'"
 
 networks:
   default:

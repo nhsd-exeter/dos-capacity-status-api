@@ -29,8 +29,6 @@ spec:
           ports:
             - containerPort: 443
               protocol: TCP
-            - containerPort: 8060
-              protocol: TCP
           resources:
             requests:
               memory: "0Mi"
