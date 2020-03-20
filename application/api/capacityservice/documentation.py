@@ -19,18 +19,18 @@ capacity_service_api_desc = "This is the Capacity Status API. </BR> \
     </BR> \
     <B>API Authentication</B></BR> \
     </BR> \
-    The API is protected by means of an API Key authentication mechanism. Clients interested \
-    in using the API will need to obtain an API Key from NHSD, and this key will need to be \
+    The API is protected by means of an Token authentication mechanism. Clients interested \
+    in using the API will need to obtain an Token from NHSD, and this Token will need to be \
     sent through as part of the request in the call to the API endpoints. </BR> \
-    As part of the API Key creation process, clients will be required to specify a valid and active DoS \
-    user account (username) that the API Key will be associated with. This will be used for \
+    As part of the API Token creation process, clients will be required to specify a valid and active DoS \
+    user account (username) that the API Token will be associated with. This will be used for \
     the API's authorisation process. </BR> \
     </BR> \
     <B>API Authorisation</B></BR> \
     </BR> \
     The endpoints provided by this API that update service capacity information are additionally \
     protected by an authorisation mechanism which confirms that the DoS user (associated with the \
-    API Key) has the correct permissions configured in DoS to be able to update the target service. \
+    API Token) has the correct permissions configured in DoS to be able to update the target service. \
     In the event that a DoS User does not have permissions to update the capacity status of a service, \
     an HTTP-403 error code will be returned and the capacity status information of the service will \
     not be updated."
@@ -48,7 +48,7 @@ response_entities_desc = {
     "notes": "<li><B>Notes</B> - a free text field providing the opportunity for any additional notes to be logged regarding the capacity status change. \
         Notes given in the request payload will be appended to the text: Capacity status set by the Capacity Service API -. </li>",
     "last_updated": "<li><B>Last updated date/time</B> - a timestamp of when the service was updated by the API.</li>",
-    "by": "<li><B>Modified by</B> - the name of the DoS User (associated with the API key) who last updated the capacity information of the service.</li>",
+    "by": "<li><B>Modified by</B> - the name of the DoS User (associated with the API Token) who last updated the capacity information of the service.</li>",
 }
 description_model = {
     "post__firstline": "This endpoint will update the capacity (RAG) status of a single service in DoS as specified in the request body JSON payload. \
