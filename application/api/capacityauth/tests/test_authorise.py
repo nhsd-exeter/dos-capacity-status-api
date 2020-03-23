@@ -49,8 +49,8 @@ class TestGetDosUser(TestCase):
         mock_queryset.get.assert_called_with(user_id=capacity_user.id)
         mock_get_user_for_id.assert_called_with(dos_capacity_user.dos_user_id)
 
-    @mock.patch(queries, "can_user_edit_service")
-    @mock.patch(authorise, "get_dos_user")
+    @mock.patch.object(queries, "can_user_edit_service")
+    @mock.patch.object(authorise, "get_dos_user")
     def test_can_capacity_user_edit_service__success(self, mock_get_dos_user, mock_can_user_edit_service):
         "Test 'can_capacity_user_edit_service' method, success"
         capacity_user = User(id=3)
@@ -61,9 +61,9 @@ class TestGetDosUser(TestCase):
 
         return_value = can_capacity_user_edit_service(capacity_user, service_uid)
 
-        self.assertTrue(return_value)
         mock_get_dos_user.assert_called_with(capacity_user)
         mock_can_user_edit_service.assert_called_with(dos_user.id, service_uid)
+        self.assertTrue(return_value)
 
 
 
