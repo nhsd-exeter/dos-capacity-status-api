@@ -1,1 +1,1 @@
-CREATE DATABASE cap_status_api;
+CREATE DATABASE capacity_status;

@@ -1,0 +1,29 @@
+resources:
+  - namespace.yaml
+  - api/uec-dos-api-cs-deployment.yaml
+  - api/uec-dos-api-cs-service.yaml
+  - proxy/uec-dos-api-cs-proxy-deployment.yaml
+  - proxy/uec-dos-api-cs-proxy-service.yaml
+  - network-policy/uec-dos-api-cs-default-deny-ingress.yaml
+  - network-policy/uec-dos-api-cs-allow-external-ingress.yaml
+  - network-policy/uec-dos-api-cs-proxy-allow-external-ingress.yaml
+
+configMapGenerator:
+  - name: uec-dos-api-cs-configmap
+    literals:
+      - PROFILE=PROFILE_TO_REPLACE
+      - PIP_TARGET=/tmp/.packages
+      - PYTHONPATH=/tmp/.packages
+      - XDG_CACHE_HOME=/tmp/.cache
+      - API_DB_PORT=API_DB_PORT_TO_REPLACE
+      - API_DB_NAME=API_DB_NAME_TO_REPLACE
+      - API_DB_USERNAME=API_DB_USERNAME_TO_REPLACE
+      - API_DB_PASSWORD=API_DB_PASSWORD_TO_REPLACE
+      - DOS_DB_PORT=DOS_DB_PORT_TO_REPLACE
+      - DOS_DB_NAME=DOS_DB_NAME_TO_REPLACE
+      - DOS_DB_USERNAME=DOS_DB_USERNAME_TO_REPLACE
+      - DOS_DB_PASSWORD=DOS_DB_PASSWORD_TO_REPLACE
+      - API_LOG_LEVEL=API_LOG_LEVEL_TO_REPLACE
+  - name: uec-dos-api-cs-proxy-configmap
+    literals:
+      - PROFILE=PROFILE_TO_REPLACE

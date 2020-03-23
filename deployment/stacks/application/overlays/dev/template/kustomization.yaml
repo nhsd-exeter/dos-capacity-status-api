@@ -1,0 +1,17 @@
+bases:
+  - ../../base
+
+patchesStrategicMerge:
+  - uec-dos-api-cs-service-customisation.yaml
+
+namespace: K8S_APP_NAMESPACE_TO_REPLACE
+
+configMapGenerator:
+  - name: uec-dos-api-cs-configmap
+    behavior: merge
+    literals:
+      - API_DB_HOST=API_DB_HOST_TO_REPLACE
+      - DOS_DB_HOST=DOS_DB_HOST_TO_REPLACE
+
+commonLabels:
+  env: nonprod

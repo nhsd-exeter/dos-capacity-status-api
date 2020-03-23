@@ -1,0 +1,39 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: K8S_APP_NAMESPACE_TO_REPLACE
+  name: uec-dos-api-cs-proxy
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1 # how many pods we can add at a time
+      maxUnavailable: 0 # maxUnavailable define how many pods can be unavailable during the rolling update
+  template:
+    metadata:
+      labels:
+        app: uec-dos-api-cs-proxy
+    spec:
+      containers:
+        - name: uec-dos-api-cs-proxy
+          image: DOCKER_REGISTRY_TO_REPLACE/proxy:PROXY_IMAGE_TAG_TO_REPLACE
+          envFrom:
+            - configMapRef:
+                name: uec-dos-api-cs-proxy-configmap
+          readinessProbe:
+            tcpSocket:
+              port: 443
+            initialDelaySeconds: 10
+            periodSeconds: 60
+          ports:
+            - containerPort: 443
+              protocol: TCP
+          resources:
+            requests:
+              memory: "0Mi"
+              cpu: "0m"
+            limits:
+              memory: "2048Mi"
+              cpu: "1000m"
+          imagePullPolicy: Always
