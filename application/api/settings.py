@@ -103,11 +103,11 @@ WSGI_APPLICATION = "api.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "HOST": os.getenv("DJANGO_DB_HOST", "db-dos"),
-        "PORT": os.getenv("DJANGO_DB_PORT", "5432"),
-        "NAME": os.getenv("DJANGO_DB_NAME", "cap_status_api"),
-        "USER": os.getenv("DJANGO_DB_USERNAME", "postgres"),
-        "PASSWORD": os.getenv("DJANGO_DB_PASSWORD", "postgres"),
+        "HOST": os.getenv("API_DB_HOST", "db-dos"),
+        "PORT": os.getenv("API_DB_PORT", "5432"),
+        "NAME": os.getenv("API_DB_NAME", "capacity_status"),
+        "USER": os.getenv("API_DB_USERNAME", "postgres"),
+        "PASSWORD": os.getenv("API_DB_PASSWORD", "postgres"),
     },
     "dos": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
@@ -132,36 +132,24 @@ LOGGING = {
     },
     "handlers": {
         "console": {
-            "level": os.getenv("LOG_LEVEL", "INFO"),
+            "level": os.getenv("API_LOG_LEVEL", "INFO"),
             "class": "logging.StreamHandler",
-            "formatter": "datetime_format",
-            "filters": ["request_id"],
-        },
-        "file": {
-            "level": "DEBUG",
-            "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(BASE_DIR, "logs/capacity-status-api-debug.log"),
-            "maxBytes": 1024 * 1024 * 15,  # 15MB
-            "backupCount": 10,
             "formatter": "datetime_format",
             "filters": ["request_id"],
         },
     },
     "loggers": {
         "django": {
-            "handlers": ["console", "file"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG"),
+            "handlers": ["console"],
+            "level": os.getenv("API_LOG_LEVEL", "DEBUG"),
         },
         "django.server": {
             # Nothing particularly interesting, so just return warning and above
             # to reduce log clutter.
-            "handlers": ["console", "file"],
+            "handlers": ["console"],
             "level": "WARNING",
         },
-        "api": {
-            "handlers": ["console", "file"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG"),
-        },
+        "api": {"handlers": ["console"], "level": os.getenv("API_LOG_LEVEL", "DEBUG"),},
     },
 }
 

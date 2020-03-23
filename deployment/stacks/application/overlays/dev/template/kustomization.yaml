@@ -10,7 +10,7 @@ configMapGenerator:
   - name: uec-dos-api-cs-configmap
     behavior: merge
     literals:
-      - DJANGO_DB_HOST=DJANGO_DB_HOST_TO_REPLACE
+      - API_DB_HOST=API_DB_HOST_TO_REPLACE
       - DOS_DB_HOST=DOS_DB_HOST_TO_REPLACE
 
 commonLabels:

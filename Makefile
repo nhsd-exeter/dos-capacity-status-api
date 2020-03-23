@@ -67,34 +67,16 @@ project-clean: project-stop
 	make docker-image-clean NAME=proxy
 
 project-deploy:
-	make project-deploy-prepare
-	eval "$$(make project-populate-application-variables)"
-	make k8s-deploy STACK=application
-	echo "The URL is $(UI_URL)"
-
-project-deploy-prepare:
 	eval "$$(make aws-assume-role-export-variables)"
 	make k8s-kubeconfig-get
 	eval "$$(make k8s-kubeconfig-export)"
+	eval "$$(make project-populate-secret-variables)"
+	make k8s-deploy STACK=application
+	echo "The URL is $(UI_URL)"
 
-project-populate-application-variables:
-	echo "export PROFILE=dev"
-	echo "export API_IMAGE_TAG=0.0.1"
-	echo "export PROXY_IMAGE_TAG=0.0.1"
-	echo "export DJANGO_DB_HOST=uec-dos-api-cs-nonprod-db.cqger35bxcwy.eu-west-2.rds.amazonaws.com"
-	echo "export DOS_DB_HOST=uec-dos-api-cs-nonprod-db.cqger35bxcwy.eu-west-2.rds.amazonaws.com"
-	echo "export DJANGO_DB_NAME=cap_status_api"
-	echo "export DJANGO_DB_PASSWORD=$$(make -s aws-secret-get NAME=capacity-status-dev-api-db-password)"
-	echo "export DJANGO_DB_PORT=5432"
-	echo "export DJANGO_DB_USERNAME=postgres"
-	echo "export DOS_DB_NAME=postgres"
+project-populate-secret-variables:
+	echo "export API_DB_PASSWORD=$$(make -s aws-secret-get NAME=capacity-status-dev-api-db-password)"
 	echo "export DOS_DB_PASSWORD=$$(make -s aws-secret-get NAME=capacity-status-dev-dos-db-password)"
-	echo "export DOS_DB_PORT=5432"
-	echo "export DOS_DB_USERNAME=postgres"
-	echo "export LOG_LEVEL=INFO"
-	echo "export DJANGO_LOG_LEVEL=INFO"
-
-
 
 # ==============================================================================
 
