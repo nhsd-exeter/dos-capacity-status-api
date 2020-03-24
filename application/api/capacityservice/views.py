@@ -2,11 +2,11 @@ from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.authentication import TokenAuthentication
 
 from drf_yasg.utils import swagger_auto_schema
 
 from rest_framework.generics import RetrieveUpdateAPIView
-from rest_framework_api_key.permissions import HasAPIKey
 
 from .serializers.model_serializers import CapacityStatusModelSerializer
 from .serializers.payload_serializer import CapacityStatusRequestPayloadSerializer
@@ -14,11 +14,10 @@ from .serializers.payload_serializer import CapacityStatusRequestPayloadSerializ
 from .serializers.response_serializer import CapacityStatusResponseSerializer
 
 from .models import ServiceCapacities
-from api.capacityauth.permissions import HasDosUserAPIKey
 
 from api.capacityauth.authorise import (
-    can_dos_user_api_key_edit_service,
-    get_user_for_key,
+    can_capacity_user_edit_service,
+    get_dos_user,
 )
 from api.dos.queries import get_dos_service_for_uid
 from .documentation import (
@@ -35,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 class CapacityStatusView(RetrieveUpdateAPIView):
-    permission_classes = [HasDosUserAPIKey]
+    authentication_classes = [TokenAuthentication]
     queryset = ServiceCapacities.objects.db_manager("dos").all()
     serializer_class = CapacityStatusModelSerializer
     lookup_field = "service__uid"
@@ -109,8 +108,8 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         return self._handle_cannot_edit_service_response(request, str(service__uid))
 
     def get_user_from_request(self, request):
-        api_key = self.get_permissions()[0].get_key_model(request)
-        return get_user_for_key(api_key)
+        user = request.user
+        return get_dos_user(user)
 
     def _validate_dos_user(self, user):
         if user is None:
@@ -153,14 +152,13 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         return Response(responseSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def _can_edit_service(self, request, service_uid):
-        api_key = self.get_permissions()[0].get_key_model(request)
-        return can_dos_user_api_key_edit_service(api_key, service_uid)
+        return can_capacity_user_edit_service(request.user, service_uid)
 
     def _update_service_capacity(self, request, service__uid):
-        api_key = self.get_permissions()[0].get_key_model(request)
+        dos_user = get_dos_user(request.user)
         context = {
-            "apiUsername": api_key.dos_username,
-            "apiUserId": api_key.dos_user_id,
+            "apiUsername": dos_user.username,
+            "apiUserId": dos_user.id,
         }
         payload_serializer = CapacityStatusRequestPayloadSerializer(
             data=request.data, context=context

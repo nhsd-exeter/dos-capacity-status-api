@@ -50,7 +50,7 @@ SECURE_HSTS_SECONDS = 30  # Set low for development (original 3600)
 
 INSTALLED_APPS = [
     "rest_framework",
-    "rest_framework_api_key",
+    "rest_framework.authtoken",
     "django.contrib.admin",
     "django.contrib.auth",
     # messages and sessions APP is needed for the auth APP
@@ -155,7 +155,7 @@ LOGGING = {
 
 SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {
-        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"},
+        "Bearer": {"type": "token", "name": "Authorization", "in": "header"},
     },
     # May need this set to true when running over HTTPS.
     "USE_SESSION_AUTH": False,
