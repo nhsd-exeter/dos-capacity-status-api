@@ -33,7 +33,7 @@ project-build-proxy:
 		$(DOCKER_DIR)/proxy/assets/certificate
 	cp -f -r \
 		$(PROJECT_DIR)/application/static/* \
-		$(DOCKER_DIR)/proxy/assets/var/www/capacity-status-api/static
+		$(DOCKER_DIR)/proxy/assets/application/static
 	make docker-image NAME=proxy VERSION=0.0.1
 
 project-create-ecr:
