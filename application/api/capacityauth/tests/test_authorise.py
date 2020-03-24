@@ -1,12 +1,12 @@
 from django.core.exceptions import ObjectDoesNotExist
-
 from django.contrib.auth.models import User
 from unittest import TestCase, mock
+
 from ..models import CapacityAuthDosUser
 from ..authorise import get_dos_user, can_capacity_user_edit_service
-from .. import authorise
 from api.dos.models import Users as DosUser
 from api.dos import queries
+from .. import authorise
 
 class TestGetDosUser(TestCase):
 #     "Test retrieval of Dos User from DoS (Django) app for a Capacity User"
