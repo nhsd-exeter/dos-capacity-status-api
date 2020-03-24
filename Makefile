@@ -6,6 +6,8 @@ include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 project-config:
 	make docker-config
 
+project-clean-build-deploy: project-clean project-build project-push-images project-deploy
+
 project-clean-build: project-clean project-build
 
 project-build: project-config project-stop
@@ -29,17 +31,18 @@ project-build-proxy:
 	cp -f \
 		$(PROJECT_DIR)/certificate/* \
 		$(DOCKER_DIR)/proxy/assets/certificate
+	cp -f -r \
+		$(PROJECT_DIR)/application/static/* \
+		$(DOCKER_DIR)/proxy/assets/var/www/capacity-status-api/static
 	make docker-image NAME=proxy VERSION=0.0.1
 
 project-create-ecr:
 	make docker-create-repository NAME=api
-	make docker-create-repository NAME=db
 	make docker-create-repository NAME=proxy
 
 project-push-images: # Push Docker images to the ECR
 	make docker-login
 	make docker-push NAME=api VERSION=0.0.1
-	make docker-push NAME=db VERSION=0.0.1
 	make docker-push NAME=proxy VERSION=0.0.1
 
 project-migrate:
@@ -75,8 +78,8 @@ project-deploy:
 	echo "The URL is $(UI_URL)"
 
 project-populate-secret-variables:
-	echo "export API_DB_PASSWORD=$$(make -s aws-secret-get NAME=capacity-status-dev-api-db-password)"
-	echo "export DOS_DB_PASSWORD=$$(make -s aws-secret-get NAME=capacity-status-dev-dos-db-password)"
+	echo "export API_DB_PASSWORD=$$(make -s aws-secret-get NAME=capacity-status-api-dev-api-db-password)"
+	echo "export DOS_DB_PASSWORD=$$(make -s aws-secret-get NAME=capacity-status-api-dev-dos-db-password)"
 
 # ==============================================================================
 
