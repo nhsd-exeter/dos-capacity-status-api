@@ -86,9 +86,8 @@ project-deploy:
 	echo "The URL is $(UI_URL)"
 
 project-populate-secret-variables:
-	echo "export API_DB_PASSWORD=$$(make -s aws-secret-get NAME=capacity-status-api-dev-api-db-password)"
-	echo "export DOS_DB_PASSWORD=$$(make -s aws-secret-get NAME=capacity-status-api-dev-dos-db-dos-password)"
-	echo "export APP_ADMIN_PASSWORD=$$(make -s aws-secret-get NAME=capacity-status-api-admin-password)"
+	make secret-fetch-and-export-variables NAME=uec-dos-api-capacity-status-dev
+
 
 # ==============================================================================
 
