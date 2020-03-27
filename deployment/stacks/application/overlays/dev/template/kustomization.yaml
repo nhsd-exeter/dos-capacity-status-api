@@ -1,8 +1,8 @@
 bases:
   - ../../base
 
-patchesStrategicMerge:
-  - uec-dos-api-cs-service-customisation.yaml
+#patchesStrategicMerge:
+#  - uec-dos-api-cs-service-elb-customisation.yaml
 
 namespace: K8S_APP_NAMESPACE_TO_REPLACE
 
