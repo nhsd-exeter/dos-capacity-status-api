@@ -1,8 +1,8 @@
 bases:
   - ../../base
 
-#patchesStrategicMerge:
-#  - uec-dos-api-cs-service-elb-customisation.yaml
+patchesStrategicMerge:
+  - uec-dos-api-cs-proxy-ingress-customisation.yaml
 
 namespace: K8S_APP_NAMESPACE_TO_REPLACE
 
@@ -14,4 +14,4 @@ configMapGenerator:
       - DOS_DB_HOST=DOS_DB_HOST_TO_REPLACE
 
 commonLabels:
-  env: nonprod
+  env: dev

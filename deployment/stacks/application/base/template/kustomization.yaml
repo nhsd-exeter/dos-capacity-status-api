@@ -3,7 +3,8 @@ resources:
   - api/uec-dos-api-cs-deployment.yaml
   - api/uec-dos-api-cs-service.yaml
   - proxy/uec-dos-api-cs-proxy-deployment.yaml
-  - proxy/uec-dos-api-cs-proxy-alb-service.yaml
+  - proxy/uec-dos-api-cs-proxy-service.yaml
+  - proxy/uec-dos-api-cs-proxy-ingress.yaml
   - network-policy/uec-dos-api-cs-default-deny-ingress.yaml
   - network-policy/uec-dos-api-cs-allow-external-ingress.yaml
   - network-policy/uec-dos-api-cs-proxy-allow-external-ingress.yaml
