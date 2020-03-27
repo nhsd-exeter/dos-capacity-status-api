@@ -6,7 +6,7 @@ include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 project-config:
 	make docker-config
 
-project-clean-build-deploy: project-clean project-build project-push-images project-deploy
+project-clean-deploy: project-clean project-build project-push-images project-deploy
 
 project-clean-build: project-clean project-build
 
@@ -22,9 +22,17 @@ project-build-postgres:
 	make docker-image NAME=postgres VERSION=0.0.1 NAME_AS=db
 
 project-build-api:
+	cd $(APPLICATION_DIR)
+	tar -czf $(PROJECT_DIR)/build/docker/api/assets/api-app.tar.gz \
+		api \
+		logs \
+		static \
+		manage.py \
+		requirements.txt
 	cp -f \
 		$(PROJECT_DIR)/certificate/* \
 		$(DOCKER_DIR)/api/assets/certificate
+	cd $(PROJECT_DIR)
 	make docker-image NAME=api VERSION=0.0.1
 
 project-build-proxy:
@@ -79,7 +87,8 @@ project-deploy:
 
 project-populate-secret-variables:
 	echo "export API_DB_PASSWORD=$$(make -s aws-secret-get NAME=capacity-status-api-dev-api-db-password)"
-	echo "export DOS_DB_PASSWORD=$$(make -s aws-secret-get NAME=capacity-status-api-dev-dos-db-password)"
+	echo "export DOS_DB_PASSWORD=$$(make -s aws-secret-get NAME=capacity-status-api-dev-dos-db-dos-password)"
+	echo "export APP_ADMIN_PASSWORD=$$(make -s aws-secret-get NAME=capacity-status-api-admin-password)"
 
 # ==============================================================================
 
