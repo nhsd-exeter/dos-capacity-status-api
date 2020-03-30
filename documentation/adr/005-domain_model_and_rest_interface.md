@@ -9,14 +9,14 @@
 The Capacity Status API will be built using the Django web framework. The framework offers a number of modules and features that can be utilised when building an API. This ADR discusses these concepts and the decisions made in determining which Django features to use, and how we can use them. Essentially, this comes down to three distinct parts:
 
 - Rest Interface (views and controllers)
-- Serialisation (the broker between the request and the domain model; and the domain model and the response)
+- Serialization (the broker between the request and the domain model; and the domain model and the response)
 - Domain Model (where and how the information is kept)
 
 The Capacity Status API is required to:
 
-- Take in capacity status information to update a specified with, containing the following information:
+- Take in capacity status information to update a specific service, containing the following information:
   - Capacity Status (the capacity status to put the service into in readable format: Red, Amber, Green)
-  - Reset Status In Minuets (when setting the capacity status to either a Red or Amber state, this is the number of minuets the service will persist in this state. After this time, the service will be automatically set back to the Green capacity status)
+  - Reset Status In Minutes (when setting the capacity status to either a Red or Amber state, this is the number of minutes the service will persist in this state. After this time, the service will be automatically set back to the Green capacity status)
   - Notes (a free text field that the requester can set)
 
 - Update the capacity status information in Core DoS with the following information:
@@ -45,9 +45,9 @@ For the interface, we decided upon using the Django Rest Framework extension (DR
 The extension comes with already defined 'views' which automatically configure (and give) the API any set of the standard REST endpoints that we would require. The Capacity Status API will require a GET and PUT endpoint, which can be automatically configured using the DRF RetrieveUpdateAPIView view. The default endpoint functionality provided by the DRF can also be easily modified to suit the specific business needs of the API.
 
 
-### Serialisation
+### Serialization
 
-Django provides a component known as a 'Serilizer' which deals with everything concerning the transfer of data to and from the client (request/response) to and from the domain model. The serialiser deals with:
+Django provides a component known as a 'Serializer' which deals with everything concerning the transfer of data to and from the client (request/response) to and from the domain model. The serializer deals with:
 
 - validation of the data
 - conversion of the data (from JSON to domain model or visa-versa)
@@ -57,11 +57,11 @@ The Capacity Status API needs to deal with three streams of information:
 - Capacity information held in the data model
 - Capacity going out
 
-Each stream of information contains slightly different views on the capacity information, we have therefore decided to adopt a three-serialiser approach in dealing with this use case. In doing this, we have a separate, well defined serialiser for each information stream. Each serialiser will be configured with its own set of validation rules specifically catered to handle its specified data stream. Each serialiser will also have its own defined mechanism to deal with passing the data along to the next information stream. This gives us clear separation of concerns for what each serialiser is doing. We therefore have:
+Each stream of information contains slightly different views on the capacity information, we have therefore decided to adopt a three-serializer approach in dealing with this use case. In doing this, we have a separate, well defined serializer for each information stream. Each serializer will be configured with its own set of validation rules specifically catered to handle its specified data stream. Each serializer will also have its own defined mechanism to deal with passing the data along to the next information stream. This gives us clear separation of concerns for what each serializer is doing. We therefore have:
 
-- Payload Serialiser - responsible for consuming the JSON payload from the request, validating the data, and converting the data into the format that the Data Model Serializer expects.
-- Data Model Serialiser - responsible for consuming the data from the Payload Serialiser, validating the data, and updating the Domain Model. Also responsible for retrieving capacity information from the Domain Model.
-- Response Serialiser - responsible for consuming the data from the Data Model Serializer, validating the data, and converting the data into JSON for the response.
+- Payload Serializer - responsible for consuming the JSON payload from the request, validating the data, and converting the data into the format that the Data Model Serializer expects.
+- Data Model Serializer - responsible for consuming the data from the Payload Serializer, validating the data, and updating the Domain Model. Also responsible for retrieving capacity information from the Domain Model.
+- Response Serializer - responsible for consuming the data from the Data Model Serializer, validating the data, and converting the data into JSON for the response.
 
 ### Domain Model
 
@@ -75,12 +75,12 @@ The part of the model relating to capacity status information (not user permissi
 
 The part of the model relating to user permissions to be able to update capacity status information also resides in the Core DoS database, and retrieval of this data will be performed by a dedicated 'DoS' module that the Capacity Status API can call. This reduces coupling concerns between Core DoS and the API, thus maintaining the integrity of the APIs core code base.
 
-Finally, the User Management model is created and maintained by the API and is stored in its own database. This further decouples the concept of the API user (or more specifically the API Key) from what is know as the user in Core DoS. The approach taken is for Django to manage the data model, and this will be performed by Django's built in database migration tools. Using this approach we are completely decoupled from what type of database we are using as Django will automatically apply the correct drivers to whatever database we choose. This also means that no database scripting of any kind is required, and the API developers need only to maintain the Django models within code. (Django will take care of applying the changes to the database).
+Finally, the User Management model is created and maintained by the API and is stored in its own database. This further decouples the concept of the API user (or more specifically the API Key) from what is known as the user in Core DoS. The approach taken is for Django to manage the data model, and this will be performed by Django's built in database migration tools. Using this approach we are completely decoupled from what type of database we are using as Django will automatically apply the correct drivers to whatever database we choose. This also means that no database scripting of any kind is required, and the API developers need only to maintain the Django models within code. (Django will take care of applying the changes to the database).
 
 ## Consequences
 
 Framework takes away the vast majority of boiler plate code.
-API documentation is automatically generated from both endpoints and serialisers, vastly reducing overheads on creating and maintaining API documentation.
+API documentation is automatically generated from both endpoints and serializers, vastly reducing overheads on creating and maintaining API documentation.
 Clear separation of concerns for handling the data flows through the API.
 Clear separation for handling retrieval and update of a service, from dealing with user permissions, management, and authentication.
 The API is tightly coupled to the Core DoS database when storing and retrieving capacity status information. Although for our immediate use case, this is an acceptable risk.

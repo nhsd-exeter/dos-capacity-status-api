@@ -31,7 +31,7 @@ The technology stack is therefore:
 Very light touch framework with available extensions to only bring in exactly what the solution requires. Will need flask extensions to complete the solution, but these are well known about and documented. Identified extensions so far are:
 
 - Flask-Restplus - provides REST functionality and API documentation that Swagger can plug into.
-- Flask-SQLAlchemy (and psycopg2-binary) - both required to enable connectivity to a Postgres RDS database. Also provides ORM modeling.
+- Flask-SQLAlchemy (and psycopg2-binary) - both required to enable connectivity to a Postgres RDS database. Also provides ORM modelling.
 - pytest - pythons automated unit test framework for writing and running unit tests.
 
 Easy to work with. The documentation that comes with Flask is very good. Flask debug mode is concise and understandable.

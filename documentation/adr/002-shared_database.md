@@ -10,7 +10,7 @@ This is not an external API to DoS, it is part of the DoS ecosystem. The operati
 
 ## Decision
 
-The relevant content of the database is shared between the Core DoS application and the Capacity Status API. The decision was made to have the API use and update the Core DoS database. This approach is the most logical solution at this time, as any other alternative would like need to corporate some kinda of interim internal API between the Capacity Status API and the Core DoS database. Have an interim API would be replicating functionality of the Capacity Status API and would therefore be redundant.
+The relevant content of the database is shared between the Core DoS application and the Capacity Status API. The decision was made to have the API use and update the Core DoS database. This approach is the most logical solution at this time, as any other alternative would likely need to incorporate some kind of interim internal API between the Capacity Status API and the Core DoS database. Having an interim API would be replicating functionality of the Capacity Status API and would therefore be redundant.
 
 ## Consequences
 
