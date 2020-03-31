@@ -12,7 +12,7 @@ class TestGetSuccess(unittest.TestCase):
 
     def test_get_success(self):
         response = self.client.get(
-            TestEnv.api_unauthorised_url, HTTP_HOST="127.0.0.1", **TestEnv.auth_headers
+            TestEnv.api_unauthorised_url, HTTP_HOST=TestEnv.api_host, **TestEnv.auth_headers
         )
         json_response = json.loads(str(response.content, encoding="utf8"))
 

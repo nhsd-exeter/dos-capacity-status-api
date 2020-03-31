@@ -16,7 +16,7 @@ class TestPatchView(unittest.TestCase):
             TestEnv.api_unauthorised_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
 

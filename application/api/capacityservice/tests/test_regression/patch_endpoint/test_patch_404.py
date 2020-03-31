@@ -9,7 +9,7 @@ class TestPatch404(unittest.TestCase):
     def test_no_service_found(self):
         client = Client()
         response = client.patch(
-            TestEnv.api_no_service_url, HTTP_HOST="127.0.0.1", **TestEnv.auth_headers
+            TestEnv.api_no_service_url, HTTP_HOST=TestEnv.api_host, **TestEnv.auth_headers
         )
 
         self.assertEqual(
@@ -23,7 +23,7 @@ class TestPatch404(unittest.TestCase):
         client = Client()
         response = client.patch(
             TestEnv.api_inactive_service_url,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
 
