@@ -1,7 +1,7 @@
 # 004 - Authentication and Authorisation
 
 - Date: 2020/01/28
-- Status: Proposed
+- Status: Superseded by ADR-008
 - Deciders: Daniel Stefaniuk, Jonathan Pearce, Matthew Begley
 
 ## Context
