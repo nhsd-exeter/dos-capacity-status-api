@@ -2,7 +2,6 @@ from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.authentication import TokenAuthentication
 
 from drf_yasg.utils import swagger_auto_schema
 
@@ -34,7 +33,6 @@ logger = logging.getLogger(__name__)
 
 
 class CapacityStatusView(RetrieveUpdateAPIView):
-    authentication_classes = [TokenAuthentication]
     queryset = ServiceCapacities.objects.db_manager("dos").all()
     serializer_class = CapacityStatusModelSerializer
     lookup_field = "service__uid"
