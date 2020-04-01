@@ -25,8 +25,8 @@ test: clean # Run the test suite
 	python manage.py test api/capacityservice/ api/dos/
 
 coverage: clean # View a report on test coverage
-	coverage run --source='.' --omit=*/tests/*,*/migrations/* \
-	 manage.py test api/
+	coverage run --source='.' --omit=*/tests/*,*/migrations/*,*apps.py,*asgi.py,*wsgi.py \
+	manage.py test api/
 	coverage report -m
 	coverage erase
 
