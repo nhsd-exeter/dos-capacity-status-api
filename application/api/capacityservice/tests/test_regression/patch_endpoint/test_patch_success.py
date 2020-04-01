@@ -21,7 +21,7 @@ class TestPatchSuccess(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
         json_response = json.loads(str(response.content, encoding="utf8"))
@@ -40,7 +40,7 @@ class TestPatchSuccess(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
         json_response = json.loads(str(response.content, encoding="utf8"))
@@ -61,7 +61,7 @@ class TestPatchSuccess(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
         json_response = json.loads(str(response.content, encoding="utf8"))
@@ -85,7 +85,7 @@ class TestPatchSuccess(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
         json_response = json.loads(str(response.content, encoding="utf8"))
@@ -108,7 +108,7 @@ class TestPatchSuccess(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
         json_response = json.loads(str(response.content, encoding="utf8"))
@@ -132,7 +132,7 @@ class TestPatchSuccess(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
 
@@ -152,7 +152,7 @@ class TestPatchSuccess(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
 
@@ -172,7 +172,7 @@ class TestPatchSuccess(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
 
@@ -192,7 +192,7 @@ class TestPatchSuccess(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
 
@@ -214,7 +214,7 @@ class TestPatchSuccess(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
 
@@ -243,7 +243,7 @@ class TestPatchSuccess(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
 

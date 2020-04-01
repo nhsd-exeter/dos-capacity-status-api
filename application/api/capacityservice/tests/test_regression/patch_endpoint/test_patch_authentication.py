@@ -9,10 +9,10 @@ class TestPatchAuthentication(unittest.TestCase):
     client = Client()
 
     def test_unauthorised_user_no_creds(self):
-        response = self.client.patch(TestEnv.api_url)
+        response = self.client.patch(TestEnv.api_url, HTTP_HOST=TestEnv.api_host,)
 
         self.assertEqual(
-            response.status_code, 403, "Response status code is not as expected."
+            response.status_code, 401, "Response status code is not as expected."
         )
         self.assertEqual(
             response.content,
@@ -22,23 +22,22 @@ class TestPatchAuthentication(unittest.TestCase):
 
     def test_unauthorised_user_invalid_creds(self):
         response = self.client.patch(
-            TestEnv.api_url, HTTP_HOST="127.0.0.1", **TestEnv.invalid_auth_headers
+            TestEnv.api_url, HTTP_HOST=TestEnv.api_host, **TestEnv.invalid_auth_headers
         )
 
         self.assertEqual(
-            response.status_code, 403, "Response status code is not as expected."
+            response.status_code, 401, "Response status code is not as expected."
         )
         self.assertEqual(
             response.content,
-            b'{"detail":"Authentication credentials were not provided."}',
+            b'{"detail":"Invalid token."}',
             "Response message is not as expected.",
         )
 
     def test_user_not_active(self):
         response = self.client.patch(
-            TestEnv.api_url, HTTP_HOST="127.0.0.1", **TestEnv.inactive_auth_headers
+            TestEnv.api_url, HTTP_HOST=TestEnv.api_host, **TestEnv.inactive_auth_headers
         )
-
         self.assertEqual(
             response.status_code, 401, "Response status code is not as expected."
         )

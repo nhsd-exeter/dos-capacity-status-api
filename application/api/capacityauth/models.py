@@ -40,7 +40,7 @@ class CapacityAuthDosUser(models.Model):
     )
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
-    def save(self):
+    def save(self, *args, **kwargs):
         self.dos_user_id = get_dos_user_for_username(self.dos_username).id
         return super().save()
 

@@ -16,7 +16,7 @@ class TestPatchValidationVal0001(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
 
@@ -42,7 +42,7 @@ class TestPatchValidationVal0002(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
 
@@ -64,7 +64,7 @@ class TestPatchValidationVal0002(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
 
@@ -86,7 +86,7 @@ class TestPatchValidationVal0002(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
 
@@ -113,7 +113,7 @@ class TestPatchValidationVal0003(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
 
@@ -136,7 +136,7 @@ class TestPatchValidationVal0003(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
 
@@ -163,7 +163,7 @@ class TestPatchValidationVal0004(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
 
@@ -186,7 +186,7 @@ class TestPatchValidationVal0004(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
 
@@ -219,7 +219,7 @@ class TestPatchValidationVal0005(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
 
@@ -246,7 +246,7 @@ class TestPatchValidationVal0006(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
 
@@ -274,7 +274,7 @@ class TestPatchValidationMultipleVals(unittest.TestCase):
             TestEnv.api_url,
             content_type="application/json",
             data=data,
-            HTTP_HOST="127.0.0.1",
+            HTTP_HOST=TestEnv.api_host,
             **TestEnv.auth_headers,
         )
 
