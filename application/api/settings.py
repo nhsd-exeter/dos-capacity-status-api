@@ -30,7 +30,6 @@ ALLOWED_HOSTS = [
     "localhost",
 ]
 
-# TODO [Needs Reviewing Start] Added as part of enabling https with gunicorn need to review if the following is needed
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 if os.getenv("PROFILE", "prod") == "local":
     SESSION_COOKIE_SECURE = False
@@ -44,24 +43,21 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 SECURE_HSTS_SECONDS = 30  # Set low for development (original 3600)
-# TODO [Needs Reviewing End]
 
 # Application definition
-
 INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "django.contrib.admin",
     "django.contrib.auth",
-    # messages and sessions APP is needed for the auth APP
     "django.contrib.messages",
     "django.contrib.sessions",
     "django.contrib.contenttypes",
     "django.contrib.staticfiles",
-    "api.dos",
-    "api.capacityservice",
-    "api.capacityauth",
     "drf_yasg",
+    "api.dos_interface",
+    "api.service",
+    "api.authentication",
 ]
 
 MIDDLEWARE = [
@@ -96,9 +92,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "api.wsgi.application"
-
-# Database
-# https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
     "default": {

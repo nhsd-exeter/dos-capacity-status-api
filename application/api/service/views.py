@@ -14,11 +14,11 @@ from .serializers.response_serializer import CapacityStatusResponseSerializer
 
 from .models import ServiceCapacities
 
-from api.capacityauth.authorise import (
+from api.authentication.authorise import (
     can_capacity_user_edit_service,
     get_dos_user,
 )
-from api.dos.queries import get_dos_service_for_uid
+from api.dos_interface.queries import get_dos_service_for_uid
 from .documentation import (
     description_get,
     description_post,

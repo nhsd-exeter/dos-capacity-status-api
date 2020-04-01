@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class DosConfig(AppConfig):
-    name = "dos"
+    name = "dos_interface"
