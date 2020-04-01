@@ -3,7 +3,7 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 
-from ....authentication.models import DosUserAPIKey
+from ....authentication.models import CapacityAuthDosUser
 
 
 class TestEnv:
