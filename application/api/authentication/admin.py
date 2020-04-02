@@ -2,7 +2,6 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin, User
 from .models import CapacityAuthDosUser
 
-
 admin.site.site_header = "Capacity Status API Administration"
 
 class DosUserInline(admin.StackedInline):
@@ -23,6 +22,3 @@ class UserAdmin(BaseUserAdmin):
 
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
-
-
-

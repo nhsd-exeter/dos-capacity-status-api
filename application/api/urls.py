@@ -9,7 +9,7 @@ from drf_yasg import openapi
 from rest_framework import routers, permissions
 from rest_framework.documentation import include_docs_urls
 
-from .capacityservice.documentation import capacity_service_api_desc
+from .service.documentation import capacity_service_api_desc
 
 
 """
@@ -40,8 +40,8 @@ schema_view = get_schema_view(
 APP_PATH = "api/v0.0.1/capacity/"
 
 urlpatterns = [
-    path(APP_PATH, include("api.capacityservice.urls")),
-    path(APP_PATH, include("api.capacityauth.urls")),
+    path(APP_PATH, include("api.service.urls")),
+    path(APP_PATH, include("api.authentication.urls")),
     path(
         APP_PATH + "apidoc/",
         include("rest_framework.urls", namespace="rest_framework"),

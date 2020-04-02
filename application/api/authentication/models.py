@@ -8,9 +8,10 @@ from django.core.exceptions import (
 import logging
 
 
-from api.dos.queries import get_dos_user_for_username
+from api.dos_interface.queries import get_dos_user_for_username
 
 logger = logging.getLogger(__name__)
+
 
 def validate_dos_username_exists(value):
     logger.info("Validate DoS user exists for name: " + str(value))
@@ -25,12 +26,13 @@ def validate_dos_username_exists(value):
     except ObjectDoesNotExist:
         raise ValidationError(
             "Username '%(value)s' does not exist in DoS", params={"value": value}
-            )
+        )
     except MultipleObjectsReturned:
         raise ValidationError(
             "Unexpected multiple DoS users with given username '%(value)s'",
             params={"value": value},
         )
+
 
 class CapacityAuthDosUser(models.Model):
 
@@ -47,5 +49,4 @@ class CapacityAuthDosUser(models.Model):
     class Meta:
         verbose_name = "Capacity Auth DoS User"
         verbose_name_plural = "Capacity Auth DoS Users"
-
 
