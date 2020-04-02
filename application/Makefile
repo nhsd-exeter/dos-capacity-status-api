@@ -30,6 +30,18 @@ coverage: clean # View a report on test coverage
 	coverage report -m
 	coverage erase
 
+unit-test-coverage: clean # View a report on test coverage
+	coverage run --source='.' --omit=*/tests/*,*/migrations/*,*apps.py,*asgi.py,*wsgi.py \
+		manage.py test api/ --exclude-tag=regression
+	coverage report -m
+	coverage erase
+
+regression-test-coverage: clean # View a report on test coverage
+	coverage run --source='.' --omit=*/tests/*,*/migrations/*,*apps.py,*asgi.py,*wsgi.py \
+		manage.py test api/ --tag=regression
+	coverage report -m
+	coverage erase
+
 tidy: clean # Tidy code with the 'black' formatte
 	@echo "\nTidying code with black..."
 	black -l 119 api

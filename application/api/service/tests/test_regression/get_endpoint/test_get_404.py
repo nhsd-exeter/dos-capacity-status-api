@@ -1,9 +1,9 @@
 import unittest
-from django.test import Client
+from django.test import Client, tag
 
 from ..test_env import TestEnv
 
-
+@tag("regression")
 class TestGet404(unittest.TestCase):
     "Tests the service not found scenario for the GET endpoint"
 

@@ -1,10 +1,10 @@
 import unittest
 import json
-from django.test import Client
+from django.test import Client, tag
 
 from ..test_env import TestEnv
 
-
+@tag("regression")
 class TestGetSuccess(unittest.TestCase):
     "Tests success scenarios for the Get endpoint"
 

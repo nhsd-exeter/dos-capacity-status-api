@@ -1,8 +1,8 @@
 import unittest
-from django.test import Client
+from django.test import Client, tag
 from ..test_env import TestEnv
 
-
+@tag("regression")
 class TestPatch404(unittest.TestCase):
     "Tests for handling service not found scenario for the PATCH endpoint"
 

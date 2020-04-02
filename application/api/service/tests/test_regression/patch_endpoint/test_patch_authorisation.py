@@ -1,9 +1,9 @@
 import unittest
 import json
-from django.test import Client
+from django.test import Client, tag
 from ..test_env import TestEnv
 
-
+@tag("regression")
 class TestPatchView(unittest.TestCase):
     "Tests authorisation for the PATCH endpoint."
 
