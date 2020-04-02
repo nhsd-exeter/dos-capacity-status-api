@@ -12,6 +12,8 @@ configMapGenerator:
     literals:
       - API_DB_HOST=API_DB_HOST_TO_REPLACE
       - DOS_DB_HOST=DOS_DB_HOST_TO_REPLACE
+      - DJANGO_SECRET_KEY=DJANGO_SECRET_KEY_TO_REPLACE
+      - DJANGO_DEBUG=DJANGO_DEBUG_TO_REPLACE
 
 commonLabels:
   env: dev

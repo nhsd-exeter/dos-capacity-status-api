@@ -49,7 +49,7 @@
     make project-trust-certificate
     make project-build
     make project-start project-log # Press Ctrl-C to exit
-    open https://localhost:8443/apidoc/
+    open https://localhost:8443/api/v0.0.1/capacity/apidoc/
     make project-stop
 
 #### Dev Routine
@@ -75,34 +75,70 @@ Activate the virtual environment:
 
 source $HOME/pythonvirtenvs/capacity-status-env/bin/activate
 
-Now install all of the extensions & load the static server files:
+Install all of the modules that the application requires:
 
-First, navigate to the root directory and run the following command:
+cd application
+pip3 install -r requirements.txt
 
-make project-build
-make api-build
+Your development environment is now ready.
 
-##### Running the application in the development environment
+##### Running the API in the development environment
 
-In the development environment, the application runs in debug mode on port 8000
+In the development environment, the API runs in debug mode on localhost. It is possible to
+have an instance of the API running on port 8000 (HTTP) or 8443 (HTTPS). The HTTPS version
+of the API is dockerised and runs within a container on your local machine, while the HTTP
+version runs in the command window. It is possible to have one or both versions of the API running.
 
-To run the application, make sure that you have your python virtual environment
-activated:
+Both versions of the API require a dockerised postgres database and a dockerised proxy server
+to be running on your local machine. These components are included in this project.
 
-source $HOME/pythonvirtenvs/capacity-status-env/bin/activate
+###### Running the Dockerised API in HTTPS mode
 
-Now run the following to start the application in the root directory of the
-project:
+To run the (dockerised) API on localhost across port 8443, starting from the project
+root directory:
 
-make project-start
-make project-migrate
-make api-start
+make project-build    - This builds the API, Database, and Proxy Server images.
+make project-start    - This runs the API, Database, and Proxy Server images.
 
-The application is configured to run on http://localhost:8000/apidoc/ in the development environment.
+Issuing a 'docker ps' command will show you the state of the running containers. You should
+have running containers for the API, Database, and Proxy Server.
+
+The API will be running on localhost on port 8443. The URL to the API Documentation is:
+
+https://localhost:8443/api/v0.0.1/capacity/apidoc
 
 Navigate here in a browser to see all available endpoints and routes.
 
-## Unit testing
+Any changes made and saved to the API code base will NOT cause Django to immediately re-start the API
+with those new changes. Instead, the project will need to be rebuilt and re-started for any changes to
+the project to be seen. In this case, it is recommended that the following commands are run within the
+project root directory:
+
+make project-clean-build    - This clears out previous images and builds new images
+make project-start
+
+###### Running the API in HTTP mode
+
+To run the API on localhost across port 8000 (from the command prompt), starting from the
+project root directory:
+
+Follow the instructions given in the 'Running the Dockerised API in HTTPS mode' section, and
+perform the following additional steps:
+
+source $HOME/pythonvirtenvs/capacity-status-env/bin/activate     - Activate the virtual env
+make api-start
+
+The API will be running on localhost on port 8000. The URL to the API Documentation is:
+
+http://localhost:8000/api/v0.0.1/capacity/apidoc
+
+Navigate here in a browser to see all available endpoints and routes.
+
+Any changes made and saved to the API code base will cause Django to immediately re-start the API
+with those new changes.  However, changes made to the Database or Proxy Server will require a new
+build of the images as detailed in the 'Running the Dockerised API in HTTPS mode' section.
+
+## Unit Tests
 
 ### Creating unit tests
 
@@ -114,11 +150,9 @@ Navigate here in a browser to see all available endpoints and routes.
 
 ### Running the unit tests
 
-The unit tests can be run by executing the following command in the root directory:
+The unit tests can be run by executing the following command in the project root directory:
     ./application/manage.py test api
 
 ## Todo
 
-* `application/Makefile` needs to be refactored
 * The `api` image weights more than 300MB. Can we drop the build dependencies but still keep `pg_config` binary?
-* Fix the packages versions in the `application/requirements.txt` or do `pip freeze > requirements-lock.txt`
