@@ -1,7 +1,8 @@
 from unittest import TestCase
 
-from ..queries import can_user_edit_service, Users
+from ..queries import can_user_edit_service, get_dos_service_for_uid, Users
 from ..models import Services
+from api.dos_interface.models import Services
 
 
 class TestCanUserEditService(TestCase):
@@ -82,6 +83,16 @@ class TestCanUserEditService(TestCase):
         dos_user_id = 1000000001
         user_can_edit = can_user_edit_service(dos_user_id, service_uid)
         self.assertFalse(user_can_edit)
+
+    def test_get_dos_service_for_uid__success(self):
+        "Test get_dos_service_for_uid, success"
+        service_uid = "149198"
+        service = get_dos_service_for_uid(service_uid)
+        self.assertIsInstance(service, Services)
+        self.assertEqual(service.uid, service_uid)
+        self.assertIsNotNone(service.name)
+        self.assertNotEqual(service.name, "")
+
 
     # Re-activate users & services
     def tearDown(self):
