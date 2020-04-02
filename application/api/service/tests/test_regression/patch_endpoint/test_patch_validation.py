@@ -1,9 +1,9 @@
 import unittest
 import json
-from django.test import Client
+from django.test import Client, tag
 from ..test_env import TestEnv
 
-
+@tag("regression")
 class TestPatchValidationVal0001(unittest.TestCase):
     "Tests for the VAL-0001 validation code for the Patch endpoint"
 

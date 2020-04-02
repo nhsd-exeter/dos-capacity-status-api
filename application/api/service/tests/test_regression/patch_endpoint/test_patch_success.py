@@ -2,14 +2,14 @@ import unittest
 import json
 from datetime import datetime, timedelta
 
-from django.test import Client
+from django.test import Client, tag
 from ..test_env import TestEnv
 from ..test_helper import TestHelper
 
 test_helper = TestHelper()
 client = Client()
 
-
+@tag("regression")
 class TestPatchSuccess(unittest.TestCase):
     "Tests for the successful update of capacity status information"
 

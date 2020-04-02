@@ -1,8 +1,8 @@
 import unittest
-from django.test import Client
+from django.test import Client, tag
 from ..test_env import TestEnv
 
-
+@tag("regression")
 class TestPatchAuthentication(unittest.TestCase):
     "Tests for authentication scenarios for the Patch endpoint"
 
