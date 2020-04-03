@@ -111,11 +111,11 @@ api-start:
 
 # ==============================================================================
 
-project-generate-certificate:
+project-generate-development-certificate:
 	make ssl-generate-certificate \
 		DIR=$(PROJECT_DIR)/certificate \
 		NAME=certificate \
-		DOMAINS='localhost,DNS:*.k8s-prod.texasplatform.uk,DNS:*.k8s-nonprod.texasplatform.uk,DNS:proxy:443'
+		DOMAINS='localhost,DNS:*.k8s-nonprod.texasplatform.uk,DNS:proxy:443'
 
 project-trust-certificates: ## Trust the development certificates
 	sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain \
