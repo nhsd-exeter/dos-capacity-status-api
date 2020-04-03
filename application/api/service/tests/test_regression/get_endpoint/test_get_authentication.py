@@ -3,6 +3,7 @@ from django.test import Client, tag
 
 from ..test_env import TestEnv
 
+
 @tag("regression")
 class TestGetAuthentication(unittest.TestCase):
     "Tests authentication for the Get endpoint"
@@ -12,9 +13,7 @@ class TestGetAuthentication(unittest.TestCase):
     def test_unauthorised_user_no_creds(self):
         response = self.client.get(TestEnv.api_url, HTTP_HOST=TestEnv.api_host,)
 
-        self.assertEqual(
-            response.status_code, 401, "Response status code is not as expected."
-        )
+        self.assertEqual(response.status_code, 401, "Response status code is not as expected.")
         self.assertEqual(
             response.content,
             b'{"detail":"Authentication credentials were not provided."}',
@@ -22,27 +21,17 @@ class TestGetAuthentication(unittest.TestCase):
         )
 
     def test_unauthorised_user_invalid_creds(self):
-        response = self.client.get(
-            TestEnv.api_url, HTTP_HOST=TestEnv.api_host, **TestEnv.invalid_auth_headers
-        )
+        response = self.client.get(TestEnv.api_url, HTTP_HOST=TestEnv.api_host, **TestEnv.invalid_auth_headers)
 
+        self.assertEqual(response.status_code, 401, "Response status code is not as expected.")
         self.assertEqual(
-            response.status_code, 401, "Response status code is not as expected."
-        )
-        self.assertEqual(
-            response.content,
-            b'{"detail":"Invalid token."}',
-            "Response message is not as expected.",
+            response.content, b'{"detail":"Invalid token."}', "Response message is not as expected.",
         )
 
     def test_user_not_active(self):
-        response = self.client.get(
-            TestEnv.api_url, HTTP_HOST=TestEnv.api_host, **TestEnv.inactive_auth_headers
-        )
+        response = self.client.get(TestEnv.api_url, HTTP_HOST=TestEnv.api_host, **TestEnv.inactive_auth_headers)
 
-        self.assertEqual(
-            response.status_code, 401, "Response status code is not as expected."
-        )
+        self.assertEqual(response.status_code, 401, "Response status code is not as expected.")
         self.assertEqual(
             response.content,
             b'"Given Dos user does not have an active status"',

@@ -21,7 +21,11 @@ clean: # Reset the project and remove auto-generated assets
 	find . | grep -E "(__pycache__)" | xargs rm -rf
 
 flake8: # Run the flake8 code checker
-	flake8 --max-line-length=119 api
+	flake8 \
+		--ignore E231 \
+		--max-line-length=119 \
+		--exclude */tests/__init__.py,api/service/documentation.py \
+		api
 
 test-dos-interface: clean
 	python manage.py test api/dos_interface/

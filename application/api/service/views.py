@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+# from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from rest_framework.response import Response
@@ -66,9 +66,12 @@ class CapacityStatusView(RetrieveUpdateAPIView):
             200: CapacityStatusResponseSerializer,
             400: validation_error_response,
             401: authentication_error_response,
-            403: "Forbidden - when a user does not have permissions to update capacity information for the requested service.",
-            404: "Not Found - when the requested service to update is either not active, or could not be found in DoS.",
-            500: "Internal Server Error - when an unexpected error is encountered whilst processing the request.",
+            403: """Forbidden - when a user does not have permissions to update capacity
+                    information for the requested service.""",
+            404: """Not Found - when the requested service to update is either not active,
+                    or could not be found in DoS.""",
+            500: """Internal Server Error - when an unexpected error is encountered whilst
+                    processing the request.""",
         },
         request_body=CapacityStatusRequestPayloadSerializer,
     )
@@ -89,9 +92,12 @@ class CapacityStatusView(RetrieveUpdateAPIView):
             200: CapacityStatusResponseSerializer,
             400: validation_error_response,
             401: authentication_error_response,
-            403: "Forbidden - when a user does not have permissions to update capacity information for the requested service.",
-            404: "Not Found - when the requested service to update is either not active, or could not be found in DoS.",
-            500: "Internal Server Error - when an unexpected error is encountered whilst processing the request.",
+            403: """Forbidden - when a user does not have permissions to update capacity
+                    information for the requested service.""",
+            404: """Not Found - when the requested service to update is either not active,
+                    or could not be found in DoS.""",
+            500: """Internal Server Error - when an unexpected error is encountered whilst
+                    processing the request.""",
         },
         request_body=CapacityStatusRequestPayloadSerializer,
     )

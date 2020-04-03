@@ -4,6 +4,7 @@ from django.test import Client, tag
 
 from ..test_env import TestEnv
 
+
 @tag("regression")
 class TestGetSuccess(unittest.TestCase):
     "Tests success scenarios for the Get endpoint"
@@ -11,21 +12,16 @@ class TestGetSuccess(unittest.TestCase):
     client = Client()
 
     def test_get_success(self):
-        response = self.client.get(
-            TestEnv.api_unauthorised_url, HTTP_HOST=TestEnv.api_host, **TestEnv.auth_headers
-        )
+        response = self.client.get(TestEnv.api_unauthorised_url, HTTP_HOST=TestEnv.api_host, **TestEnv.auth_headers)
         json_response = json.loads(str(response.content, encoding="utf8"))
 
-        self.assertEqual(
-            response.status_code, 200, "Response status code is not as expected."
-        )
+        self.assertEqual(response.status_code, 200, "Response status code is not as expected.")
 
         self.assertEqual(
             json_response["serviceUid"], 110798,
         )
         self.assertEqual(
-            json_response["serviceName"],
-            "Dentist - Sneinton Family Dental Practice (Nottingham)",
+            json_response["serviceName"], "Dentist - Sneinton Family Dental Practice (Nottingham)",
         )
         self.assertEqual(
             json_response["capacityStatus"], "GREEN",
@@ -33,8 +29,7 @@ class TestGetSuccess(unittest.TestCase):
 
         reset_date_time_present = "resetDateTime" in json_response
         self.assertFalse(
-            reset_date_time_present,
-            "A reset date time is present in the JSON response.",
+            reset_date_time_present, "A reset date time is present in the JSON response.",
         )
         notes_present = "notes" in json_response
         self.assertFalse(

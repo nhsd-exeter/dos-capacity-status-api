@@ -1,7 +1,7 @@
 import unittest
-import json
 from django.test import Client, tag
 from ..test_env import TestEnv
+
 
 @tag("regression")
 class TestPatchValidationVal0001(unittest.TestCase):
@@ -20,13 +20,10 @@ class TestPatchValidationVal0001(unittest.TestCase):
             **TestEnv.auth_headers,
         )
 
-        self.assertEqual(
-            response.status_code, 400, "Response status code is not as expected."
-        )
+        self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0001") > 0),
-            "Response message is not as expected.",
+            (str(response.content).find("VAL-0001") > 0), "Response message is not as expected.",
         )
 
 
@@ -46,13 +43,10 @@ class TestPatchValidationVal0002(unittest.TestCase):
             **TestEnv.auth_headers,
         )
 
-        self.assertEqual(
-            response.status_code, 400, "Response status code is not as expected."
-        )
+        self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0002") > 0),
-            "Response message is not as expected.",
+            (str(response.content).find("VAL-0002") > 0), "Response message is not as expected.",
         )
 
     def test_invalid_capacity_status_given_text(self):
@@ -68,13 +62,10 @@ class TestPatchValidationVal0002(unittest.TestCase):
             **TestEnv.auth_headers,
         )
 
-        self.assertEqual(
-            response.status_code, 400, "Response status code is not as expected."
-        )
+        self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0002") > 0),
-            "Response message is not as expected.",
+            (str(response.content).find("VAL-0002") > 0), "Response message is not as expected.",
         )
 
     def test_invalid_capacity_status_given_blank(self):
@@ -90,13 +81,10 @@ class TestPatchValidationVal0002(unittest.TestCase):
             **TestEnv.auth_headers,
         )
 
-        self.assertEqual(
-            response.status_code, 400, "Response status code is not as expected."
-        )
+        self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0002") > 0),
-            "Response message is not as expected.",
+            (str(response.content).find("VAL-0002") > 0), "Response message is not as expected.",
         )
 
 
@@ -117,13 +105,10 @@ class TestPatchValidationVal0003(unittest.TestCase):
             **TestEnv.auth_headers,
         )
 
-        self.assertEqual(
-            response.status_code, 400, "Response status code is not as expected."
-        )
+        self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0003") > 0),
-            "Response message is not as expected.",
+            (str(response.content).find("VAL-0003") > 0), "Response message is not as expected.",
         )
 
     def test_invalid_reset_status_blank(self):
@@ -140,13 +125,10 @@ class TestPatchValidationVal0003(unittest.TestCase):
             **TestEnv.auth_headers,
         )
 
-        self.assertEqual(
-            response.status_code, 400, "Response status code is not as expected."
-        )
+        self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0003") > 0),
-            "Response message is not as expected.",
+            (str(response.content).find("VAL-0003") > 0), "Response message is not as expected.",
         )
 
 
@@ -167,13 +149,10 @@ class TestPatchValidationVal0004(unittest.TestCase):
             **TestEnv.auth_headers,
         )
 
-        self.assertEqual(
-            response.status_code, 400, "Response status code is not as expected."
-        )
+        self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0004") > 0),
-            "Response message is not as expected.",
+            (str(response.content).find("VAL-0004") > 0), "Response message is not as expected.",
         )
 
     def test_invalid_reset_status_in_given_too_high(self):
@@ -190,13 +169,10 @@ class TestPatchValidationVal0004(unittest.TestCase):
             **TestEnv.auth_headers,
         )
 
-        self.assertEqual(
-            response.status_code, 400, "Response status code is not as expected."
-        )
+        self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0004") > 0),
-            "Response message is not as expected.",
+            (str(response.content).find("VAL-0004") > 0), "Response message is not as expected.",
         )
 
 
@@ -223,13 +199,10 @@ class TestPatchValidationVal0005(unittest.TestCase):
             **TestEnv.auth_headers,
         )
 
-        self.assertEqual(
-            response.status_code, 400, "Response status code is not as expected."
-        )
+        self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0005") > 0),
-            "Response message is not as expected.",
+            (str(response.content).find("VAL-0005") > 0), "Response message is not as expected.",
         )
 
 
@@ -250,13 +223,10 @@ class TestPatchValidationVal0006(unittest.TestCase):
             **TestEnv.auth_headers,
         )
 
-        self.assertEqual(
-            response.status_code, 400, "Response status code is not as expected."
-        )
+        self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0006") > 0),
-            "Response message is not as expected.",
+            (str(response.content).find("VAL-0006") > 0), "Response message is not as expected.",
         )
 
 
@@ -278,21 +248,16 @@ class TestPatchValidationMultipleVals(unittest.TestCase):
             **TestEnv.auth_headers,
         )
 
-        self.assertEqual(
-            response.status_code, 400, "Response status code is not as expected."
+        self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
+
+        self.assertTrue(
+            (str(response.content).find("VAL-0002") > 0), "Response message is not as expected, no VAL-0002.",
         )
 
         self.assertTrue(
-            (str(response.content).find("VAL-0002") > 0),
-            "Response message is not as expected, no VAL-0002.",
+            (str(response.content).find("VAL-0004") > 0), "Response message is not as expected, no VAL-0004.",
         )
 
         self.assertTrue(
-            (str(response.content).find("VAL-0004") > 0),
-            "Response message is not as expected, no VAL-0004.",
-        )
-
-        self.assertTrue(
-            (str(response.content).find("VAL-0006") > 0),
-            "Response message is not as expected, no VAL-0006.",
+            (str(response.content).find("VAL-0006") > 0), "Response message is not as expected, no VAL-0006.",
         )
