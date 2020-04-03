@@ -2,7 +2,6 @@ from unittest import TestCase
 
 from ..queries import can_user_edit_service, get_dos_service_for_uid, Users
 
-# from ..models import Services
 from api.dos_interface.models import Services
 
 

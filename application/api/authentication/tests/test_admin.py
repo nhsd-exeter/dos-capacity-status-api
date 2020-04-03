@@ -1,7 +1,4 @@
 from unittest import TestCase, mock
-
-# from django.contrib import admin
-
 from ..admin import DosUserInline
 from ..models import CapacityAuthDosUser
 
