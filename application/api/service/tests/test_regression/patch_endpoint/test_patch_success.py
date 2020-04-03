@@ -26,7 +26,9 @@ class TestPatchSuccess(unittest.TestCase):
         )
         json_response = json.loads(str(response.content, encoding="utf8"))
 
-        self.assertEqual(response.status_code, 200, "Response status code is not as expected.")
+        self.assertEqual(
+            response.status_code, 200, "Response status code is not as expected."
+        )
 
         test_helper.check_response(json_response)
 
@@ -43,13 +45,17 @@ class TestPatchSuccess(unittest.TestCase):
         )
         json_response = json.loads(str(response.content, encoding="utf8"))
 
-        self.assertEqual(response.status_code, 200, "Response status code is not as expected.")
+        self.assertEqual(
+            response.status_code, 200, "Response status code is not as expected."
+        )
 
         test_helper.check_response(json_response, capacity_status="AMBER")
 
     def test_update_capacity_status_amber_full(self):
 
-        data = '{"capacityStatus":"amber", "resetStatusIn":50, "notes":"some more notes"}'
+        data = (
+            '{"capacityStatus":"amber", "resetStatusIn":50, "notes":"some more notes"}'
+        )
 
         response = client.patch(
             TestEnv.api_url,
@@ -60,7 +66,9 @@ class TestPatchSuccess(unittest.TestCase):
         )
         json_response = json.loads(str(response.content, encoding="utf8"))
 
-        self.assertEqual(response.status_code, 200, "Response status code is not as expected.")
+        self.assertEqual(
+            response.status_code, 200, "Response status code is not as expected."
+        )
 
         test_helper.check_response(
             json_response,
@@ -82,13 +90,19 @@ class TestPatchSuccess(unittest.TestCase):
         )
         json_response = json.loads(str(response.content, encoding="utf8"))
 
-        self.assertEqual(response.status_code, 200, "Response status code is not as expected.")
+        self.assertEqual(
+            response.status_code, 200, "Response status code is not as expected."
+        )
 
-        test_helper.check_response(json_response, capacity_status="GREEN", expected_reset_date_time=False)
+        test_helper.check_response(
+            json_response, capacity_status="GREEN", expected_reset_date_time=False
+        )
 
     def test_update_capacity_status_green_full(self):
 
-        data = '{"capacityStatus":"green", "resetStatusIn":50, "notes":"some more notes"}'
+        data = (
+            '{"capacityStatus":"green", "resetStatusIn":50, "notes":"some more notes"}'
+        )
 
         response = client.patch(
             TestEnv.api_url,
@@ -99,7 +113,9 @@ class TestPatchSuccess(unittest.TestCase):
         )
         json_response = json.loads(str(response.content, encoding="utf8"))
 
-        self.assertEqual(response.status_code, 200, "Response status code is not as expected.")
+        self.assertEqual(
+            response.status_code, 200, "Response status code is not as expected."
+        )
 
         test_helper.check_response(
             json_response,
@@ -122,7 +138,9 @@ class TestPatchSuccess(unittest.TestCase):
 
         json_response = json.loads(str(response.content, encoding="utf8"))
 
-        self.assertEqual(response.status_code, 200, "Response status code is not as expected.")
+        self.assertEqual(
+            response.status_code, 200, "Response status code is not as expected."
+        )
 
         test_helper.check_response(json_response, reset_status_in=0)
 
@@ -140,7 +158,9 @@ class TestPatchSuccess(unittest.TestCase):
 
         json_response = json.loads(str(response.content, encoding="utf8"))
 
-        self.assertEqual(response.status_code, 200, "Response status code is not as expected.")
+        self.assertEqual(
+            response.status_code, 200, "Response status code is not as expected."
+        )
 
         test_helper.check_response(json_response, reset_status_in=30)
 
@@ -158,7 +178,9 @@ class TestPatchSuccess(unittest.TestCase):
 
         json_response = json.loads(str(response.content, encoding="utf8"))
 
-        self.assertEqual(response.status_code, 200, "Response status code is not as expected.")
+        self.assertEqual(
+            response.status_code, 200, "Response status code is not as expected."
+        )
 
         test_helper.check_response(json_response, reset_status_in=1440)
 
@@ -176,9 +198,13 @@ class TestPatchSuccess(unittest.TestCase):
 
         json_response = json.loads(str(response.content, encoding="utf8"))
 
-        self.assertEqual(response.status_code, 200, "Response status code is not as expected.")
+        self.assertEqual(
+            response.status_code, 200, "Response status code is not as expected."
+        )
 
-        test_helper.check_response(json_response, notes="Capacity status set by Capacity Status API - 1234")
+        test_helper.check_response(
+            json_response, notes="Capacity status set by Capacity Status API - 1234"
+        )
 
     def test_update_capacity_additional_notes_text(self):
 
@@ -194,10 +220,14 @@ class TestPatchSuccess(unittest.TestCase):
 
         json_response = json.loads(str(response.content, encoding="utf8"))
 
-        self.assertEqual(response.status_code, 200, "Response status code is not as expected.")
+        self.assertEqual(
+            response.status_code, 200, "Response status code is not as expected."
+        )
 
         test_helper.check_response(
-            json_response, reset_status_in=50, notes="Capacity status set by Capacity Status API - some more notes",
+            json_response,
+            reset_status_in=50,
+            notes="Capacity status set by Capacity Status API - some more notes",
         )
 
     def test_update_capacity_additional_notes_loads(self):
@@ -219,8 +249,11 @@ class TestPatchSuccess(unittest.TestCase):
 
         json_response = json.loads(str(response.content, encoding="utf8"))
 
-        self.assertEqual(response.status_code, 200, "Response status code is not as expected.")
+        self.assertEqual(
+            response.status_code, 200, "Response status code is not as expected."
+        )
 
         test_helper.check_response(
-            json_response, notes="Capacity status set by Capacity Status API - " + TestEnv.max_notes,
+            json_response,
+            notes="Capacity status set by Capacity Status API - " + TestEnv.max_notes,
         )
