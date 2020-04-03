@@ -80,6 +80,8 @@ Install all of the modules that the application requires:
 cd application
 pip3 install -r requirements.txt
 
+Note: Running 'deactivate' will deactivate the virtual environment.
+
 Your development environment is now ready.
 
 ##### Running the API in the development environment
@@ -173,4 +175,12 @@ Value:  Token 3f26b15ee5c4723ecd91ddde5809a248c1f1a5b5
 The unit tests can be run by executing the following command in the project root directory:
     ./application/manage.py test api
 
-#### Deployment
+## Deployment
+
+Deployment of the API and the Proxy Server is achieved by running the following make commands in the
+root directory of the project.
+
+make project-deploy PROFILE=dev   - Deploys current built images from the AWS ECR to the development env
+make project-clean-build-deploy PROFILE=dev   - Deploys newly build images to the development env
+
+N.B. The PROFILE variable can be set to other environments.
