@@ -32,6 +32,7 @@ services:
       DB_PASSWORD: postgres
       APP_ADMIN_PASSWORD: admin
       DJANGO_DEBUG: "True"
+      HTTP_PROTOCOL: https
     volumes:
       - $PROJECT_DIR:/project
       - $HOME/.python/pip/cache:/tmp/.cache/pip

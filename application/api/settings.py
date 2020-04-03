@@ -19,7 +19,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# Note that the key is obtained from AWS Secrets in the production environment.
 SECRET_KEY = os.getenv(
     "DJANGO_SECRET_KEY", "=tapo65h_g^cf4sxjawp-tl&z@1@5*&)p5gn2kax!^udtvs27c"
 )
@@ -33,7 +33,7 @@ ALLOWED_HOSTS = [
 ]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-if os.getenv("PROFILE", "prod") == "local":
+if os.getenv("HTTP_PROTOCOL", "https") == "http":
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
 else:

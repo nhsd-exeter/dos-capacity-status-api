@@ -14,5 +14,7 @@ DOS_DB_NAME := postgres
 DOS_DB_PORT := 5432
 DOS_DB_USERNAME := postgres
 
+HTTP_PROTOCOL := http
+
 API_IMAGE_TAG := 0.0.1
 PROXY_IMAGE_TAG := 0.0.1

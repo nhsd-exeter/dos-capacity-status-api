@@ -107,6 +107,8 @@ The API will be running on localhost on port 8443. The URL to the API Documentat
 
 https://localhost:8443/api/v0.0.1/capacity/apidoc
 
+## NEED TO MENTION ADMIN MODULE/PASSWORD/TOKEN IN REQUEST.
+
 Navigate here in a browser to see all available endpoints and routes.
 
 Any changes made and saved to the API code base will NOT cause Django to immediately re-start the API
@@ -152,7 +154,3 @@ build of the images as detailed in the 'Running the Dockerised API in HTTPS mode
 
 The unit tests can be run by executing the following command in the project root directory:
     ./application/manage.py test api
-
-## Todo
-
-* The `api` image weights more than 300MB. Can we drop the build dependencies but still keep `pg_config` binary?
