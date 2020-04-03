@@ -170,10 +170,19 @@ Value:  Token 3f26b15ee5c4723ecd91ddde5809a248c1f1a5b5
 * Base your test class on unittest.TestCase.
 * Add the new test file to the __init__.py file so that the unit test runner picks the new tests up.
 
-#### Running the unit tests
+#### Running the unit tests from command line
 
 The unit tests can be run by executing the following command in the project root directory:
     ./application/manage.py test api
+
+#### Running the unit tests from Make
+
+The entire test suite of the API can be run by issuing the following command in the root directory of the
+project:
+
+make project-test
+
+Results from the tests will be written out to the screen.
 
 ### Deployment
 

@@ -44,6 +44,11 @@ project-build-proxy:
 		$(DOCKER_DIR)/proxy/assets/application/static
 	make docker-image NAME=proxy VERSION=0.0.1
 
+project-test:
+	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+	DIR=application \
+	CMD="python manage.py test api"
+
 project-create-ecr:
 	make docker-create-repository NAME=api
 	make docker-create-repository NAME=proxy

@@ -21,8 +21,17 @@ clean: # Reset the project and remove auto-generated assets
 flake8: # Run the flake8 code checker
 	flake8 --max-line-length=119 api
 
-test: clean # Run the test suite
-	python manage.py test api/capacityservice/ api/dos/
+test-dos-interface: clean
+	python manage.py test api/dos_interface/
+
+test-service: clean
+	python manage.py test api/service/
+
+test-authentication: clean
+	python manage.py test api/authentication/
+
+test-api: clean
+	python manage.py test api/
 
 coverage: clean # View a report on test coverage
 	coverage run --source='.' --omit=*/tests/*,*/migrations/*,*apps.py,*asgi.py,*wsgi.py \
