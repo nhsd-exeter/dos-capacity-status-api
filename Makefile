@@ -124,8 +124,6 @@ project-trust-certificates: ## Trust the development certificates
 # ==============================================================================
 
 project-verify-email:
-	# TODO: The `AWS_ACCOUNT_ID_LIVE_PARENT` variables has to be set in Jenkins
-	AWS_ACCOUNT_ID_LIVE_PARENT=462131752500
 	if [ false == $$(make aws-account-check-id ID=$$AWS_ACCOUNT_ID_LIVE_PARENT) ]; then
 		echo "ERROR: You are not logged into the live parent account"
 		exit 1
