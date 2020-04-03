@@ -107,8 +107,6 @@ The API will be running on localhost on port 8443. The URL to the API Documentat
 
 https://localhost:8443/api/v0.0.1/capacity/apidoc
 
-## NEED TO MENTION ADMIN MODULE/PASSWORD/TOKEN IN REQUEST.
-
 Navigate here in a browser to see all available endpoints and routes.
 
 Any changes made and saved to the API code base will NOT cause Django to immediately re-start the API
@@ -140,6 +138,26 @@ Any changes made and saved to the API code base will cause Django to immediately
 with those new changes.  However, changes made to the Database or Proxy Server will require a new
 build of the images as detailed in the 'Running the Dockerised API in HTTPS mode' section.
 
+##### Creating an authenticated user in the Development Environment
+
+Only authenticated users can use the API endpoints. As such, an authenticated user will need to be
+created. Creation of authenticated users is achieved in the APIs admin module. To access the admin
+module, go to the following endpoint:
+
+https://localhost:8443/api/v0.0.1/capacity/admin
+
+Credentials for the administrator user in the development environment are admin/admin.
+
+When creating an API user, there will be a field to link this user with a DoS User. The development
+environment is pre-configured with a DoS user that can be used as the API user. The DoS User is 'EditCapacity'.
+Once an API user has been created, you can go ahead and generate a Token for the user. This token will
+need to be provided in the 'Authorization' section of all request headers.
+
+Authorization header format:
+
+Key:    Authorization
+Value:  Token 3f26b15ee5c4723ecd91ddde5809a248c1f1a5b5
+
 ## Unit Tests
 
 ### Creating unit tests
@@ -154,3 +172,5 @@ build of the images as detailed in the 'Running the Dockerised API in HTTPS mode
 
 The unit tests can be run by executing the following command in the project root directory:
     ./application/manage.py test api
+
+#### Deployment
