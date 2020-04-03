@@ -45,22 +45,22 @@
 
 ### Ops Routine
 
-    cd capacity-status-api
+    cd dos-capacity-status-api
     make project-trust-certificate
     make project-build
     make project-start project-log # Press Ctrl-C to exit
     open https://localhost:8443/api/v0.0.1/capacity/apidoc/
     make project-stop
 
-#### Dev Routine
+### Dev Routine
 
-##### Pre-requisites
+#### Pre-requisites
 
 You'll need to have the following installed:
     Python version 3.7.5
     Pip version 19.3.1
 
-##### Configuring the development environment
+#### Configuring the development environment
 
 To run the application locally, you'll first need to create a python virtual
 environment that has all of the relevant python modules and extensions that
@@ -84,7 +84,7 @@ Note: Running 'deactivate' will deactivate the virtual environment.
 
 Your development environment is now ready.
 
-##### Running the API in the development environment
+#### Running the API in the development environment
 
 In the development environment, the API runs in debug mode on localhost. It is possible to
 have an instance of the API running on port 8000 (HTTP) or 8443 (HTTPS). The HTTPS version
@@ -94,7 +94,7 @@ version runs in the command window. It is possible to have one or both versions 
 Both versions of the API require a dockerised postgres database and a dockerised proxy server
 to be running on your local machine. These components are included in this project.
 
-###### Running the Dockerised API in HTTPS mode
+##### Running the Dockerised API in HTTPS mode
 
 To run the (dockerised) API on localhost across port 8443, starting from the project
 root directory:
@@ -119,7 +119,7 @@ project root directory:
 make project-clean-build    - This clears out previous images and builds new images
 make project-start
 
-###### Running the API in HTTP mode
+##### Running the API in HTTP mode
 
 To run the API on localhost across port 8000 (from the command prompt), starting from the
 project root directory:
@@ -140,7 +140,7 @@ Any changes made and saved to the API code base will cause Django to immediately
 with those new changes.  However, changes made to the Database or Proxy Server will require a new
 build of the images as detailed in the 'Running the Dockerised API in HTTPS mode' section.
 
-##### Creating an authenticated user in the Development Environment
+#### Creating an authenticated user in the Development Environment
 
 Only authenticated users can use the API endpoints. As such, an authenticated user will need to be
 created. Creation of authenticated users is achieved in the APIs admin module. To access the admin
@@ -160,9 +160,9 @@ Authorization header format:
 Key:    Authorization
 Value:  Token 3f26b15ee5c4723ecd91ddde5809a248c1f1a5b5
 
-## Unit Tests
+### Unit Tests
 
-### Creating unit tests
+#### Creating unit tests
 
 * Ensure test files are created in a relevant sub-directory under the test directory of the app under test.
 * Ensure all test files are prefixed with "test_" and match the name of the module/class that this test file tests.
@@ -170,12 +170,12 @@ Value:  Token 3f26b15ee5c4723ecd91ddde5809a248c1f1a5b5
 * Base your test class on unittest.TestCase.
 * Add the new test file to the __init__.py file so that the unit test runner picks the new tests up.
 
-### Running the unit tests
+#### Running the unit tests
 
 The unit tests can be run by executing the following command in the project root directory:
     ./application/manage.py test api
 
-## Deployment
+### Deployment
 
 Deployment of the API and the Proxy Server is achieved by running the following make commands in the
 root directory of the project.
