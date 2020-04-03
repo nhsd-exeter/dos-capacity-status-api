@@ -7,6 +7,9 @@ XARGS := xargs -0 $(shell test $$(uname) = Linux && echo -r)
 GREP_T_FLAG := $(shell test $$(uname) = Linux && echo -T)
 export PYFLAKES_BUILTINS=_
 
+OMIT := "*/tests/*,*/migrations/*,*apps.py,*asgi.py,*wsgi.py"
+OMIT :=$(OMIT)",*manage.py,*api/settings.py"
+
 clean: # Reset the project and remove auto-generated assets
 	rm -rf build
 	rm -rf dist
@@ -25,20 +28,19 @@ test: clean # Run the test suite
 	python manage.py test api/capacityservice/ api/dos/
 
 coverage: clean # View a report on test coverage
-	coverage run --source='.' --omit=*/tests/*,*/migrations/*,*apps.py,*asgi.py,*wsgi.py \
-		manage.py test api/
+	coverage run --source='.' --omit=$(OMIT) manage.py test api/
 	coverage report -m
 	coverage erase
 
 unit-test-coverage: clean # View a report on test coverage
-	coverage run --source='.' --omit=*/tests/*,*/migrations/*,*apps.py,*asgi.py,*wsgi.py \
-		manage.py test api/ --exclude-tag=regression
+	coverage run --source='.' --omit=$(OMIT) manage.py test api/ \
+		--exclude-tag=regression
 	coverage report -m
 	coverage erase
 
 regression-test-coverage: clean # View a report on test coverage
-	coverage run --source='.' --omit=*/tests/*,*/migrations/*,*apps.py,*asgi.py,*wsgi.py \
-		manage.py test api/ --tag=regression
+	coverage run --source='.' --omit=$(OMIT) manage.py test api/ \
+		--tag=regression
 	coverage report -m
 	coverage erase
 
