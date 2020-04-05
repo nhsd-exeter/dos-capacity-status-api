@@ -3,29 +3,48 @@ include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 
 # ==============================================================================
 
-project-config:
-	make docker-config
+project-build: project-config project-stop # Build project
+	make \
+		api-build \
+		db-build \
+		proxy-build
 
-project-clean-deploy: project-clean project-build project-push-images project-deploy
+project-test: # Test project
+	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+		DIR=application \
+		CMD="python manage.py test api"
 
-project-clean-build: project-clean project-build
+project-push-images: # Push Docker images to the ECR
+	make docker-login
+	make docker-push NAME=api VERSION=0.0.1
+	make docker-push NAME=proxy VERSION=0.0.1
 
-project-build: project-config project-stop
-	make project-build-api
-	make project-build-postgres
-	make project-build-proxy
+project-deploy: # Deploy to Kubernetes cluster - mandatory: PROFILE
+	[ local == $(PROFILE) ] && exit 1
+	eval "$$(make aws-assume-role-export-variables)"
+	make k8s-kubeconfig-get
+	eval "$$(make k8s-kubeconfig-export)"
+	eval "$$(make project-populate-secret-variables)"
+	make k8s-deploy STACK=application
+	# TODO: What's the URL?
+	echo "The URL is $(UI_URL)"
 
-project-build-postgres:
-	cp -f \
-		$(PROJECT_DIR)/certificate/* \
-		$(DOCKER_DIR)/postgres/assets/etc/postgresql/certificate
-	make docker-image NAME=postgres VERSION=0.0.1 NAME_AS=db
+project-clean: # Clean up project
+	make \
+		api-clean \
+		db-clean \
+		proxy-clean
+	rm -rfv $(HOME)/.python/pip
 
-project-build-api:
+# ==============================================================================
+
+api-build:
+	make docker-run-python \
+		DIR=application \
+		CMD="pip install -r requirements.txt && python manage.py collectstatic --noinput" SH=true
 	cd $(APPLICATION_DIR)
 	tar -czf $(PROJECT_DIR)/build/docker/api/assets/api-app.tar.gz \
 		api \
-		logs \
 		static \
 		manage.py \
 		requirements.txt
@@ -35,33 +54,40 @@ project-build-api:
 	cd $(PROJECT_DIR)
 	make docker-image NAME=api VERSION=0.0.1
 
-project-build-proxy:
+api-clean:
+	make docker-image-clean NAME=api
+	rm -rfv \
+		$(DOCKER_DIR)/api/assets/*.tar.gz \
+		$(DOCKER_DIR)/api/assets/certificate/certificate.* \
+		$(PROJECT_DIR)/application/static
+
+db-build:
+	make docker-image NAME=postgres VERSION=0.0.1 NAME_AS=db
+
+db-clean:
+	make docker-image-clean NAME=postgres
+
+proxy-build:
 	cp -f \
 		$(PROJECT_DIR)/certificate/* \
 		$(DOCKER_DIR)/proxy/assets/certificate
-	cp -f -r \
-		$(PROJECT_DIR)/application/static/* \
-		$(DOCKER_DIR)/proxy/assets/application/static
+	cp -rf \
+		$(PROJECT_DIR)/application/static \
+		$(DOCKER_DIR)/proxy/assets/application
 	make docker-image NAME=proxy VERSION=0.0.1
 
-project-test:
-	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
-	DIR=application \
-	CMD="python manage.py test api"
+proxy-clean:
+	make docker-image-clean NAME=proxy
+	rm -rfv \
+		$(DOCKER_DIR)/proxy/assets/application/static \
+		$(DOCKER_DIR)/proxy/assets/certificate/certificate.*
 
-project-create-ecr:
-	make docker-create-repository NAME=api
-	make docker-create-repository NAME=proxy
-
-project-push-images: # Push Docker images to the ECR
-	make docker-login
-	make docker-push NAME=api VERSION=0.0.1
-	make docker-push NAME=proxy VERSION=0.0.1
+# ==============================================================================
 
 project-migrate:
 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
-	DIR=application \
-	CMD="python manage.py migrate"
+		DIR=application \
+		CMD="python manage.py migrate"
 
 project-restart:
 	make \
@@ -77,37 +103,18 @@ project-stop:
 project-log:
 	make docker-compose-log YML=$(DOCKER_COMPOSE_YML)
 
-project-clean: project-stop
-	make docker-image-clean NAME=postgres
-	make docker-image-clean NAME=api
-	make docker-image-clean NAME=proxy
-
-project-deploy:
-	eval "$$(make aws-assume-role-export-variables)"
-	make k8s-kubeconfig-get
-	eval "$$(make k8s-kubeconfig-export)"
-	eval "$$(make project-populate-secret-variables)"
-	make k8s-deploy STACK=application
-	echo "The URL is $(UI_URL)"
-
 project-populate-secret-variables:
-	make secret-fetch-and-export-variables NAME=uec-dos-api-capacity-status-dev
-
+	make secret-fetch-and-export-variables NAME=uec-dos-api-capacity-status-$(PROFILE)
 
 # ==============================================================================
 
-api-build:
-	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
-		DIR=application \
-		CMD="pip install -r requirements.txt && python manage.py collectstatic --noinput" SH=true
-	cd $(APPLICATION_DIR)
-	tar -czf $(PROJECT_DIR)/build/docker/api/assets/api-app.tar.gz \
-		api \
-		logs \
-		static \
-		manage.py \
-		requirements.txt
+# TODO: Do we really need this target?
+project-clean-deploy: project-clean project-build project-push-images project-deploy
 
+# TODO: Do we really need this target?
+project-clean-build: project-clean project-build
+
+# TODO: Do we really need this target?
 api-start:
 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
 		DIR=application \
@@ -116,36 +123,25 @@ api-start:
 
 # ==============================================================================
 
+project-config:
+	make docker-config
+
 project-generate-development-certificate:
 	make ssl-generate-certificate \
 		DIR=$(PROJECT_DIR)/certificate \
 		NAME=certificate \
 		DOMAINS='localhost,DNS:*.k8s-nonprod.texasplatform.uk,DNS:proxy:443'
 
-project-trust-certificates: ## Trust the development certificates
-	sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain \
-		$(PROJECT_DIR)/certificate/$(SSL_CERTIFICATE_NAME).pem
+project-trust-certificate:
+	make ssl-trust-certificate \
+		FILE=$(PROJECT_DIR)/certificate/certificate.pem
 
-# ==============================================================================
-
-project-verify-email:
-	if [ false == $$(make aws-account-check-id ID=$$AWS_ACCOUNT_ID_LIVE_PARENT) ]; then
-		echo "ERROR: You are not logged into the live parent account"
-		exit 1
-	fi
-	make aws-ses-verify-email-identity EMAIL=$(EMAIL_FROM)
+project-create-ecr:
+	make docker-create-repository NAME=api
+	make docker-create-repository NAME=proxy
 
 # ==============================================================================
 
 .SILENT: \
 	project-populate-application-variables \
 	project-populate-db-pu-job-variables
-
-
-project-trust-certificate:
-	make ssl-trust-certificate \
-		FILE=$(PROJECT_DIR)/certificate/localhost.pem
-
-# ==============================================================================
-
-.SILENT:

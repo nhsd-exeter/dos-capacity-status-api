@@ -6,4 +6,4 @@ metadata:
   annotations:
     alb.ingress.kubernetes.io/waf-acl-id: dfae6ec3-aa05-428f-a022-5fd85f646009
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:730319765130:certificate/c0718115-4e22-4f48-a4aa-8c16ea86c5e6
-    alb.ingress.kubernetes.io/inbound-cidrs: 194.101.83.23/24, 51.140.225.142/24, 81.155.242.0/24, 82.28.50.0/24
+    alb.ingress.kubernetes.io/inbound-cidrs: 194.101.83.23/24, 51.140.225.142/24, 81.155.242.0/24, 82.28.50.0/24, 51.140.225.142

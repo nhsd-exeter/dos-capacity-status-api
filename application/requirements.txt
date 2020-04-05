@@ -1,6 +1,6 @@
-django==3.0.2
 django-request-id==1.0.0
 django-request-logging==0.7.0
 django-rest-framework==0.1.0
+django==3.0.2
 drf-yasg==1.17.0
 psycopg2-binary==2.8.4

@@ -3,23 +3,30 @@
 # ==============================================================================
 # Service variables
 
-API_DB_NAME := capacity_status
-API_DB_PORT := 5432
-API_DB_USERNAME := postgres
-API_LOG_LEVEL := INFO
+API_HOST = uec-dos-api-cs
 
-DOS_DB_NAME := pathwaysdos_test
-DOS_DB_PORT := 5432
-DOS_DB_USERNAME := postgres
+API_DB_HOST =
+API_DB_NAME = capacity_status
+API_DB_PORT = 5432
+API_DB_USERNAME = postgres
+API_LOG_LEVEL = INFO
 
-HTTP_PROTOCOL := https
+DOS_DB_HOST =
+DOS_DB_NAME = pathwaysdos_test
+DOS_DB_PORT = 5432
+DOS_DB_USERNAME = postgres
 
-API_IMAGE_TAG := 0.0.1
-PROXY_IMAGE_TAG := 0.0.1
+# TODO: What is this variable for? We always should be using https
+HTTP_PROTOCOL = https
+
+# TODO: This has to go
+API_IMAGE_TAG = 0.0.1
+PROXY_IMAGE_TAG = 0.0.1
 
 # ==============================================================================
 # Infrastructure variables
 
-STACKS := application
+# TODO: Rename `application` to `service`
+STACKS = application
 
-TF_VAR_profile := $(PROFILE) # This evaluates to 'dev'
+TF_VAR_profile = $(PROFILE)

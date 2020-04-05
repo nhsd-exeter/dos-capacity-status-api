@@ -30,3 +30,4 @@ configMapGenerator:
   - name: uec-dos-api-cs-proxy-configmap
     literals:
       - PROFILE=PROFILE_TO_REPLACE
+      - API_HOST=API_HOST_TO_REPLACE

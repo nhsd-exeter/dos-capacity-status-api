@@ -11,14 +11,18 @@
     - [Recommendations](#recommendations)
     - [Run the Project](#run-the-project)
     - [Ops Routine](#ops-routine)
-      - [Dev Routine](#dev-routine)
-        - [Pre-requisites](#pre-requisites)
-        - [Configuring the development environment](#configuring-the-development-environment)
-        - [Running the application in the development environment](#running-the-application-in-the-development-environment)
-  - [Unit testing](#unit-testing)
-    - [Creating unit tests](#creating-unit-tests)
-    - [Running the unit tests](#running-the-unit-tests)
-  - [Todo](#todo)
+    - [Dev Routine](#dev-routine)
+      - [Pre-requisites](#pre-requisites)
+      - [Configuring the development environment](#configuring-the-development-environment)
+      - [Running the API in the development environment](#running-the-api-in-the-development-environment)
+        - [Running the Dockerised API in HTTPS mode](#running-the-dockerised-api-in-https-mode)
+        - [Running the API in HTTP mode](#running-the-api-in-http-mode)
+      - [Creating an authenticated user in the Development Environment](#creating-an-authenticated-user-in-the-development-environment)
+    - [Testing](#testing)
+      - [Creating unit tests](#creating-unit-tests)
+      - [Running the unit tests from command line](#running-the-unit-tests-from-command-line)
+      - [Running the unit tests from Make](#running-the-unit-tests-from-make)
+    - [Deployment](#deployment)
 
 ## Quick Start
 
@@ -38,8 +42,8 @@
 
 ### Recommendations
 
-* Use iTerm2 and Visual Studio Code for development
-* Before starting any work, please read [CONTRIBUTING.md](CONTRIBUTING.md)
+- Use iTerm2 and Visual Studio Code for development
+- Before starting any work, please read [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ### Run the Project
 
@@ -160,7 +164,7 @@ Authorization header format:
 Key:    Authorization
 Value:  Token 3f26b15ee5c4723ecd91ddde5809a248c1f1a5b5
 
-### Unit Tests
+### Testing
 
 #### Creating unit tests
 
@@ -180,16 +184,23 @@ The unit tests can be run by executing the following command in the project root
 The entire test suite of the API can be run by issuing the following command in the root directory of the
 project:
 
-make project-test
-
-Results from the tests will be written out to the screen.
+    make project-test
 
 ### Deployment
 
-Deployment of the API and the Proxy Server is achieved by running the following make commands in the
+Deployment of the API service is achieved by running the following make commands in the
 root directory of the project.
 
-make project-deploy PROFILE=dev   - Deploys current built images from the AWS ECR to the development env
-make project-clean-build-deploy PROFILE=dev   - Deploys newly build images to the development env
+Deploy current built images from the AWS ECR to the development env
 
-N.B. The PROFILE variable can be set to other environments.
+    make project-deploy PROFILE=dev
+
+Deploy newly build images to the development environment
+
+    make PROFILE=dev \
+      project-clean \
+      project-build \
+      project-push-images \
+      project-deploy
+
+The `PROFILE` variable can be set to other environments.
