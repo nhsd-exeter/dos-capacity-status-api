@@ -19,11 +19,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "=tapo65h_g^cf4sxjawp-tl&z@1@5*&)p5gn2kax!^udtvs27c"
+# Note that the key is obtained from AWS Secrets in the production environment.
+SECRET_KEY = os.getenv(
+    "DJANGO_SECRET_KEY", "=tapo65h_g^cf4sxjawp-tl&z@1@5*&)p5gn2kax!^udtvs27c"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DJANGO_DEBUG", False)
 
 ALLOWED_HOSTS = [
     ".amazonaws.com",
@@ -31,7 +33,7 @@ ALLOWED_HOSTS = [
 ]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-if os.getenv("PROFILE", "prod") == "local":
+if os.getenv("HTTP_PROTOCOL", "https") == "http":
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
 else:
@@ -55,9 +57,9 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.staticfiles",
     "drf_yasg",
+    "api.authentication",
     "api.dos_interface",
     "api.service",
-    "api.authentication",
 ]
 
 MIDDLEWARE = [
@@ -148,9 +150,10 @@ LOGGING = {
 
 SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {
-        "Bearer": {"type": "token", "name": "Authorization", "in": "header"},
+        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"},
     },
-    # May need this set to true when running over HTTPS.
+    # This invokes the Django Login button on the Swagger API pages, which we don't need
+    # because we are supplying a token. Hence this is set to False.
     "USE_SESSION_AUTH": False,
 }
 
@@ -167,12 +170,10 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
     ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ]
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated",],
 }
 
 # Internationalization

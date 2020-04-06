@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM python:latest
 
 ENV DEBIAN_FRONTEND="noninteractive"
 
@@ -23,7 +23,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 ADD assets/api-app.tar.gz /application
-ADD assets/certificate /certificate
+COPY assets/certificate /certificate
 
 WORKDIR /application
 
