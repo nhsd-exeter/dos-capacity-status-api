@@ -41,7 +41,7 @@ urlpatterns = [
     path(APP_PATH, include("api.authentication.urls")),
     path(APP_PATH + "apidoc/", include("rest_framework.urls", namespace="rest_framework"),),
     url(
-        r"^" + APP_PATH + "apidoc(?P<format>\.json|\.yaml)$",
+        r"^" + APP_PATH + r"apidoc(?P<format>\.json|\.yaml)$",
         schema_view.without_ui(cache_timeout=0),
         name="schema-json",
     ),

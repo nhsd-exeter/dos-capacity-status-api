@@ -184,13 +184,7 @@ class TestPatchValidationVal0005(unittest.TestCase):
 
         too_many_notes = TestEnv.max_notes + "a"
 
-        data = (
-            '{"capacityStatus":"red",\
-            "notes":"'
-            + too_many_notes
-            + '"}'
-        )
-
+        data = '{"capacityStatus":"red","notes":"' + too_many_notes + '"}'
         response = client.patch(
             TestEnv.api_url,
             content_type="application/json",

@@ -202,13 +202,7 @@ class TestPatchSuccess(unittest.TestCase):
 
     def test_update_capacity_additional_notes_loads(self):
 
-        data = (
-            '{"capacityStatus":"reD",\
-            "notes":"'
-            + TestEnv.max_notes
-            + '"}'
-        )
-
+        data = '{"capacityStatus":"reD","notes":"' + TestEnv.max_notes + '"}'
         response = client.patch(
             TestEnv.api_url,
             content_type="application/json",
