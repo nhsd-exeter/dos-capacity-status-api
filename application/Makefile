@@ -7,8 +7,7 @@ XARGS := xargs -0 $(shell test $$(uname) = Linux && echo -r)
 GREP_T_FLAG := $(shell test $$(uname) = Linux && echo -T)
 export PYFLAKES_BUILTINS=_
 
-OMIT := "*/tests/*,*/migrations/*,*apps.py,*asgi.py,*wsgi.py"
-OMIT :=$(OMIT)",*manage.py,*api/settings.py"
+OMIT := */tests/*,*/migrations/*,*apps.py,*asgi.py,*wsgi.py,*manage.py,*api/settings.py
 
 clean: # Reset the project and remove auto-generated assets
 	rm -rf build
