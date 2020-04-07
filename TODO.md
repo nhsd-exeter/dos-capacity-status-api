@@ -1,0 +1,34 @@
+# TODO
+
+- Application
+  - Protect proxy `/admin` endpoint (CSAPI-62)
+  - Add logging in a format that can be picked up by existing DoS Splunk (CSAPI-7)
+  - Increase the max reset status period in mins to 5 hours (CSAPI-63)
+- Development
+  - Make targets to support development flow
+- Infrastructure
+  - Refactor RDS configuration, custom parameter and option group
+  - Refactor ALB and WAF configuration
+  - Refactor Kubernetes deployment scripts
+  - Crete Route 53 record automatically (CSAPI-55)
+  - Create Secrets Manager entry automatically
+  - API throttling (CSAPI-44)
+  - Database backup and restore scripts
+- Documentation
+  - Generate API Documentation automatically (CSAPI-9)
+- Testing
+  - Check for unit test completeness (CSAPI-64)
+  - Can unit and integration tests be run independently
+  - Provide acceptance test suite
+  - Provide load test suite
+  - Provide security test suite
+- Deployment
+  - Deploy to production (CSAPI-65, CSAPI-66)
+  - Implement Jenkins pipeline (CSAPI-65, CSAPI-66)
+  - Tagging upon deployment (CSAPI-65, CSAPI-66)
+- Monitoring:
+  - Configure Splunk (CSAPI-70)
+  - Configure Instana (CSAPI-69)
+  - Configure Pingdom
+  - Configure CloudWatch
+  - Configure Slack
