@@ -6,6 +6,7 @@
   - Increase the max reset status period in mins to 5 hours (CSAPI-63)
 - Development
   - Make targets to support development flow
+  - Consistent formatting in IDE and command-line (flake8)
 - Infrastructure
   - Refactor RDS configuration, custom parameter and option group
   - Refactor ALB and WAF configuration
