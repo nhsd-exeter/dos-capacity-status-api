@@ -26,7 +26,6 @@ PROXY_IMAGE_TAG = 0.0.1
 # ==============================================================================
 # Infrastructure variables
 
-# TODO: Rename `application` to `service`
-STACKS = application
+STACKS = service
 
 TF_VAR_profile = $(PROFILE)
