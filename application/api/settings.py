@@ -20,9 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # Note that the key is obtained from AWS Secrets in the production environment.
-SECRET_KEY = os.getenv(
-    "DJANGO_SECRET_KEY", "=tapo65h_g^cf4sxjawp-tl&z@1@5*&)p5gn2kax!^udtvs27c"
-)
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "=tapo65h_g^cf4sxjawp-tl&z@1@5*&)p5gn2kax!^udtvs27c")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", False)
@@ -134,10 +132,7 @@ LOGGING = {
         },
     },
     "loggers": {
-        "django": {
-            "handlers": ["console"],
-            "level": os.getenv("API_LOG_LEVEL", "DEBUG"),
-        },
+        "django": {"handlers": ["console"], "level": os.getenv("API_LOG_LEVEL", "DEBUG"),},
         "django.server": {
             # Nothing particularly interesting, so just return warning and above
             # to reduce log clutter.
@@ -149,11 +144,8 @@ LOGGING = {
 }
 
 SWAGGER_SETTINGS = {
-    "SECURITY_DEFINITIONS": {
-        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"},
-    },
-    # This invokes the Django Login button on the Swagger API pages, which we don't need
-    # because we are supplying a token. Hence this is set to False.
+    "SECURITY_DEFINITIONS": {"Bearer": {"type": "token", "name": "Authorization", "in": "header"},},
+    # May need this set to true when running over HTTPS.
     "USE_SESSION_AUTH": False,
 }
 
@@ -161,18 +153,14 @@ SWAGGER_SETTINGS = {
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.TokenAuthentication",
-    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.TokenAuthentication",],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated",],
 }
 

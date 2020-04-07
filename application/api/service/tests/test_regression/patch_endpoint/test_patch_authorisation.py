@@ -1,7 +1,7 @@
 import unittest
-import json
 from django.test import Client, tag
 from ..test_env import TestEnv
+
 
 @tag("regression")
 class TestPatchView(unittest.TestCase):
@@ -20,6 +20,4 @@ class TestPatchView(unittest.TestCase):
             **TestEnv.auth_headers,
         )
 
-        self.assertEqual(
-            response.status_code, 403, "Response status code is not as expected."
-        )
+        self.assertEqual(response.status_code, 403, "Response status code is not as expected.")

@@ -26,10 +26,9 @@ class TestHelper(unittest.TestCase):
             json_response["capacityStatus"], capacity_status,
         )
         if expected_reset_date_time:
-            (
-                expected_reset_time_str_upper,
-                expected_reset_time_str_lower,
-            ) = self._get_expected_reset_time(reset_status_in=reset_status_in)
+            (expected_reset_time_str_upper, expected_reset_time_str_lower,) = self._get_expected_reset_time(
+                reset_status_in=reset_status_in
+            )
 
             self.assertGreater(
                 json_response["resetDateTime"], expected_reset_time_str_lower,
@@ -40,8 +39,7 @@ class TestHelper(unittest.TestCase):
         else:
             reset_date_time_present = "resetDateTime" in json_response
             self.assertFalse(
-                reset_date_time_present,
-                "A reset date time is present in the JSON response.",
+                reset_date_time_present, "A reset date time is present in the JSON response.",
             )
         self.assertEqual(
             json_response["notes"], notes,
@@ -58,17 +56,9 @@ class TestHelper(unittest.TestCase):
 
     def _get_expected_reset_time(self, reset_status_in=240):
         current_time = datetime.now()
-        expected_reset_time_upper = (
-            current_time + timedelta(minutes=reset_status_in) + timedelta(minutes=3)
-        )
-        expected_reset_time_str_upper = expected_reset_time_upper.astimezone().strftime(
-            "%Y-%m-%dT%H:%M:%SZ"
-        )
-        expected_reset_time_lower = (
-            current_time + timedelta(minutes=reset_status_in) - timedelta(minutes=3)
-        )
-        expected_reset_time_str_lower = expected_reset_time_lower.astimezone().strftime(
-            "%Y-%m-%dT%H:%M:%SZ"
-        )
+        expected_reset_time_upper = current_time + timedelta(minutes=reset_status_in) + timedelta(minutes=3)
+        expected_reset_time_str_upper = expected_reset_time_upper.astimezone().strftime("%Y-%m-%dT%H:%M:%SZ")
+        expected_reset_time_lower = current_time + timedelta(minutes=reset_status_in) - timedelta(minutes=3)
+        expected_reset_time_str_lower = expected_reset_time_lower.astimezone().strftime("%Y-%m-%dT%H:%M:%SZ")
 
         return expected_reset_time_str_upper, expected_reset_time_str_lower

@@ -15,56 +15,37 @@ class TestValidateDosUsernameExists(TestCase):
 
     @mock.patch.object(models, "get_dos_user_for_username")
     @mock.patch.object(models, "logger")
-    def test_validate_dos_username_exists__no_validator_errors(
-        self, mock_logger, mock_get_dos_user_for_username
-    ):
+    def test_validate_dos_username_exists__no_validator_errors(self, mock_logger, mock_get_dos_user_for_username):
         "Test 'validate_dos_username_exists' method no validation errors"
         stub_dos_username = "stub_username"
-        mock_get_dos_user_for_username.return_value = DosUser(
-            id=101, username=stub_dos_username, status="ACTIVE"
-        )
+        mock_get_dos_user_for_username.return_value = DosUser(id=101, username=stub_dos_username, status="ACTIVE")
 
         validate_dos_username_exists(stub_dos_username)
 
-        mock_logger.info.assert_called_with(
-            "Validate DoS user exists for name: " + str(stub_dos_username)
-        )
+        mock_logger.info.assert_called_with("Validate DoS user exists for name: " + str(stub_dos_username))
         mock_logger.debug.assert_called_with(
-            "DoS user exists with values: %s",
-            mock_get_dos_user_for_username.return_value,
+            "DoS user exists with values: %s", mock_get_dos_user_for_username.return_value,
         )
 
     @mock.patch.object(models, "get_dos_user_for_username")
     @mock.patch.object(models, "logger")
-    def test_validate_dos_username_exists__not_active_error(
-        self, mock_logger, mock_get_dos_user_for_username
-    ):
+    def test_validate_dos_username_exists__not_active_error(self, mock_logger, mock_get_dos_user_for_username):
         "Test 'validate_dos_username_exists' method not active user validation errors"
         stub_dos_username = "stub_username"
-        mock_get_dos_user_for_username.return_value = DosUser(
-            id=101, username=stub_dos_username, status="PENDING"
-        )
+        mock_get_dos_user_for_username.return_value = DosUser(id=101, username=stub_dos_username, status="PENDING")
         with self.assertRaises(ValidationError):
             try:
                 validate_dos_username_exists(stub_dos_username)
 
             except ValidationError as e:
                 self.assertEqual(
-                    [
-                        "Username '"
-                        + stub_dos_username
-                        + "' is not an 'ACTIVE' DoS user"
-                    ],
-                    e.messages,
+                    ["Username '" + stub_dos_username + "' is not an 'ACTIVE' DoS user"], e.messages,
                 )
                 raise e
 
-        mock_logger.info.assert_called_with(
-            "Validate DoS user exists for name: " + str(stub_dos_username)
-        )
+        mock_logger.info.assert_called_with("Validate DoS user exists for name: " + str(stub_dos_username))
         mock_logger.debug.assert_called_with(
-            "DoS user exists with values: %s",
-            mock_get_dos_user_for_username.return_value,
+            "DoS user exists with values: %s", mock_get_dos_user_for_username.return_value,
         )
 
     @mock.patch.object(models, "get_dos_user_for_username")
@@ -81,14 +62,11 @@ class TestValidateDosUsernameExists(TestCase):
 
             except ValidationError as e:
                 self.assertEqual(
-                    ["Username '" + stub_dos_username + "' does not exist in DoS"],
-                    e.messages,
+                    ["Username '" + stub_dos_username + "' does not exist in DoS"], e.messages,
                 )
                 raise e
 
-        mock_logger.info.assert_called_with(
-            "Validate DoS user exists for name: " + str(stub_dos_username)
-        )
+        mock_logger.info.assert_called_with("Validate DoS user exists for name: " + str(stub_dos_username))
 
     @mock.patch.object(models, "get_dos_user_for_username")
     @mock.patch.object(models, "logger")
@@ -104,18 +82,11 @@ class TestValidateDosUsernameExists(TestCase):
 
             except ValidationError as e:
                 self.assertEqual(
-                    [
-                        "Unexpected multiple DoS users with given username '"
-                        + stub_dos_username
-                        + "'"
-                    ],
-                    e.messages,
+                    ["Unexpected multiple DoS users with given username '" + stub_dos_username + "'"], e.messages,
                 )
                 raise e
 
-        mock_logger.info.assert_called_with(
-            "Validate DoS user exists for name: " + str(stub_dos_username)
-        )
+        mock_logger.info.assert_called_with("Validate DoS user exists for name: " + str(stub_dos_username))
 
 
 class TestCapacityAuthDosUser(TestCase):
@@ -130,9 +101,6 @@ class TestCapacityAuthDosUser(TestCase):
         mock_super().save.return_value = "stub_return"
 
         return_value = capacity_auth_dos_user.save()
-        mock_get_dos_user_for_username.assert_called_with(
-            capacity_auth_dos_user.dos_username
-        )
+        mock_get_dos_user_for_username.assert_called_with(capacity_auth_dos_user.dos_username)
         mock_super().save.assert_called()
         self.assertEqual(mock_super().save.return_value, return_value)
-

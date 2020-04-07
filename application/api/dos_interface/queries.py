@@ -44,4 +44,3 @@ def get_dos_service_for_uid(service_uid, throwDoesNotExist=True):
             return Services.objects.db_manager("dos").get(uid=service_uid)
         except ObjectDoesNotExist:
             return None
-

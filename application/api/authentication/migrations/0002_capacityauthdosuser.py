@@ -19,37 +19,21 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="CapacityAuthDosUser",
             fields=[
-                (
-                    "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID",),),
                 ("dos_user_id", models.IntegerField()),
                 (
                     "dos_username",
                     models.CharField(
                         max_length=255,
                         unique=True,
-                        validators=[
-                            api.authentication.models.validate_dos_username_exists
-                        ],
+                        validators=[api.authentication.models.validate_dos_username_exists],
                     ),
                 ),
                 (
                     "user",
-                    models.OneToOneField(
-                        on_delete=django.db.models.deletion.CASCADE,
-                        to=settings.AUTH_USER_MODEL,
-                    ),
+                    models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL,),
                 ),
             ],
-            options={
-                "verbose_name": "Capacity Auth DoS User",
-                "verbose_name_plural": "Capacity Auth DoS Users",
-            },
+            options={"verbose_name": "Capacity Auth DoS User", "verbose_name_plural": "Capacity Auth DoS Users",},
         ),
     ]

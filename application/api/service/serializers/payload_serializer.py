@@ -43,10 +43,7 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
         help_text="Optional field of up to 900 characters to add ad-hoc notes to this status update action. Any \
             notes provided will be appended to the end of the default notes set by the API, e.g. Capacity status set \
                 by the Capacity Status API - additional notes here.",
-        error_messages={
-            "max_length": validation_rules[5]["error_msg"],
-            "blank": validation_rules[6]["error_msg"],
-        },
+        error_messages={"max_length": validation_rules[5]["error_msg"], "blank": validation_rules[6]["error_msg"],},
     )
     resetStatusIn = serializers.IntegerField(
         required=False,
@@ -54,8 +51,9 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
         min_value=0,
         max_value=1440,
         help_text="The amount of time, specified in 1 minute blocks up to and including 24 hours (1440 minutes), \
-            from the time the capacity status is updated by the request to reset the capacity status of the service back \
-                to GREEN. If no value or 0 is provided, the reset time will default to 4 hours (240 minutes).",
+            from the time the capacity status is updated by the request to reset the capacity status of the \
+            service back to GREEN. If no value or 0 is provided, the reset time will default to 4 hours \
+            (240 minutes).",
         error_messages={
             "invalid": validation_rules[3]["error_msg"],
             "min_value": validation_rules[4]["error_msg_min_value"],
@@ -83,8 +81,7 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
     def convertToModel(self, data):
 
         logger.debug(
-            "Data in CapacityStatusRequestPayloadSerializer for model conversion: %s",
-            data,
+            "Data in CapacityStatusRequestPayloadSerializer for model conversion: %s", data,
         )
 
         payload_data = super().validated_data
@@ -106,13 +103,9 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
 
         data["modifiedbyid"] = context["apiUserId"]
         data["modifiedby"] = context["apiUsername"]
-        data["modifieddate"] = (
-            datetime.now().astimezone().strftime("%Y-%m-%dT%H:%M:%SZ")
-        )
+        data["modifieddate"] = datetime.now().astimezone().strftime("%Y-%m-%dT%H:%M:%SZ")
 
-        logger.debug(
-            "Converted data from CapacityStatusRequestPayloadSerializer: %s", data
-        )
+        logger.debug("Converted data from CapacityStatusRequestPayloadSerializer: %s", data)
 
         return data
 
