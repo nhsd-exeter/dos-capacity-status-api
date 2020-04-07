@@ -29,7 +29,7 @@ resource "aws_db_instance" "db_instance" {
   skip_final_snapshot       = var.skip_final_snapshot #TODO check : added based off looking at SF
   copy_tags_to_snapshot     = true
   username                  = var.db_master_username
-  password                  = aws_secretsmanager_secret_version.postgres_capacity_status_api_master_password.secret_string
+  password                  = aws_secretsmanager_secret_version.capacity_status_db_password.secret_string
   db_subnet_group_name      = aws_db_subnet_group.db_subnet_group.name
   multi_az                  = var.multi_az
   parameter_group_name      = aws_db_parameter_group.parameter_group.name
