@@ -39,7 +39,7 @@ resource "aws_db_instance" "db_instance" {
   auto_minor_version_upgrade = var.db_auto_minor_version_upgrade #TODO check this is needed not in SF setup
 
   tags = {
-    Name        = "${var.service_prefix}-${var.cloud_env_type}"
+    Name        = "${var.service_prefix}-${var.cloud_env_type}-db"
     BillingCode = var.billing_code_tag
     Environment = var.environment_tag
     Version     = var.version_tag
@@ -67,7 +67,7 @@ resource "aws_db_parameter_group" "parameter_group" {
   parameter {
     name         = "rds.force_ssl"
     value        = "1"
-    apply_method = "pending-reboot"
+    apply_method = "immediate"
   }
   parameter {
     name         = "timezone"
@@ -82,6 +82,6 @@ resource "aws_db_parameter_group" "parameter_group" {
   parameter {
     name         = "ssl"
     value        = "1"
-    apply_method = "pending-reboot"
+    apply_method = "immediate"
   }
 }
