@@ -4,4 +4,3 @@
 *.mypy_cache
 *.log
 *.swp
-*.terraform
