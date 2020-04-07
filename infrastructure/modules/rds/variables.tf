@@ -1,4 +1,3 @@
-
 ##################################################################################
 # INFRASTRUCTURE COMPONENT VERSION
 ##################################################################################
@@ -7,15 +6,16 @@ variable "version_tag" {
   default     = "1.0"
 }
 
-##################################################################################
+############################
 # AWS COMMON
-##################################################################################
+############################
 variable "aws_region" {
   description = "The AWS region"
 }
-variable "aws_profile" {
-  description = "The AWS profile"
-}
+# variable "aws_profile" {
+#   description = "The AWS profile"
+# }
+variable "cloud_env_type" { description = "The cloud enviroment type e.g. nonprod, prod" }
 
 ############################
 # TERRAFORM COMMON
@@ -61,16 +61,15 @@ variable "service_name" {
 # RDS DATABASE
 ############################
 # The following variables are all read from the variables-<environment>.tfvars.json file
-variable "db_identifier" {}
-variable "db_name" {}
+
+variable "db_name" { description = "The name of the database." }
 variable "db_master_username" {}
-variable "db_master_password" {}
-variable "db_size" {}
+variable "db_size" { description = "RDS (EC2) instance class" }
 variable "db_engine_version" {}
 variable "db_engine" {}
 variable "db_storage" {}
 variable "db_port" {}
-variable "allocated_storage" {}
+variable "db_allocated_storage" {}
 variable "enable_backup" {
   default = false
 }
@@ -79,15 +78,19 @@ variable "backup_window" {}
 # Maintenance window should be after backup and within allowed times for region:
 #(see https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#AdjustingTheMaintenanceWindow
 variable "maintenance_window" {}
-variable "publicly_accessible" {}
-variable "db_storage_encryption" {}
+variable "deletion_protection" {
+  description = "If the DB instance should have deletion protection enabled. The database can't be deleted when this value is set to true."
+}
 variable "db_auto_minor_version_upgrade" {}
-variable "db_copy_tags_to_snapshot" {}
 variable "multi_az" {}
 variable "db_subnet_group_name" {}
 variable "db_max_connections" {}
-variable "db_sg_name_suffix" {}
 variable "apply_immediately" {
   description = "Specifies whether any database modifications are applied immediately, or during the next maintenance window."
   default     = false
+}
+variable "skip_final_snapshot" {}
+variable "private_subnets_ids" {
+  default     = []
+  description = "List of private subnet ids where the RDS nodes and backend services live."
 }

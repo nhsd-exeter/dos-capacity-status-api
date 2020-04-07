@@ -10,9 +10,9 @@ terraform_platform_state_s3_bucket = "nhsd-texasplatform-terraform-state-store-l
 ####################################################################################
 # AWS COMMON
 ####################################################################################
-aws_profile = "nhsd-ddc-exeter-texas-live-k8s-nonprod"
-aws_region  = "eu-west-2"
-
+aws_profile    = "nhsd-ddc-exeter-texas-live-k8s-nonprod"
+aws_region     = "eu-west-2"
+cloud_env_type = "nonprod"
 
 ####################################################################################
 # TEXAS COMMON
@@ -51,15 +51,13 @@ db_max_connections            = "100"
 db_engine                     = "postgres"
 db_storage                    = "gp2"
 db_port                       = "5432"
-db_sg_name_suffix             = "nonprod-db-sg"
 db_subnet_group_name          = "uec-dos-api-cs-nonprod-db"
-allocated_storage             = 5
+db_allocated_storage          = 5
 enable_backup                 = true
 backup_retention_period       = "4"
 backup_window                 = "01:00-02:00"
 maintenance_window            = "Tue:02:30-Tue:03:30"
-publicly_accessible           = false
-db_storage_encryption         = true
+deletion_protection           = false
 db_auto_minor_version_upgrade = false
-db_copy_tags_to_snapshot      = true
 multi_az                      = false
+skip_final_snapshot           = false
