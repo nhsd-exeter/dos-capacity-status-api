@@ -25,7 +25,7 @@ project-deploy: # Deploy to Kubernetes cluster - mandatory: PROFILE
 	make k8s-kubeconfig-get
 	eval "$$(make k8s-kubeconfig-export)"
 	eval "$$(make project-populate-secret-variables)"
-	make k8s-deploy STACK=application
+	make k8s-deploy STACK=service
 	# TODO: What's the URL?
 	echo "The URL is $(UI_URL)"
 
