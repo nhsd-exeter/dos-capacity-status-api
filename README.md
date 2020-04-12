@@ -23,6 +23,7 @@
       - [Running the unit tests from command line](#running-the-unit-tests-from-command-line)
       - [Running the unit tests from Make](#running-the-unit-tests-from-make)
     - [Deployment](#deployment)
+      - [Temporary provision-build-deploy instruction set](#temporary-provision-build-deploy-instruction-set)
 
 ## Quick Start
 
@@ -204,3 +205,26 @@ Deploy newly build images to the development environment
       project-deploy
 
 The `PROFILE` variable can be set to other environments.
+
+#### Temporary provision-build-deploy instruction set
+
+    cd infrastructure/stacks/service
+    terraform init \
+      -backend-config="bucket=nhsd-texasplatform-terraform-service-state-store-lk8s-nonprod" \
+      -backend-config="key=uec-dos-api-cs/terraform.tfstate" \
+      -backend-config="region=eu-west-2"
+    terraform plan -var-file=../tfvars/nonprod.tfvars
+    terraform destroy -var-file=../tfvars/nonprod.tfvars
+    terraform apply -var-file=../tfvars/nonprod.tfvars
+    # Go to AWS SM, copy from `uec-dos-api-cs-nonprod-capacity_status_db_password` to `uec-dos-api-capacity-status-dev.API_DB_PASSWORD`
+    # Go to AWS RDS VPC security groups, add the nonprod open VPN security group (live-lk8s-nonprod-openvpn-sg) to the RDS instance as an INBOUND rule to
+    our RDS security group
+    cd ../../..
+    eval $(make secret-fetch-and-export-variables NAME=uec-dos-api-capacity-status-dev)
+    export SERVICE_DB_HOST=$API_DB_HOST
+    export SERVICE_DB_PORT=5432
+    export SERVICE_DB_NAME=postgres
+    export SERVICE_DB_USERNAME=postgres
+    export SERVICE_DB_PASSWORD=$API_DB_PASSWORD
+    make docker-run-data ARGS="--entrypoint data/dos-import-db.sh"
+    make project-clean-deploy PROFILE=dev

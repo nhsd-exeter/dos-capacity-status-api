@@ -1,6 +1,4 @@
 .DS_Store
+.idea
 .vscode
 *.code-workspace
-*.mypy_cache
-*.log
-*.swp
