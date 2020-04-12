@@ -8,7 +8,16 @@
   - Make targets to support development flow
   - Consistent formatting in IDE and command-line (flake8)
 - Infrastructure
-  - Refactor RDS configuration, custom parameter and option group
+  - Split DB responsibility, DoS DB should run a container and API connects to it's own RDS
+  - Change RDS DB identifier, currently it is `uec-dos-api-cs-nonprod-db`
+  - Change RDS Security Group, currently it is `uec-dos-api-cs-nonprod-db-sg`
+  - Move RDS Terraform variables to Make profile
+  - Sort out tags
+  - Create [custom option group](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithOptionGroups.html) for the RDS instance
+  - Move RDS password to the `uec-dos-api-capacity-status-$(PROFILE)` secret
+  - Review Subnet Group
+  - Review Security Group rule
+  - Refactor RDS configuration
   - Refactor ALB and WAF configuration
   - Refactor Kubernetes deployment scripts
   - Crete Route 53 record automatically (CSAPI-55)
