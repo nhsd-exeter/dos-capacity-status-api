@@ -211,6 +211,12 @@ docker-compose-start: ### Start Docker Compose - mandatory: YML=[docker-compose.
 		--file $(YML) \
 		up --no-build --remove-orphans --detach
 
+docker-compose-start-single-service: ### Start Docker Compose - mandatory: YML=[docker-compose.yml]
+	make docker-config
+	docker-compose \
+		--file $(YML) \
+		up --no-build --remove-orphans --detach $(SERVICE)
+
 docker-compose-stop: ### Stop Docker Compose - mandatory: YML=[docker-compose.yml]
 	docker-compose \
 		--file $(YML) \

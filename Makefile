@@ -142,6 +142,48 @@ project-create-ecr:
 
 # ==============================================================================
 
+dev-db-build:
+	export AWS_ACCOUNT_ID_MGMT=1234
+	export AWS_ACCOUNT_ID_PROD=1234
+	export AWS_ACCOUNT_ID_NONPROD=1234567
+	make db-clean db-build
+
+dev-db-start:
+	export AWS_ACCOUNT_ID_MGMT=1234
+	export AWS_ACCOUNT_ID_PROD=1234
+	export AWS_ACCOUNT_ID_NONPROD=1234567
+	make docker-compose-start-single-service YML=$(DOCKER_COMPOSE_YML) SERVICE=db-dos
+
+dev-build:
+	cd $(APPLICATION_DIR)
+	virtualenv ./venv
+	source ./venv/bin/activate
+	pip install -r requirements.txt
+	python manage.py collectstatic --noinput
+
+dev-migrate:
+	export DOS_DB_HOST=localhost
+	export API_DB_HOST=localhost
+	export APP_ADMIN_PASSWORD=admin
+	cd $(APPLICATION_DIR)
+	source ./venv/bin/activate
+	python manage.py migrate
+
+dev-start:
+	export DOS_DB_HOST=localhost
+	export API_DB_HOST=localhost
+	cd $(APPLICATION_DIR)
+	source ./venv/bin/activate
+	python manage.py runserver 0.0.0.0:8000
+
+dev-clean:
+	cd $(APPLICATION_DIR)
+	rm -rfv ./venv ./staticg
+
+
+
+# ==============================================================================
+
 .SILENT: \
 	project-populate-application-variables \
 	project-populate-db-pu-job-variables
