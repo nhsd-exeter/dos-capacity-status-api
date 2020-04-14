@@ -95,13 +95,13 @@ project-restart:
 		project-start
 
 project-start:
-	make docker-compose-start YML=$(DOCKER_COMPOSE_YML)
+	make docker-compose-start
 
 project-stop:
-	make docker-compose-stop YML=$(DOCKER_COMPOSE_YML)
+	make docker-compose-stop
 
 project-log:
-	make docker-compose-log YML=$(DOCKER_COMPOSE_YML)
+	make docker-compose-log
 
 project-populate-secret-variables:
 	make secret-fetch-and-export-variables NAME=uec-dos-api-capacity-status-$(PROFILE)
@@ -142,45 +142,31 @@ project-create-ecr:
 
 # ==============================================================================
 
+dev-setup:
+	make python-virtualenv
+
 dev-db-build:
-	export AWS_ACCOUNT_ID_MGMT=1234
-	export AWS_ACCOUNT_ID_PROD=1234
-	export AWS_ACCOUNT_ID_NONPROD=1234567
 	make db-clean db-build
 
 dev-db-start:
-	export AWS_ACCOUNT_ID_MGMT=1234
-	export AWS_ACCOUNT_ID_PROD=1234
-	export AWS_ACCOUNT_ID_NONPROD=1234567
-	make docker-compose-start-single-service YML=$(DOCKER_COMPOSE_YML) SERVICE=db-dos
+	make docker-compose-start-single-service NAME=db-dos
 
 dev-build:
 	cd $(APPLICATION_DIR)
-	virtualenv ./venv
-	source ./venv/bin/activate
 	pip install -r requirements.txt
 	python manage.py collectstatic --noinput
 
 dev-migrate:
-	export DOS_DB_HOST=localhost
-	export API_DB_HOST=localhost
-	export APP_ADMIN_PASSWORD=admin
 	cd $(APPLICATION_DIR)
-	source ./venv/bin/activate
+	export API_DB_HOST=localhost
+	export DOS_DB_HOST=localhost
 	python manage.py migrate
 
 dev-start:
-	export DOS_DB_HOST=localhost
+	cd $(APPLICATION_DIR)
 	export API_DB_HOST=localhost
-	cd $(APPLICATION_DIR)
-	source ./venv/bin/activate
-	python manage.py runserver 0.0.0.0:8000
-
-dev-clean:
-	cd $(APPLICATION_DIR)
-	rm -rfv ./venv ./staticg
-
-
+	export DOS_DB_HOST=localhost
+	python manage.py runserver 0.0.0.0:8080
 
 # ==============================================================================
 
