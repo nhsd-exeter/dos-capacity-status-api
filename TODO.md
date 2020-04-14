@@ -1,6 +1,8 @@
 # TODO
 
 - Application
+  - Let's revisit the domain model and consider again the naming of `serviceUid`, `serviceName`, `capacityStatus`
+  - PUT vs. PATCH
   - Protect proxy `/admin` endpoint (CSAPI-62)
   - Add logging in a format that can be picked up by existing DoS Splunk (CSAPI-7)
   - Increase the max reset status period in mins to 5 hours (CSAPI-63)
