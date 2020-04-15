@@ -4,6 +4,7 @@
 # Service variables
 
 API_HOST = uec-dos-api-cs
+#API_ADMIN_ALLOWED_HOSTS = [secret]
 
 API_DB_NAME = capacity_status
 API_DB_PORT = 5432
