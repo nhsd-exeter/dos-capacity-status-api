@@ -10,6 +10,12 @@ http {
     upstream API_HOST_TO_REPLACE {
         server API_HOST_TO_REPLACE:8443;
     }
+
+    map $http_x_forwarded_for $allow_host {
+                default       0;
+                ALLOWED_HOSTS_TO_REPLACE
+    }
+
     server {
         listen 443 ssl;
         server_name localhost;
@@ -18,6 +24,19 @@ http {
         location /static/ {
             autoindex   on;
             root        /application;
+        }
+        location ~ /admin {
+
+            if ($allow_host = 0) {
+                return 403;
+            }
+
+            proxy_pass         https://API_HOST_TO_REPLACE;
+            proxy_redirect     off;
+            proxy_set_header   Host $host;
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header   X-Forwarded-Host $server_name;
         }
         location /api {
             proxy_pass         https://API_HOST_TO_REPLACE;
