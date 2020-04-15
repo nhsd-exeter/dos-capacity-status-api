@@ -145,6 +145,11 @@ project-create-ecr:
 dev-setup:
 	make python-virtualenv
 
+dev-clean:
+	make python-virtualenv-clean
+	cd $(APPLICATION_DIR)
+	rm -rfv static/
+
 dev-db-build:
 	make db-clean db-build
 
