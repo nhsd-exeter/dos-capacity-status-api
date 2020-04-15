@@ -4,6 +4,7 @@
 # Service variables
 
 API_HOST = api
+API_ADMIN_ALLOWED_HOSTS = 127.0.0.1
 
 API_DB_HOST = db-dos
 API_DB_NAME = capacity_status
