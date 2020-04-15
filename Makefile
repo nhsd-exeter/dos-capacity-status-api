@@ -147,7 +147,7 @@ dev-setup:
 
 dev-clean:
 	make python-virtualenv-clean
-	rm -rfv $(APPLICATION_DIR)/static/
+	rm -rf $(APPLICATION_DIR)/static
 
 dev-db-build:
 	make db-clean db-build
