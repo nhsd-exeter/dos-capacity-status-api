@@ -1,14 +1,32 @@
 # TODO
 
+## Priority list
+
+- Testing
+  - Create a test user from a script that can be easily executed, configured and customised
 - Application
-  - Let's revisit the domain model and consider again the naming of `serviceUid`, `serviceName`, `capacityStatus`
-  - PUT vs. PATCH
   - Protect proxy `/admin` endpoint (CSAPI-62)
   - Add logging in a format that can be picked up by existing DoS Splunk (CSAPI-7)
   - Increase the max reset status period in mins to 5 hours (CSAPI-63)
+  - PUT vs. PATCH
 - Development
-  - Make targets to support development flow
   - Consistent formatting in IDE and command-line (flake8)
+- Development
+  - Consistent formatting in IDE and command-line (flake8)
+- Documentation
+  - Generate API Documentation automatically (CSAPI-9)
+- Testing
+  - Check for unit and integration test completeness (CSAPI-64)
+  - Can unit and integration tests be run independently
+  - Implement smoke test suite
+
+### Other tasks
+
+- Security
+  - Create a new DoS user only to be used by the API application
+  - API request throttling
+- Application
+  - Let's revisit the domain model and consider again the naming of `serviceUid`, `serviceName`, `capacityStatus`
 - Infrastructure
   - Split DB responsibility, DoS DB should run a container and API connects to it's own RDS
   - Change RDS DB identifier, currently it is `uec-dos-api-cs-nonprod-db`
@@ -29,8 +47,6 @@
 - Documentation
   - Generate API Documentation automatically (CSAPI-9)
 - Testing
-  - Check for unit test completeness (CSAPI-64)
-  - Can unit and integration tests be run independently
   - Provide acceptance test suite
   - Provide load test suite
   - Provide security test suite
