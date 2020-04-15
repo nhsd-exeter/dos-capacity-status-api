@@ -17,6 +17,8 @@ DOS_DB_NAME = postgres
 DOS_DB_PORT = 5432
 DOS_DB_USERNAME = postgres
 
+APP_ADMIN_PASSWORD = admin
+
 # TODO: What is this variable for? We always should be using https
 HTTP_PROTOCOL = http
 

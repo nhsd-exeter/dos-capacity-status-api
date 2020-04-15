@@ -95,13 +95,13 @@ project-restart:
 		project-start
 
 project-start:
-	make docker-compose-start YML=$(DOCKER_COMPOSE_YML)
+	make docker-compose-start
 
 project-stop:
-	make docker-compose-stop YML=$(DOCKER_COMPOSE_YML)
+	make docker-compose-stop
 
 project-log:
-	make docker-compose-log YML=$(DOCKER_COMPOSE_YML)
+	make docker-compose-log
 
 project-populate-secret-variables:
 	make secret-fetch-and-export-variables NAME=uec-dos-api-capacity-status-$(PROFILE)
@@ -139,6 +139,38 @@ project-trust-certificate:
 project-create-ecr:
 	make docker-create-repository NAME=api
 	make docker-create-repository NAME=proxy
+
+# ==============================================================================
+
+dev-setup:
+	make python-virtualenv
+
+dev-clean:
+	make python-virtualenv-clean
+	rm -rf $(APPLICATION_DIR)/static
+
+dev-db-build:
+	make db-clean db-build
+
+dev-db-start:
+	make docker-compose-start-single-service NAME=db-dos
+
+dev-build:
+	cd $(APPLICATION_DIR)
+	pip install -r requirements.txt
+	python manage.py collectstatic --noinput
+
+dev-migrate:
+	cd $(APPLICATION_DIR)
+	export API_DB_HOST=localhost
+	export DOS_DB_HOST=localhost
+	python manage.py migrate
+
+dev-start:
+	cd $(APPLICATION_DIR)
+	export API_DB_HOST=localhost
+	export DOS_DB_HOST=localhost
+	python manage.py runserver 0.0.0.0:8080
 
 # ==============================================================================
 

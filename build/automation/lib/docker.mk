@@ -9,7 +9,7 @@ DOCKER_NGINX_VERSION := $(or $(DOCKER_NGINX_VERSION), 1.17.8)
 DOCKER_NODE_VERSION := $(or $(DOCKER_NODE_VERSION), 13.8.0) # Non-LTS version should be used
 DOCKER_OPENJDK_VERSION := $(or $(DOCKER_OPENJDK_VERSION), 13-jdk) # JDK version for Java, Mave and Gradle should be in sync
 DOCKER_POSTGRES_VERSION := $(or $(DOCKER_POSTGRES_VERSION), 12.2)
-DOCKER_PYTHON_VERSION := $(or $(DOCKER_PYTHON_VERSION), 3.8.1-slim) # Do not use Alpine image
+DOCKER_PYTHON_VERSION := $(PYTHON_VERSION)-slim
 DOCKER_TERRAFORM_VERSION := $(or $(or $(TEXAS_TERRAFORM_VERSION), $(DOCKER_TERRAFORM_VERSION)), 0.12.20) # Maintained by the platform
 DOCKER_TOOLS_VERSION := $(or $(DOCKER_TOOLS_VERSION), $(shell cat $(DOCKER_DIR)/tools/.version 2> /dev/null || cat $(DOCKER_DIR)/tools/VERSION 2> /dev/null || echo unknown))
 
@@ -205,21 +205,27 @@ docker-image-load: ### Load image from a flat file - mandatory: NAME; optional: 
 
 # ==============================================================================
 
-docker-compose-start: ### Start Docker Compose - mandatory: YML=[docker-compose.yml]
+docker-compose-start: ### Start Docker Compose - optional: YML=[docker-compose.yml, defaults to $(DOCKER_COMPOSE_YML)]
 	make docker-config
 	docker-compose \
-		--file $(YML) \
+		--file $(or $(YML), $(DOCKER_COMPOSE_YML)) \
 		up --no-build --remove-orphans --detach
 
-docker-compose-stop: ### Stop Docker Compose - mandatory: YML=[docker-compose.yml]
+docker-compose-start-single-service: ### Start Docker Compose - mandatory: NAME=[service name]; optional: YML=[docker-compose.yml, defaults to $(DOCKER_COMPOSE_YML)]
+	make docker-config
 	docker-compose \
-		--file $(YML) \
+		--file $(or $(YML), $(DOCKER_COMPOSE_YML)) \
+		up --no-build --remove-orphans --detach $(NAME)
+
+docker-compose-stop: ### Stop Docker Compose - optional: YML=[docker-compose.yml, defaults to $(DOCKER_COMPOSE_YML)]
+	docker-compose \
+		--file $(or $(YML), $(DOCKER_COMPOSE_YML)) \
 		stop
 	docker rm --force --volumes $$(docker ps --all --quiet) 2> /dev/null ||:
 
-docker-compose-log: ### Log Docker Compose output - mandatory: YML=[docker-compose.yml]; optional: DO_NOT_FOLLOW=true
+docker-compose-log: ### Log Docker Compose output - optional: DO_NOT_FOLLOW=true,YML=[docker-compose.yml, defaults to $(DOCKER_COMPOSE_YML)]
 	docker-compose \
-		--file $(YML) \
+		--file $(or $(YML), $(DOCKER_COMPOSE_YML)) \
 		logs $$(echo $(DO_NOT_FOLLOW) | grep -E 'true|yes|y|on|1|TRUE|YES|Y|ON' > /dev/null 2>&1 && : || echo "--follow")
 
 # ==============================================================================
