@@ -2,8 +2,6 @@
 
 ## Priority list
 
-- Testing
-  - Create a test user from a script that can be easily executed, configured and customised
 - Application
   - Protect proxy `/admin` endpoint (CSAPI-62)
   - Add logging in a format that can be picked up by existing DoS Splunk (CSAPI-7)

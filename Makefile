@@ -172,8 +172,22 @@ dev-start:
 	export DOS_DB_HOST=localhost
 	python manage.py runserver 0.0.0.0:8080
 
+dev-create-user:
+	password=$$(make secret-random)
+	cd $(APPLICATION_DIR)
+	export API_DB_HOST=localhost
+	export DOS_DB_HOST=localhost
+	python manage.py user test $$password
+
+dev-smoke-test:
+	token=$$(make dev-create-user)
+	service_id=153455
+	curl -H "Authorization: Token $$token" http://localhost:8080/api/v0.0.1/capacity/services/$$service_id/capacitystatus/
+
 # ==============================================================================
 
 .SILENT: \
+	dev-create-user \
+	dev-smoke-test \
 	project-populate-application-variables \
 	project-populate-db-pu-job-variables

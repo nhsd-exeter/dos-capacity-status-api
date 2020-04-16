@@ -297,7 +297,7 @@ _dev-config-command-line:
 	rm -f $$(brew --prefix)/bin/python
 	ln $$(brew --prefix)/bin/python3 $$(brew --prefix)/bin/python
 	curl -s https://bootstrap.pypa.io/get-pip.py | sudo $$(brew --prefix)/bin/python3
-	$$(brew --prefix)/bin/pip3 install \
+	$$(brew --prefix)/bin/pip3 install $(PYTHON_PACKAGES) \
 		black \
 		boto3 \
 		bpython \
