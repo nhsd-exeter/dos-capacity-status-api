@@ -4,6 +4,8 @@ from ..validation import validation_rules
 
 from datetime import datetime, timedelta
 
+from os import getenv
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -17,7 +19,9 @@ This is the request payload serializer. It is responsible for:
     straight to the database model serializer for database level
     validation and update.
 """
-
+default_reset_status_in = getenv("RESET_STATUS_IN_DEFAULT_VALUE", 240)
+min_reset_status_in = getenv("RESET_STATUS_IN_DEFAULT_VALUE", 0)
+max_reset_status_in = getenv("RESET_STATUS_IN_DEFAULT_VALUE", 1440)
 
 class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
 
@@ -47,13 +51,14 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
     )
     resetStatusIn = serializers.IntegerField(
         required=False,
-        default=240,
-        min_value=0,
-        max_value=1440,
-        help_text="The amount of time, specified in 1 minute blocks up to and including 24 hours (1440 minutes), \
+        default= default_reset_status_in,
+        min_value= min_reset_status_in,
+        max_value= max_reset_status_in,
+        help_text="The amount of time, specified in 1 minute blocks up to and including %d hours (%d minutes), \
             from the time the capacity status is updated by the request to reset the capacity status of the \
-            service back to GREEN. If no value or 0 is provided, the reset time will default to 4 hours \
-            (240 minutes).",
+            service back to GREEN. If no value or %d is provided, the reset time will default to %d hours \
+            (%d minutes)." % (max_reset_status_in/60, max_reset_status_in, min_reset_status_in,
+            default_reset_status_in/60, default_reset_status_in),
         error_messages={
             "invalid": validation_rules[3]["error_msg"],
             "min_value": validation_rules[4]["error_msg_min_value"],

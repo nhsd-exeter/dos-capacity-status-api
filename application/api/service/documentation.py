@@ -1,5 +1,7 @@
 from .validation import validation_rules
 from drf_yasg import openapi
+from .serializers.payload_serializer import default_reset_status_in
+from .serializers.payload_serializer import max_reset_status_in
 
 capacity_service_api_desc = "This is the Capacity Status API. </BR> \
     </BR> \
@@ -42,9 +44,9 @@ response_entities_desc = {
     "reset_status_in": "<li><B>Reset time</B> - the date and time when the service will automatically transition back to a Green capacity status having been set to either \
         Amber or Red by the request. The reset time will be set to the date and time when the capacity status is updated (or maintained) plus the amount \
         of time in minutes as defined by the resetStatusIn value given in the request payload. If this value is not provided, the reset time will default to \
-        4 hours from the time the capacity status is updated. A capacity status change to Red or Amber for a service can be set to persist for a maximum period of 24 hours \
-        per request before automatically being reset back to Green. This means that if a service needs to be Red or Amber for over 24 hours, multiple \
-        requests through this API for that service will be required. </li>",
+        %d hours from the time the capacity status is updated. A capacity status change to Red or Amber for a service can be set to persist for a maximum period of %d hours \
+        per request before automatically being reset back to Green. This means that if a service needs to be Red or Amber for over %d hours, multiple \
+        requests through this API for that service will be required. </li>" % (default_reset_status_in/60, max_reset_status_in/60, max_reset_status_in/60),
     "notes": "<li><B>Notes</B> - a free text field providing the opportunity for any additional notes to be logged regarding the capacity status change. \
         Notes given in the request payload will be appended to the text: Capacity status set by the Capacity Service API -. </li>",
     "last_updated": "<li><B>Last updated date/time</B> - a timestamp of when the service was updated by the API.</li>",
