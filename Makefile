@@ -177,7 +177,7 @@ dev-create-user:
 	cd $(APPLICATION_DIR)
 	export API_DB_HOST=localhost
 	export DOS_DB_HOST=localhost
-	python manage.py user test $$password
+	python manage.py user test $$password TestUser
 
 dev-smoke-test:
 	token=$$(make dev-create-user)

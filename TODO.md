@@ -9,8 +9,6 @@
   - PUT vs. PATCH
 - Development
   - Consistent formatting in IDE and command-line (flake8)
-- Development
-  - Consistent formatting in IDE and command-line (flake8)
 - Documentation
   - Generate API Documentation automatically (CSAPI-9)
 - Testing
@@ -18,13 +16,13 @@
   - Can unit and integration tests be run independently
   - Implement smoke test suite
 
-### Other tasks
+## Other tasks
 
 - Security
-  - Create a new DoS user only to be used by the API application
-  - API request throttling
+  - Create a new DB user in the DoS database only to be used by the API application to connect
+  - API throttling (CSAPI-44)
 - Application
-  - Let's revisit the domain model and consider again the naming of `serviceUid`, `serviceName`, `capacityStatus`
+  - Let's revisit the domain model and consider again the naming of `serviceUid` (just `id`), `serviceName` (just `name`?), `capacityStatus` (just `status`?)
 - Infrastructure
   - Split DB responsibility, DoS DB should run a container and API connects to it's own RDS
   - Change RDS DB identifier, currently it is `uec-dos-api-cs-nonprod-db`
@@ -40,10 +38,7 @@
   - Refactor Kubernetes deployment scripts
   - Crete Route 53 record automatically (CSAPI-55)
   - Create Secrets Manager entry automatically
-  - API throttling (CSAPI-44)
   - Database backup and restore scripts
-- Documentation
-  - Generate API Documentation automatically (CSAPI-9)
 - Testing
   - Provide acceptance test suite
   - Provide load test suite
