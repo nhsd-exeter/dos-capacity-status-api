@@ -1,7 +1,10 @@
 from .validation import validation_rules
 from drf_yasg import openapi
-from .serializers.payload_serializer import default_reset_status_in
-from .serializers.payload_serializer import max_reset_status_in
+from django.conf import settings
+
+default_reset_status_in = settings.RESET_STATUS_IN_DEFAULT_VALUE
+max_reset_status_in = settings.RESET_STATUS_IN_MAX_VALUE
+min_reset_status_in = settings.RESET_STATUS_IN_MIN_VALUE
 
 capacity_service_api_desc = "This is the Capacity Status API. </BR> \
     </BR> \
@@ -115,9 +118,9 @@ validation_error_response = 'Bad Request - when the request fails one or more va
         "VAL-0002 - The given CapacityStatus value is invalid and must be a value as defined by the CapacityStatusRequestPayload model." </BR>\
     ],</BR>\
     "resetStatusIn": [</BR>\
-        "VAL-0004 - ResetStatusIn outside of limits - the reset time given is outside the minimum limit (0 minutes) defined by the CapacityStatusRequestPayload model."</BR>\
+        "VAL-0004 - ResetStatusIn outside of limits - the reset time given is outside the minimum limit (%d minutes) defined by the CapacityStatusRequestPayload model."</BR>\
     ]</BR>\
-}</pre>'
+}</pre>' % (min_reset_status_in)
 
 authentication_error_response = 'Unauthorized - when a user is either no longer active in DoS or is not authenticated to use this API. \
                 An authentication error response would look like: </BR>\

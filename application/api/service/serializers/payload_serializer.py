@@ -4,7 +4,7 @@ from ..validation import validation_rules
 
 from datetime import datetime, timedelta
 
-from os import getenv
+from django.conf import settings
 
 import logging
 
@@ -19,9 +19,9 @@ This is the request payload serializer. It is responsible for:
     straight to the database model serializer for database level
     validation and update.
 """
-default_reset_status_in = getenv("RESET_STATUS_IN_DEFAULT_VALUE", 240)
-min_reset_status_in = getenv("RESET_STATUS_IN_DEFAULT_VALUE", 0)
-max_reset_status_in = getenv("RESET_STATUS_IN_DEFAULT_VALUE", 1440)
+default_reset_status_in = settings.RESET_STATUS_IN_DEFAULT_VALUE
+min_reset_status_in = settings.RESET_STATUS_IN_MIN_VALUE
+max_reset_status_in = settings.RESET_STATUS_IN_MAX_VALUE
 
 class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
 
