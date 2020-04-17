@@ -21,6 +21,9 @@ http {
         server_name localhost;
         ssl_certificate      /certificate/certificate.pem;
         ssl_certificate_key  /certificate/certificate.key;
+
+        add_header X-Request-ID $request_id;
+
         location /static/ {
             autoindex   on;
             root        /application;
@@ -42,9 +45,12 @@ http {
             proxy_pass         https://API_HOST_TO_REPLACE;
             proxy_redirect     off;
             proxy_set_header   Host $host;
+            proxy_set_header   X-Request-ID $request_id;
             proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   X-Client-IP $http_x_forwarded_for;
             proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header   X-Forwarded-Host $server_name;
+            proxy_set_header   X-Request-Received $time_local;
         }
         location /health {
             return 200 'healthcheck success from proxy server';

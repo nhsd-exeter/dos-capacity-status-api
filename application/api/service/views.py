@@ -19,6 +19,7 @@ from api.authentication.authorise import (
     get_dos_user,
 )
 from api.dos_interface.queries import get_dos_service_for_uid
+from api.dos_interface.reporting import log_reporting_info
 from .documentation import (
     description_get,
     description_post,
@@ -48,6 +49,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
     )
     def get(self, request, service__uid):
         logger.info("Request sent from host: %s", request.META["HTTP_HOST"])
+        usage_metrics_logger.info("Request Identifier: %s", request.META["HTTP_X_REQUEST_ID"])
         user = self.get_user_from_request(request)
         user_validation_error = self._validate_dos_user(user)
         if user_validation_error:
@@ -80,6 +82,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         logger.info("Payload: %s", request.data)
         if self._can_edit_service(request, str(service__uid)):
             error_response = self._update_service_capacity(request, service__uid)
+            log_reporting_info(service__uid, request)
             if not error_response:
                 return self._serialized_update_capacity_response(service__uid)
             return error_response
@@ -107,7 +110,8 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         if self._can_edit_service(request, str(service__uid)):
             error_response = self._update_service_capacity(request, service__uid)
             if not error_response:
-                return self._serialized_update_capacity_response(service__uid)
+                response = self._serialized_update_capacity_response(service__uid)
+                return response
             return error_response
         return self._handle_cannot_edit_service_response(request, str(service__uid))
 

@@ -23,6 +23,7 @@ DOS_DB_USERNAME = postgres
 
 # TODO: What is this variable for? We always should be using https
 HTTP_PROTOCOL = https
+REQUEST_ID_HEADER = HTTP_X_REQUEST_ID
 
 # TODO: This has to go
 API_IMAGE_TAG = 0.0.1
