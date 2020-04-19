@@ -7,8 +7,6 @@
   - Add logging in a format that can be picked up by existing DoS Splunk (CSAPI-7)
   - Increase the max reset status period in mins to 5 hours (CSAPI-63)
   - PUT vs. PATCH
-- Development
-  - Consistent formatting in IDE and command-line (flake8)
 - Documentation
   - Generate API Documentation automatically (CSAPI-9)
 - Testing
@@ -53,3 +51,5 @@
   - Configure Pingdom
   - Configure CloudWatch
   - Configure Slack
+- Development
+  - Externalise `flake8` and `black` configuration

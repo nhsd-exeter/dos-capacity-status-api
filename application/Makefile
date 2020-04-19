@@ -1,7 +1,6 @@
 # TODO: This file has to be refactored
 # 1) Wrap python/flake8/black/coverage commands in a Docker container
-# 2) Integrate it with vscode and git
-# 3) If the targets are genric enough move them to the `make-devops` repository
+# 2) If the targets are genric enough move them to the `make-devops` repository
 
 XARGS := xargs -0 $(shell test $$(uname) = Linux && echo -r)
 GREP_T_FLAG := $(shell test $$(uname) = Linux && echo -T)
@@ -20,10 +19,14 @@ clean: # Reset the project and remove auto-generated assets
 	find . \( -name '*.tgz' -o -name dropin.cache \) -delete
 	find . | grep -E "(__pycache__)" | xargs rm -rf
 
-flake8: # Run the flake8 code checker
+code-format: # Format code with 'black'
+	black \
+		--line-length 120 \
+		api
+
+code-check: # Check code with 'flake8'
 	flake8 \
-		--ignore E231 \
-		--max-line-length=119 \
+		--max-line-length=120 \
 		--exclude */tests/__init__.py,api/service/documentation.py \
 		api
 
@@ -55,12 +58,6 @@ regression-test-coverage: clean # View a report on test coverage
 		--tag=regression
 	coverage report -m
 	coverage erase
-
-tidy: clean # Tidy code with the 'black' formatte
-	@echo "\nTidying code with black..."
-	black -l 119 api
-
-check: clean tidy flake8 coverage # Run all the checkers and tests
 
 docs: clean # Run sphinx to create project documentation
 	$(MAKE) -C docs html
