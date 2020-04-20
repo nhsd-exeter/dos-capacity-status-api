@@ -119,9 +119,7 @@ LOGGING = {
     # Adds unique request id to logger.
     "filters": {"request_id": {"()": "request_id.logging.RequestIdFilter"}},
     "formatters": {
-        "datetime_format": {
-            "format": "%(asctime)s %(name)-25s %(levelname)-8s request_id=%(request_id)s %(message)s",
-        },
+        "datetime_format": {"format": "%(asctime)s %(name)-25s %(levelname)-8s request_id=%(request_id)s %(message)s"},
     },
     "handlers": {
         "console": {
@@ -132,19 +130,19 @@ LOGGING = {
         },
     },
     "loggers": {
-        "django": {"handlers": ["console"], "level": os.getenv("API_LOG_LEVEL", "DEBUG"),},
+        "django": {"handlers": ["console"], "level": os.getenv("API_LOG_LEVEL", "DEBUG")},
         "django.server": {
             # Nothing particularly interesting, so just return warning and above
             # to reduce log clutter.
             "handlers": ["console"],
             "level": "WARNING",
         },
-        "api": {"handlers": ["console"], "level": os.getenv("API_LOG_LEVEL", "DEBUG"),},
+        "api": {"handlers": ["console"], "level": os.getenv("API_LOG_LEVEL", "DEBUG")},
     },
 }
 
 SWAGGER_SETTINGS = {
-    "SECURITY_DEFINITIONS": {"Bearer": {"type": "token", "name": "Authorization", "in": "header"},},
+    "SECURITY_DEFINITIONS": {"Bearer": {"type": "token", "name": "Authorization", "in": "header"}},
     # May need this set to true when running over HTTPS.
     "USE_SESSION_AUTH": False,
 }
@@ -153,15 +151,15 @@ SWAGGER_SETTINGS = {
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.TokenAuthentication",],
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated",],
+    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.TokenAuthentication"],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
 }
 
 # Internationalization

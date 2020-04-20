@@ -34,6 +34,6 @@ class Migration(migrations.Migration):
                     models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL,),
                 ),
             ],
-            options={"verbose_name": "Capacity Auth DoS User", "verbose_name_plural": "Capacity Auth DoS Users",},
+            options={"verbose_name": "Capacity Auth DoS User", "verbose_name_plural": "Capacity Auth DoS Users"},
         ),
     ]

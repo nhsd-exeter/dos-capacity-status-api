@@ -15,7 +15,7 @@ class TestDosUserInline(TestCase):
         exclude = admin.get_exclude(dummy_request, dummy_object)
 
         mock_super().get_exclude.assert_called_with(dummy_request, dummy_object)
-        self.assertListEqual(["dos_user_id",], exclude)
+        self.assertListEqual(["dos_user_id"], exclude)
 
     @mock.patch("api.authentication.admin")
     @mock.patch("api.authentication.admin.super")
@@ -30,4 +30,4 @@ class TestDosUserInline(TestCase):
         exclude = admin.get_exclude(dummy_request, dummy_object)
 
         mock_super().get_exclude.assert_called_with(dummy_request, dummy_object)
-        self.assertListEqual(["fake_exclude_field", "dos_user_id",], exclude)
+        self.assertListEqual(["fake_exclude_field", "dos_user_id"], exclude)

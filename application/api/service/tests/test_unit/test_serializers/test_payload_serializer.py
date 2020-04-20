@@ -124,7 +124,5 @@ class TestPayloadSerializer(unittest.TestCase):
             "Model modified date is a value greater than expected",
         )
         self.assertGreaterEqual(
-            modified_date_dt,
-            current_time + timedelta(minutes=-1),
-            "Model modified date is a value less than expected",
+            modified_date_dt, current_time + timedelta(minutes=-1), "Model modified date is a value less than expected",
         )
