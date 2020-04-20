@@ -21,9 +21,9 @@ can_user_edit_service_sql = """SELECT EXISTS(SELECT 1 FROM users u
 get_service_info_sql = """
     SELECT
         s.id,
+        s.uid,
         s.name,
         s.typeid,
-        s.parentid,
         sc.notes,
         sc.modifiedby,
         sc.modifieddate,
@@ -77,7 +77,11 @@ def get_service_info(service_uid, throwDoesNotExist=True):
         cursor.execute(get_service_info_sql, [str(service_uid)])
         row = dictfetchall(cursor)
 
-    return row[0], row[-1]
+    parent_row = None
+    if len(row) > 1:
+      parent_row = row[1]
+
+    return row[0], parent_row, row[-1]
 
 
 def dictfetchall(cursor):
