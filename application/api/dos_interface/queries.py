@@ -73,7 +73,7 @@ def get_dos_service_for_uid(service_uid, throwDoesNotExist=True):
 def get_service_info(service_uid, throwDoesNotExist=True):
     with connections["dos"].cursor() as cursor:
 
-        cursor.execute(get_service_info_sql, [service_uid])
+        cursor.execute(get_service_info_sql, [str(service_uid)])
         row = dictfetchall(cursor)
 
     return row[0], row[-1]

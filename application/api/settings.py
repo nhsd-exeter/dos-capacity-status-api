@@ -129,11 +129,10 @@ LOGGING = {
             "formatter": "datetime_format",
             "filters": ["request_id"],
         },
-        "usage": {
-            "level": os.getenv("API_LOG_LEVEL", "INFO"),
+        "usage_reporting": {
+            "level": "INFO",
             "class": "logging.StreamHandler",
-            "formatter": "usage_format",
-            "filters": ["request_id"],
+            "formatter": "usage_reporting_format",
         },
     },
     "loggers": {
@@ -145,7 +144,7 @@ LOGGING = {
             "level": "WARNING",
         },
         "api": {"handlers": ["console"], "level": os.getenv("API_LOG_LEVEL", "DEBUG")},
-        "api.usage.metrics": {"handlers": ["usage"], "level": os.getenv("API_LOG_LEVEL", "DEBUG")},
+        "api.usage.reporting": {"handlers": ["usage_reporting"], "level": "INFO", 'propagate': False},
     },
 }
 

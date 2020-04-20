@@ -1,7 +1,9 @@
-# from django.http import HttpResponse
+
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from rest_framework.response import Response
+
+from datetime import datetime
 
 from drf_yasg.utils import swagger_auto_schema
 
@@ -49,7 +51,6 @@ class CapacityStatusView(RetrieveUpdateAPIView):
     )
     def get(self, request, service__uid):
         logger.info("Request sent from host: %s", request.META["HTTP_HOST"])
-        usage_metrics_logger.info("Request Identifier: %s", request.META["HTTP_X_REQUEST_ID"])
         user = self.get_user_from_request(request)
         user_validation_error = self._validate_dos_user(user)
         if user_validation_error:
@@ -80,11 +81,13 @@ class CapacityStatusView(RetrieveUpdateAPIView):
     def put(self, request, service__uid):
         logger.info("Request sent from host: %s", request.META["HTTP_HOST"])
         logger.info("Payload: %s", request.data)
+        self._check_and_default_request_meta_data(request)
         if self._can_edit_service(request, str(service__uid)):
             error_response = self._update_service_capacity(request, service__uid)
-            log_reporting_info(service__uid, request)
             if not error_response:
-                return self._serialized_update_capacity_response(service__uid)
+                response = self._serialized_update_capacity_response(service__uid)
+                log_reporting_info(service__uid, request)
+                return response
             return error_response
         return self._handle_cannot_edit_service_response(request, str(service__uid))
 
@@ -107,10 +110,12 @@ class CapacityStatusView(RetrieveUpdateAPIView):
     def patch(self, request, service__uid, partial=True):
         logger.info("Request sent from host: %s", request.META["HTTP_HOST"])
         logger.info("Payload: %s", request.data)
+        self._check_and_default_request_meta_data(request)
         if self._can_edit_service(request, str(service__uid)):
             error_response = self._update_service_capacity(request, service__uid)
             if not error_response:
                 response = self._serialized_update_capacity_response(service__uid)
+                log_reporting_info(service__uid, request)
                 return response
             return error_response
         return self._handle_cannot_edit_service_response(request, str(service__uid))
@@ -173,7 +178,6 @@ class CapacityStatusView(RetrieveUpdateAPIView):
             model_data = payload_serializer.convertToModel(data=request.data)
             model_serializer = CapacityStatusModelSerializer(data=model_data)
             if model_serializer.is_valid():
-
                 self.partial_update(request, service__uid, partial=True)
                 return None
             return Response(model_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -194,3 +198,16 @@ class CapacityStatusView(RetrieveUpdateAPIView):
             return service_validation_error
         msg = "Given DoS user does not have authority to edit the service"
         return Response(msg, status=status.HTTP_403_FORBIDDEN)
+
+    def _check_and_default_request_meta_data(self, request):
+        if not "HTTP_X_REQUEST_RECEIVED" in request.META:
+            logger.warning("No request received date in header. Defaulting to now")
+            request.META["HTTP_X_REQUEST_RECEIVED"] = str(datetime.now())
+
+        if not "HTTP_X_REQUEST_ID" in request.META:
+            logger.warning("No request identifier in header. Defaulting to xxx")
+            request.META["HTTP_X_REQUEST_ID"] = "xxx"
+
+        if not "HTTP_X_CLIENT_IP" in request.META:
+            logger.warning("No client ip in header. Defaulting to 127.0.0.1")
+            request.META["HTTP_X_CLIENT_IP"] = "127.0.0.1"
