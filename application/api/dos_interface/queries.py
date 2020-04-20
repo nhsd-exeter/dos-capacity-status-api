@@ -40,7 +40,7 @@ get_service_info_sql = """
             SELECT s.id, s.parentid FROM services s
             JOIN service_ancestry d on d.parentid = s.id
         )
-	SELECT id FROM service_ancestry
+    SELECT id FROM service_ancestry
 );"""
 
 
@@ -70,6 +70,7 @@ def get_dos_service_for_uid(service_uid, throwDoesNotExist=True):
         except ObjectDoesNotExist:
             return None
 
+
 def get_service_info(service_uid, throwDoesNotExist=True):
     with connections["dos"].cursor() as cursor:
 
@@ -78,10 +79,8 @@ def get_service_info(service_uid, throwDoesNotExist=True):
 
     return row[0], row[-1]
 
+
 def dictfetchall(cursor):
     "Return all rows from a cursor as a dict"
     columns = [col[0] for col in cursor.description]
-    return [
-        dict(zip(columns, row))
-        for row in cursor.fetchall()
-    ]
+    return [dict(zip(columns, row)) for row in cursor.fetchall()]

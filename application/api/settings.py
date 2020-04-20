@@ -119,8 +119,8 @@ LOGGING = {
     # Adds unique request id to logger.
     "filters": {"request_id": {"()": "request_id.logging.RequestIdFilter"}},
     "formatters": {
-        "datetime_format": {"format": "%(asctime)s %(name)-25s %(levelname)-8s request_id=%(request_id)s %(message)s",},
-        "usage_format": {"format": "%(message)s",}
+        "datetime_format": {"format": "%(asctime)s %(name)-25s %(levelname)-8s request_id=%(request_id)s %(message)s"},
+        "usage_reporting_format": {"format": "%(message)s"},
     },
     "handlers": {
         "console": {
@@ -129,11 +129,7 @@ LOGGING = {
             "formatter": "datetime_format",
             "filters": ["request_id"],
         },
-        "usage_reporting": {
-            "level": "INFO",
-            "class": "logging.StreamHandler",
-            "formatter": "usage_reporting_format",
-        },
+        "usage_reporting": {"level": "INFO", "class": "logging.StreamHandler", "formatter": "usage_reporting_format"},
     },
     "loggers": {
         "django": {"handlers": ["console"], "level": os.getenv("API_LOG_LEVEL", "DEBUG")},
@@ -144,7 +140,7 @@ LOGGING = {
             "level": "WARNING",
         },
         "api": {"handlers": ["console"], "level": os.getenv("API_LOG_LEVEL", "DEBUG")},
-        "api.usage.reporting": {"handlers": ["usage_reporting"], "level": "INFO", 'propagate': False},
+        "api.usage.reporting": {"handlers": ["usage_reporting"], "level": "INFO", "propagate": False},
     },
 }
 

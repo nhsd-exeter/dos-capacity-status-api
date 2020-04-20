@@ -1,4 +1,3 @@
-
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from rest_framework.response import Response
@@ -200,14 +199,14 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         return Response(msg, status=status.HTTP_403_FORBIDDEN)
 
     def _check_and_default_request_meta_data(self, request):
-        if not "HTTP_X_REQUEST_RECEIVED" in request.META:
+        if "HTTP_X_REQUEST_RECEIVED" not in request.META:
             logger.warning("No request received date in header. Defaulting to now")
             request.META["HTTP_X_REQUEST_RECEIVED"] = str(datetime.now())
 
-        if not "HTTP_X_REQUEST_ID" in request.META:
+        if "HTTP_X_REQUEST_ID" not in request.META:
             logger.warning("No request identifier in header. Defaulting to xxx")
             request.META["HTTP_X_REQUEST_ID"] = "xxx"
 
-        if not "HTTP_X_CLIENT_IP" in request.META:
+        if "HTTP_X_CLIENT_IP" not in request.META:
             logger.warning("No client ip in header. Defaulting to 127.0.0.1")
             request.META["HTTP_X_CLIENT_IP"] = "127.0.0.1"
