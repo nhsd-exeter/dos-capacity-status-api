@@ -6,32 +6,23 @@ from time import gmtime, strftime
 
 import logging
 
+api_logger = logging.getLogger("api.dos_intface.reporting")
 usage_reporting_logger = logging.getLogger("api.usage.reporting")
-
-
-def _get_service_info(service_uid):
-    try:
-        service_info, parent_service_info, dos_region_info = get_service_info(service_uid)
-        return service_info, parent_service_info, dos_region_info
-    except ObjectDoesNotExist:
-        return None
 
 
 def _retrieve_service_data(service_uid):
 
-    service_info, parent_service_info, dos_region_info = _get_service_info(service_uid)
-
+    service_info, parent_service_info, dos_region_info = get_service_info(service_uid)
     service_data = {"CLIENT_NAME": service_info["modifiedby"]}
     service_data["ORG_NAME"] = "org_name=" + service_info["name"]
     service_data["ORG_TYPE"] = "org_type=" + str(service_info["typeid"])
 
     parent_org = ""
     if parent_service_info is not None:
-      parent_org = parent_service_info["uid"]
+        parent_org = parent_service_info["uid"]
 
     service_data["PARENT_ORG"] = "parentorg=" + str(parent_org)
     service_data["DOS_REGION"] = "dosregion=" + dos_region_info["name"]
-
 
     service_data["CAPACITY_STATUS"] = "capacity=" + service_info["color"]
     service_data["NOTES"] = "notes=" + service_info["notes"]
@@ -54,12 +45,22 @@ def _get_request_execution_time(request):
     return (datetime.now() - request_received).total_seconds()
 
 
-def log_reporting_info(service_uid, request, action="saveCapacityStatus", status="success"):
+def log_reporting_info(
+    service_uid, request, action="saveCapacityStatus", status="success"
+):
 
     report_data = {"ORG_ID": "org_id=" + str(service_uid)}
     report_data["REQUEST_ID"] = request.META["HTTP_X_REQUEST_ID"]
     report_data["CLIENT_IP"] = request.META["HTTP_X_CLIENT_IP"]
-    report_data.update(_retrieve_service_data(service_uid))
+
+    try:
+        report_data.update(_retrieve_service_data(service_uid))
+    except ObjectDoesNotExist:
+        api_logger.warning(
+            "No reporting service data was found for service: %s. The reporting log will not be produced.",
+            str(service_uid),
+        )
+        return None
 
     execution_time = "execution_time=" + str(_get_request_execution_time(request))
 

@@ -71,20 +71,23 @@ def get_dos_service_for_uid(service_uid, throwDoesNotExist=True):
             return None
 
 
-def get_service_info(service_uid, throwDoesNotExist=True):
+def get_service_info(service_uid):
     with connections["dos"].cursor() as cursor:
 
         cursor.execute(get_service_info_sql, [str(service_uid)])
-        row = dictfetchall(cursor)
+        result_set = _fetch_all_as_list_of_dicts(cursor)
+
+    if not result_set:
+        raise ObjectDoesNotExist
 
     parent_row = None
-    if len(row) > 1:
-      parent_row = row[1]
+    if len(result_set) > 1:
+        parent_row = result_set[1]
 
-    return row[0], parent_row, row[-1]
+    return result_set[0], parent_row, result_set[-1]
 
 
-def dictfetchall(cursor):
-    "Return all rows from a cursor as a dict"
+def _fetch_all_as_list_of_dicts(cursor):
+    "Return all rows from a cursor as a list of dictionaries"
     columns = [col[0] for col in cursor.description]
     return [dict(zip(columns, row)) for row in cursor.fetchall()]
