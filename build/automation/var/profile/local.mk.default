@@ -1,5 +1,4 @@
 -include $(VAR_DIR)/platform-texas/account-live-k8s-nonprod.mk
--include $(VAR_DIR)/rules.mk
 
 # ==============================================================================
 # Service variables
