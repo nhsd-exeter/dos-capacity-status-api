@@ -20,6 +20,7 @@ services:
       APP_ADMIN_PASSWORD: admin
       DJANGO_DEBUG: "True"
       HTTP_PROTOCOL: https
+      REQUEST_ID_HEADER: HTTP_X_REQUEST_ID
     volumes:
       - $PROJECT_DIR:/project
       - $HOME/.python/pip/cache:/tmp/.cache/pip

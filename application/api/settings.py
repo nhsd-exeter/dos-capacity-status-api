@@ -120,6 +120,7 @@ LOGGING = {
     "filters": {"request_id": {"()": "request_id.logging.RequestIdFilter"}},
     "formatters": {
         "datetime_format": {"format": "%(asctime)s %(name)-25s %(levelname)-8s request_id=%(request_id)s %(message)s"},
+        "usage_reporting_format": {"format": "%(message)s"},
     },
     "handlers": {
         "console": {
@@ -128,6 +129,7 @@ LOGGING = {
             "formatter": "datetime_format",
             "filters": ["request_id"],
         },
+        "usage_reporting": {"level": "INFO", "class": "logging.StreamHandler", "formatter": "usage_reporting_format"},
     },
     "loggers": {
         "django": {"handlers": ["console"], "level": os.getenv("API_LOG_LEVEL", "DEBUG")},
@@ -138,6 +140,7 @@ LOGGING = {
             "level": "WARNING",
         },
         "api": {"handlers": ["console"], "level": os.getenv("API_LOG_LEVEL", "DEBUG")},
+        "api.usage.reporting": {"handlers": ["usage_reporting"], "level": "INFO", "propagate": False},
     },
 }
 
@@ -185,4 +188,4 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 # Generates a unique request identifier for ever request processed and outputs this in the logs.
 # This is so we can trace a request all the way through.
 # https://django-request-id.readthedocs.io/en/latest/
-REQUEST_ID_HEADER = None
+REQUEST_ID_HEADER = os.getenv("REQUEST_ID_HEADER", None)
