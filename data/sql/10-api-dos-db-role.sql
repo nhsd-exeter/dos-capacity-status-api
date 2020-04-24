@@ -23,4 +23,12 @@ COMMENT ON ROLE uec_dos_api_cs IS 'Accessor role for the DoS Capacity Status API
 
 ALTER ROLE CREATE ROLE uec_dos_api_cs_role; SET search_path TO 'pathwaysdos';
 
+-- Grant table permissions
 
+GRANT SELECT, UPDATE ON pathwaysdos.servicecapacities TO uec_dos_api_cs_role;
+
+GRANT SELECT ON pathwaysdos.users TO uec_dos_api_cs_role;
+GRANT SELECT ON pathwaysdos.userpermissions TO uec_dos_api_cs_role;
+GRANT SELECT ON pathwaysdos.userservices TO uec_dos_api_cs_role;
+GRANT SELECT ON pathwaysdos.capacitystatuses TO uec_dos_api_cs_role;
+GRANT SELECT ON pathwaysdos.services TO uec_dos_api_cs_role;
