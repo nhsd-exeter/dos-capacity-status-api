@@ -19,9 +19,9 @@ This is the request payload serializer. It is responsible for:
     straight to the database model serializer for database level
     validation and update.
 """
-default_reset_status_in = settings.RESET_STATUS_IN_DEFAULT_VALUE
-min_reset_status_in = settings.RESET_STATUS_IN_MIN_VALUE
-max_reset_status_in = settings.RESET_STATUS_IN_MAX_VALUE
+default_reset_status_in = settings.RESET_STATUS_IN_DEFAULT_MINS
+min_reset_status_in = settings.RESET_STATUS_IN_MINIMUM_MINS
+max_reset_status_in = settings.RESET_STATUS_IN_MAX_MINS
 
 class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
 

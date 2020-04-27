@@ -2,9 +2,9 @@ from .validation import validation_rules
 from drf_yasg import openapi
 from django.conf import settings
 
-default_reset_status_in = settings.RESET_STATUS_IN_DEFAULT_VALUE
-max_reset_status_in = settings.RESET_STATUS_IN_MAX_VALUE
-min_reset_status_in = settings.RESET_STATUS_IN_MIN_VALUE
+default_reset_status_in = settings.RESET_STATUS_IN_DEFAULT_MINS
+max_reset_status_in = settings.RESET_STATUS_IN_MAX_MINS
+min_reset_status_in = settings.RESET_STATUS_IN_MINIMUM_MINS
 
 capacity_service_api_desc = "This is the Capacity Status API. </BR> \
     </BR> \
