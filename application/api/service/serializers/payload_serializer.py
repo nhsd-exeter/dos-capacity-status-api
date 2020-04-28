@@ -56,9 +56,9 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
         max_value= max_reset_status_in,
         help_text="The amount of time, specified in 1 minute blocks up to and including %d hours (%d minutes), \
             from the time the capacity status is updated by the request to reset the capacity status of the \
-            service back to GREEN. If no value or %d is provided, the reset time will default to %d hours \
-            (%d minutes)." % (max_reset_status_in/60, max_reset_status_in, min_reset_status_in,
-            default_reset_status_in/60, default_reset_status_in),
+            service back to GREEN. If no value is provided, the reset time will default to %d hours \
+            (%d minutes)." % (max_reset_status_in/60, max_reset_status_in, default_reset_status_in/60,
+            default_reset_status_in),
         error_messages={
             "invalid": validation_rules[3]["error_msg"],
             "min_value": validation_rules[4]["error_msg_min_value"],
