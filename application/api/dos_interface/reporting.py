@@ -1,7 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from api.dos_interface.queries import get_service_info
 
-from datetime import datetime
+from datetime import datetime, timezone
 from time import gmtime, strftime
 
 import logging
@@ -42,7 +42,7 @@ def _retrieve_service_data(service_uid):
 
 def _get_request_execution_time(request):
     request_received = datetime.fromisoformat(request.META["HTTP_X_REQUEST_RECEIVED"])
-    return (datetime.now() - request_received).total_seconds()
+    return (datetime.now(timezone.utc) - request_received).total_seconds()
 
 
 def log_reporting_info(
