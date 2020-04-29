@@ -189,3 +189,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 # This is so we can trace a request all the way through.
 # https://django-request-id.readthedocs.io/en/latest/
 REQUEST_ID_HEADER = os.getenv("REQUEST_ID_HEADER", None)
+
+# Business Rules
+RESET_STATUS_IN_DEFAULT_MINS = int(os.getenv("RESET_STATUS_IN_DEFAULT_MINS", 240))
+RESET_STATUS_IN_MINIMUM_MINS = int(os.getenv("RESET_STATUS_IN_MINIMUM_MINS", 0))
+RESET_STATUS_IN_MAX_MINS = int(os.getenv("RESET_STATUS_IN_MAX_MINS", 1440))
