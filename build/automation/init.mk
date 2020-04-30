@@ -1,16 +1,16 @@
 help: help-project-flow # Show project development flow targets
 
 help-all: # Show all targets
-	@awk 'BEGIN {FS = ":.*?#+ "} /^[a-zA-Z0-9_-]+:.*? #+ / {printf "\033[36m%-41s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
+	@awk 'BEGIN {FS = ":.*?#+ "} /^[ a-zA-Z0-9_-]+:.*? #+ / {printf "\033[36m%-41s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
 
 help-dev: # Show development documentation
 	# TODO: Show development documentation
 
 help-project-flow: ## Show project development flow targets
-	@awk 'BEGIN {FS = ":.*?# "} /^[a-zA-Z0-9_-]+:.*? # / {printf "\033[36m%-41s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*?# "} /^[ a-zA-Z0-9_-]+:.*? # / {printf "\033[36m%-41s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 help-project-supporting: ## Show development supporting targets
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z0-9_-]+:.*? ## / {printf "\033[36m%-41s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*?## "} /^[ a-zA-Z0-9_-]+:.*? ## / {printf "\033[36m%-41s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 devops-print-variables: ### Print all the variables
 	$(foreach v, $(sort $(.VARIABLES)),
@@ -20,10 +20,6 @@ devops-print-variables: ### Print all the variables
 	)
 
 devops-test-suite: ### Run the DevOps unit test suite - optional: DEBUG=true
-	[ "$(AWS_ACCOUNT_ID_LIVE_PARENT)" == 123456789 ] && echo "AWS_ACCOUNT_ID_LIVE_PARENT is not set correctly"
-	[ "$(AWS_ACCOUNT_ID_MGMT)" == 123456789 ] && echo "AWS_ACCOUNT_ID_MGMT is not set correctly"
-	[ "$(AWS_ACCOUNT_ID_NONPROD)" == 123456789 ] && echo "AWS_ACCOUNT_ID_NONPROD is not set correctly"
-	[ "$(AWS_ACCOUNT_ID_PROD)" == 123456789 ] && echo "AWS_ACCOUNT_ID_PROD is not set correctly"
 	make _devops-test DEBUG=$(DEBUG) TESTS=" \
 		test-file \
 		test-ssl \
@@ -34,13 +30,19 @@ devops-test-suite: ### Run the DevOps unit test suite - optional: DEBUG=true
 		test-terraform \
 		test-k8s \
 		test-jenkins \
+		test-python \
 		test-techradar \
 	"
+	find $(TMP_DIR) -mindepth 1 -maxdepth 1 -not -name '.gitignore' -print | xargs rm -rf
 
 devops-test-single: ### Run a DevOps single test - mandatory NAME=[test target name]; optional: DEBUG=true
 	make _devops-test DEBUG=$(DEBUG) TESTS="$(NAME)"
 
 _devops-test:
+	[ "$(AWS_ACCOUNT_ID_LIVE_PARENT)" == 000000000000 ] && echo "AWS_ACCOUNT_ID_LIVE_PARENT has not been set with a valid AWS account ID (this might be desired for testing or local development)"
+	[ "$(AWS_ACCOUNT_ID_MGMT)" == 000000000000 ] && echo "AWS_ACCOUNT_ID_MGMT has not been set with a valid AWS account ID (this might be desired for testing or local development)"
+	[ "$(AWS_ACCOUNT_ID_NONPROD)" == 000000000000 ] && echo "AWS_ACCOUNT_ID_NONPROD has not been set with a valid AWS account ID (this might be desired for testing or local development)"
+	[ "$(AWS_ACCOUNT_ID_PROD)" == 000000000000 ] && echo "AWS_ACCOUNT_ID_PROD has not been set with a valid AWS account ID (this might be desired for testing or local development)"
 	export _DEVOPS_RUN_TEST=true
 	if [[ "$(DEBUG)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then
 		exec 3>&1
@@ -52,7 +54,7 @@ _devops-test:
 		config="-s"
 	fi
 	source $(TEST_DIR)/test.sh
-	make $$config \
+	make $$config AWS_ACCOUNT_ID=000000000000 \
 		$(TESTS) \
 	>&3 2>&3
 
@@ -76,12 +78,16 @@ devops-synchronise: ### Synchronise the DevOps automation toolchain scripts used
 	}
 	function sync() {
 		cd $(TMP_DIR)/$(DEVOPS_PROJECT_NAME)
+		# Do not copy these files
 		rsync -rav \
 			--include=build/ \
+			--exclude=automation/etc/githooks/scripts/*-pre-commit.sh \
+			--exclude=automation/var/project.mk \
 			--exclude=docker/docker-compose.yml \
 			--exclude=Jenkinsfile \
 			build/* \
 			$(PROJECT_DIR)/build
+		# Copy these files
 		mkdir -p \
 			$(PROJECT_DIR)/documentation/adr
 		cp -fv documentation/adr/README.md $(PROJECT_DIR)/documentation/adr/README.md
@@ -110,7 +116,8 @@ devops-synchronise: ### Synchronise the DevOps automation toolchain scripts used
 			$(BIN_DIR)/markdown.pl \
 			$(DOCKER_DIR)/Dockerfile.metadata \
 			$(ETC_DIR)/platform-texas* \
-			$(LIB_DIR)/dev.mk
+			$(LIB_DIR)/dev.mk \
+			$(LIB_DIR)/fix
 		rm -rf \
 			$(TMP_DIR)/$(DEVOPS_PROJECT_NAME) \
 			.git/modules/build \
@@ -173,11 +180,9 @@ APPLICATION_TEST_DIR := $(abspath $(or $(APPLICATION_TEST_DIR), $(PROJECT_DIR)/t
 CONFIG_DIR := $(abspath $(or $(CONFIG_DIR), $(PROJECT_DIR)/config))
 DATA_DIR := $(abspath $(or $(DATA_DIR), $(PROJECT_DIR)/data))
 DEPLOYMENT_DIR := $(abspath $(or $(DEPLOYMENT_DIR), $(PROJECT_DIR)/deployment))
-DOCKER_COMPOSE_YML := $(abspath $(or $(DOCKER_COMPOSE_YML), $(DEVOPS_PROJECT_DIR)/../docker/docker-compose.yml))
-DOCKER_DIR := $(abspath $(or $(DOCKER_DIR), $(DEVOPS_PROJECT_DIR)/../docker))
 GITHOOKS_DIR_REL := $(shell echo $(abspath $(ETC_DIR)/githooks) | sed "s;$(PROJECT_DIR);;g")
 INFRASTRUCTURE_DIR := $(abspath $(or $(INFRASTRUCTURE_DIR), $(PROJECT_DIR)/infrastructure))
-JQ_PROGS_DIR_REL := $(shell echo $(abspath $(LIB_DIR)/jq) | sed "s;$(PROJECT_DIR);;g")
+JSON_DIR_REL := $(shell echo $(abspath $(LIB_DIR)/json) | sed "s;$(PROJECT_DIR);;g")
 
 PROFILE := $(or $(PROFILE), local)
 BUILD_ID := $(or $(BUILD_ID), 0)
@@ -187,8 +192,10 @@ BUILD_REPO := $(or $(shell git config --get remote.origin.url 2> /dev/null ||:),
 BUILD_BRANCH := $(or $(shell git rev-parse --abbrev-ref HEAD 2> /dev/null ||:), unknown)
 USER_ID := $(shell id -u)
 GROUP_ID := $(shell id -g)
-_TTY := $$([ -t 0 ] && echo "--tty")
+TTY_ENABLE := false
+_TTY := $$([ -t 0 ] && [ $(TTY_ENABLE) == true ] && echo "--tty")
 
+GOSS_PATH := $(BIN_DIR)/goss-linux-amd64
 SETUP_COMPLETE_FLAG_FILE := $(TMP_DIR)/.make-devops-setup-complete
 
 # ==============================================================================
@@ -201,7 +208,7 @@ SETUP_COMPLETE_FLAG_FILE := $(TMP_DIR)/.make-devops-setup-complete
 .PHONY: *
 .SHELLFLAGS := -ce
 MAKEFLAGS := --no-print-director
-PATH := /usr/local/opt/coreutils/libexec/gnubin:/usr/local/opt/findutils/libexec/gnubin:/usr/local/opt/gnu-sed/libexec/gnubin:/usr/local/opt/gnu-tar/libexec/gnubin:/usr/local/opt/grep/libexec/gnubin:/usr/local/opt/make/libexec/gnubin:$(PATH)
+PATH := /usr/local/opt/coreutils/libexec/gnubin:/usr/local/opt/findutils/libexec/gnubin:/usr/local/opt/gnu-sed/libexec/gnubin:/usr/local/opt/gnu-tar/libexec/gnubin:/usr/local/opt/grep/libexec/gnubin:/usr/local/opt/make/libexec/gnubin:$(BIN_DIR):$(PATH)
 SHELL := /bin/bash
 
 # ==============================================================================
@@ -231,39 +238,49 @@ endif
 # Check if all the required variables are set
 
 ifeq (true, $(shell [ "local" == "$(PROFILE)" ] && echo true))
-AWS_ACCOUNT_ID_LIVE_PARENT := $(or $(AWS_ACCOUNT_ID_LIVE_PARENT), 123456789)
-AWS_ACCOUNT_ID_MGMT := $(or $(AWS_ACCOUNT_ID_MGMT), 123456789)
-AWS_ACCOUNT_ID_NONPROD := $(or $(AWS_ACCOUNT_ID_NONPROD), 123456789)
-AWS_ACCOUNT_ID_PROD := $(or $(AWS_ACCOUNT_ID_PROD), 123456789)
+AWS_ACCOUNT_ID_LIVE_PARENT := $(or $(AWS_ACCOUNT_ID_LIVE_PARENT), 000000000000)
+AWS_ACCOUNT_ID_MGMT := $(or $(AWS_ACCOUNT_ID_MGMT), 000000000000)
+AWS_ACCOUNT_ID_NONPROD := $(or $(AWS_ACCOUNT_ID_NONPROD), 000000000000)
+AWS_ACCOUNT_ID_PROD := $(or $(AWS_ACCOUNT_ID_PROD), 000000000000)
 endif
 
 ifndef PROJECT_DIR
-$(error PROJECT_DIR is not set)
+$(error PROJECT_DIR is not set in the main Makefile)
 endif
 ifndef PROJECT_GROUP
-$(error PROJECT_GROUP is not set)
+$(error PROJECT_GROUP is not set in build/automation/var/project.mk)
 endif
 ifndef PROJECT_GROUP_SHORT
-$(error PROJECT_GROUP_SHORT is not set)
+$(error PROJECT_GROUP_SHORT is not set in build/automation/var/project.mk)
 endif
 ifndef PROJECT_NAME
-$(error PROJECT_NAME is not set)
+$(error PROJECT_NAME is not set in build/automation/var/project.mk)
 endif
 ifndef PROJECT_NAME_SHORT
-$(error PROJECT_NAME_SHORT is not set)
+$(error PROJECT_NAME_SHORT is not set in build/automation/var/project.mk)
+endif
+ifndef PROGRAMME
+$(error PROGRAMME is not set in build/automation/var/project.mk)
+endif
+
+ifndef TEXAS_SERVICE_TAG
+$(error TEXAS_SERVICE_TAG is not set in build/automation/var/project.mk)
+endif
+ifndef TEXAS_ROLE_PREFIX
+$(error TEXAS_ROLE_PREFIX is not set in build/automation/var/project.mk)
 endif
 
 ifndef AWS_ACCOUNT_ID_LIVE_PARENT
-$(info AWS_ACCOUNT_ID_LIVE_PARENT is not set)
+$(info AWS_ACCOUNT_ID_LIVE_PARENT is not set in ~/.dotfiles/oh-my-zsh/plugins/make-devops/aws-platform.zsh or in your CI config)
 endif
 ifndef AWS_ACCOUNT_ID_MGMT
-$(info AWS_ACCOUNT_ID_MGMT is not set)
+$(info AWS_ACCOUNT_ID_MGMT is not set in ~/.dotfiles/oh-my-zsh/plugins/make-devops/aws-platform.zsh or in your CI config)
 endif
 ifndef AWS_ACCOUNT_ID_NONPROD
-$(info AWS_ACCOUNT_ID_NONPROD is not set)
+$(info AWS_ACCOUNT_ID_NONPROD is not set in ~/.dotfiles/oh-my-zsh/plugins/make-devops/aws-platform.zsh or in your CI config)
 endif
 ifndef AWS_ACCOUNT_ID_PROD
-$(info AWS_ACCOUNT_ID_PROD is not set)
+$(info AWS_ACCOUNT_ID_PROD is not set in ~/.dotfiles/oh-my-zsh/plugins/make-devops/aws-platform.zsh or in your CI config)
 endif
 
 # ==============================================================================

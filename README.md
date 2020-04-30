@@ -62,8 +62,8 @@
 #### Pre-requisites
 
 You'll need to have the following installed:
-    Python version 3.7.5
-    Pip version 19.3.1
+Python version 3.7.5
+Pip version 19.3.1
 
 #### Configuring the development environment
 
@@ -74,11 +74,11 @@ the application requires.
 First, create a python virtual environment as follows:
 
 sudo pip3 install virtualenv
-virtualenv $HOME/pythonvirtenvs/capacity-status-env
+virtualenv \$HOME/pythonvirtenvs/capacity-status-env
 
 Activate the virtual environment:
 
-source $HOME/pythonvirtenvs/capacity-status-env/bin/activate
+source \$HOME/pythonvirtenvs/capacity-status-env/bin/activate
 
 Install all of the modules that the application requires:
 
@@ -104,8 +104,8 @@ to be running on your local machine. These components are included in this proje
 To run the (dockerised) API on localhost across port 8443, starting from the project
 root directory:
 
-make project-build    - This builds the API, Database, and Proxy Server images.
-make project-start    - This runs the API, Database, and Proxy Server images.
+make project-build - This builds the API, Database, and Proxy Server images.
+make project-start - This runs the API, Database, and Proxy Server images.
 
 Issuing a 'docker ps' command will show you the state of the running containers. You should
 have running containers for the API, Database, and Proxy Server.
@@ -121,7 +121,7 @@ with those new changes. Instead, the project will need to be rebuilt and re-star
 the project to be seen. In this case, it is recommended that the following commands are run within the
 project root directory:
 
-make project-clean-build    - This clears out previous images and builds new images
+make project-clean-build - This clears out previous images and builds new images
 make project-start
 
 ##### Running the API in HTTP mode
@@ -132,7 +132,7 @@ project root directory:
 Follow the instructions given in the 'Running the Dockerised API in HTTPS mode' section, and
 perform the following additional steps:
 
-source $HOME/pythonvirtenvs/capacity-status-env/bin/activate     - Activate the virtual env
+source \$HOME/pythonvirtenvs/capacity-status-env/bin/activate - Activate the virtual env
 make api-start
 
 The API will be running on localhost on port 8000. The URL to the API Documentation is:
@@ -142,7 +142,7 @@ http://localhost:8000/api/v0.0.1/capacity/apidoc
 Navigate here in a browser to see all available endpoints and routes.
 
 Any changes made and saved to the API code base will cause Django to immediately re-start the API
-with those new changes.  However, changes made to the Database or Proxy Server will require a new
+with those new changes. However, changes made to the Database or Proxy Server will require a new
 build of the images as detailed in the 'Running the Dockerised API in HTTPS mode' section.
 
 #### Creating an authenticated user in the Development Environment
@@ -162,23 +162,23 @@ need to be provided in the 'Authorization' section of all request headers.
 
 Authorization header format:
 
-Key:    Authorization
-Value:  Token 3f26b15ee5c4723ecd91ddde5809a248c1f1a5b5
+Key: Authorization
+Value: Token 3f26b15ee5c4723ecd91ddde5809a248c1f1a5b5
 
 ### Testing
 
 #### Creating unit tests
 
-* Ensure test files are created in a relevant sub-directory under the test directory of the app under test.
-* Ensure all test files are prefixed with "test_" and match the name of the module/class that this test file tests.
-* Ensure that import unittest is brought into the test file.
-* Base your test class on unittest.TestCase.
-* Add the new test file to the __init__.py file so that the unit test runner picks the new tests up.
+- Ensure test files are created in a relevant sub-directory under the test directory of the app under test.
+- Ensure all test files are prefixed with "test\_" and match the name of the module/class that this test file tests.
+- Ensure that import unittest is brought into the test file.
+- Base your test class on unittest.TestCase.
+- Add the new test file to the `__init__.py` file so that the unit test runner picks the new tests up.
 
 #### Running the unit tests from command line
 
 The unit tests can be run by executing the following command in the project root directory:
-    ./application/manage.py test api
+./application/manage.py test api
 
 #### Running the unit tests from Make
 
@@ -217,14 +217,17 @@ The `PROFILE` variable can be set to other environments.
     terraform destroy -var-file=../tfvars/nonprod.tfvars
     terraform apply -var-file=../tfvars/nonprod.tfvars
     # Go to AWS SM, copy from `uec-dos-api-cs-nonprod-capacity_status_db_password` to `uec-dos-api-capacity-status-dev.API_DB_PASSWORD`
-    # Go to AWS RDS VPC security groups, add the nonprod open VPN security group (live-lk8s-nonprod-openvpn-sg) to the RDS instance as an INBOUND rule to
-    our RDS security group
+    # Go to AWS RDS VPC security groups, add the nonprod open VPN security group (live-lk8s-nonprod-openvpn-sg) to the RDS instance as an INBOUND rule to our RDS security group
     cd ../../..
     eval $(make secret-fetch-and-export-variables NAME=uec-dos-api-capacity-status-dev)
-    export SERVICE_DB_HOST=$API_DB_HOST
-    export SERVICE_DB_PORT=5432
-    export SERVICE_DB_NAME=postgres
-    export SERVICE_DB_USERNAME=postgres
-    export SERVICE_DB_PASSWORD=$API_DB_PASSWORD
-    make docker-run-data ARGS="--entrypoint data/dos-import-db.sh"
+    cd data/aws-rds-sql
+    make build
+    make run \
+      DB_HOST=$API_DB_HOST \
+      DB_PORT=5432 \
+      DB_NAME=postgres \
+      DB_USERNAME=postgres \
+      DB_PASSWORD=$API_DB_PASSWORD
+    make clean
+    cd ../..
     make project-clean-deploy PROFILE=dev

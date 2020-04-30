@@ -1,25 +1,25 @@
 DEV_OHMYZSH_DIR := ~/.dotfiles/oh-my-zsh
 
-macos-setup: ## Provision your MacBook (and become a DevOps ninja) - optional: REINSTALL=true
+macos-setup devops-setup: ## Provision your MacBook (and become a DevOps ninja) - optional: REINSTALL=true
 	rm -f $(SETUP_COMPLETE_FLAG_FILE)
-	make dev-disable-gatekeeper
+	make macos-disable-gatekeeper
 	make \
-		dev-prepare \
-		dev-update \
-		dev-install-essential \
-		dev-install-additional \
-		dev-install-corporate \
-		dev-check \
-		dev-config \
-		dev-fix
-	make dev-enable-gatekeeper
+		macos-prepare \
+		macos-update \
+		macos-install-essential \
+		macos-install-additional \
+		macos-install-corporate \
+		macos-check \
+		macos-config \
+		macos-fix
+	make macos-enable-gatekeeper
 	touch $(SETUP_COMPLETE_FLAG_FILE)
 
-dev-prepare:: ## Prepare for installation and configuration of the development dependencies
+macos-prepare:: ## Prepare for installation and configuration of the development dependencies
 	networksetup -setdnsservers Wi-Fi 8.8.8.8
 	sudo chown -R $$(id -u) $$(brew --prefix)/*
 
-dev-update:: ## Update all currently installed development dependencies
+macos-update:: ## Update all currently installed development dependencies
 	which mas > /dev/null 2>&1 || brew install mas
 	mas upgrade $(mas list | grep -i xcode | awk '{ print $1 }')
 	brew update
@@ -27,17 +27,18 @@ dev-update:: ## Update all currently installed development dependencies
 	brew tap buo/cask-upgrade
 	brew cu --all --yes
 
-dev-install-essential:: ## Install essential development dependencies - optional: REINSTALL=true
+macos-install-essential:: ## Install essential development dependencies - optional: REINSTALL=true
 	install="install"
 	if [[ "$$REINSTALL" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then
 		install="reinstall --force"
 	fi
 	brew update
-	brew tap blendle/blendle
-	brew tap buo/cask-upgrade
-	brew tap homebrew/cask-fonts
-	brew tap homebrew/cask-versions
-	brew tap johanhaleby/kubetail
+	brew tap adoptopenjdk/openjdk ||:
+	brew tap blendle/blendle ||:
+	brew tap buo/cask-upgrade ||:
+	brew tap homebrew/cask-fonts ||:
+	brew tap homebrew/cask-versions ||:
+	brew tap johanhaleby/kubetail ||:
 	brew $$install ack ||:
 	brew $$install aws-iam-authenticator ||:
 	brew $$install awscli ||:
@@ -48,14 +49,17 @@ dev-install-essential:: ## Install essential development dependencies - optional
 	brew $$install findutils ||:
 	brew $$install gawk ||:
 	brew $$install git ||:
+	brew $$install git-crypt ||:
 	brew $$install gnu-sed ||:
 	brew $$install gnu-tar ||:
 	brew $$install gnutls ||:
 	brew $$install go ||:
+	brew $$install google-authenticator-libpam ||:
 	brew $$install google-java-format ||:
 	brew $$install gpg ||:
 	brew $$install gradle ||:
 	brew $$install grep ||:
+	brew $$install helm ||:
 	brew $$install httpie ||:
 	brew $$install jenv ||:
 	brew $$install jq ||:
@@ -77,21 +81,23 @@ dev-install-essential:: ## Install essential development dependencies - optional
 	brew $$install zsh-autosuggestions ||:
 	brew $$install zsh-completions ||:
 	brew $$install zsh-syntax-highlighting ||:
+	brew cask $$install adoptopenjdk13 ||:
 	brew cask $$install docker ||:
 	brew cask $$install font-hack-nerd-font ||:
 	brew cask $$install iterm2 ||:
-	brew cask $$install java ||:
 	brew cask $$install visual-studio-code ||:
 	# maven depends on java
 	brew $$install maven ||:
 
-dev-install-additional:: ## Install additional development dependencies - optional: REINSTALL=true
+macos-install-additional:: ## Install additional development dependencies - optional: REINSTALL=true
 	install="install"
 	if [[ "$$REINSTALL" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then
 		install="reinstall --force"
 	fi
 	brew update
-	brew $$install github/gh/gh
+	#brew tap weaveworks/tap ||:
+	brew $$install github/gh/gh ||:
+	#brew $$install weaveworks/tap/eksctl ||:
 	brew cask $$install appcleaner ||:
 	brew cask $$install atom ||:
 	brew cask $$install bettertouchtool ||:
@@ -108,6 +114,7 @@ dev-install-additional:: ## Install additional development dependencies - option
 	brew cask $$install istat-menus ||:
 	brew cask $$install karabiner-elements ||:
 	brew cask $$install keepingyouawake ||:
+	brew cask $$install microsoft-remote-desktop-beta ||:
 	brew cask $$install postman ||:
 	brew cask $$install pycharm ||:
 	brew cask $$install sourcetree ||:
@@ -127,7 +134,7 @@ dev-install-additional:: ## Install additional development dependencies - option
 	brew cask reinstall --force \
 		https://raw.githubusercontent.com/Homebrew/homebrew-cask/5a0a2b2322e35ec867f6633ca985ee485255f0b1/Casks/virtualbox-extension-pack.rb ||:
 
-dev-install-corporate:: ## Install corporate dependencies - optional: REINSTALL=true
+macos-install-corporate:: ## Install corporate dependencies - optional: REINSTALL=true
 	install="install"
 	if [[ "$$REINSTALL" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then
 		install="reinstall --force"
@@ -135,12 +142,11 @@ dev-install-corporate:: ## Install corporate dependencies - optional: REINSTALL=
 	brew update
 	brew cask $$install microsoft-office ||:
 	brew cask $$install microsoft-teams ||:
-	brew cask $$install skype-for-business ||:
 	brew cask $$install slack ||:
 	brew cask $$install vmware-horizon-client ||:
 	brew cask $$install avast-security ||:
 
-dev-check:: ## Check if the development dependencies are installed
+macos-check:: ## Check if the development dependencies are installed
 	# Essential dependencies
 	mas list | grep -i "xcode" ||:
 	brew list ack ||:
@@ -153,14 +159,17 @@ dev-check:: ## Check if the development dependencies are installed
 	brew list findutils ||:
 	brew list gawk ||:
 	brew list git ||:
+	brew list git-crypt ||:
 	brew list gnu-sed ||:
 	brew list gnu-tar ||:
 	brew list gnutls ||:
 	brew list go ||:
+	brew list google-authenticator-libpam ||:
 	brew list google-java-format ||:
 	brew list gpg ||:
 	brew list gradle ||:
 	brew list grep ||:
+	brew list helm ||:
 	brew list httpie ||:
 	brew list jenv ||:
 	brew list jq ||:
@@ -183,12 +192,14 @@ dev-check:: ## Check if the development dependencies are installed
 	brew list zsh-autosuggestions ||:
 	brew list zsh-completions ||:
 	brew list zsh-syntax-highlighting ||:
+	brew cask list adoptopenjdk13 ||:
 	brew cask list docker ||:
 	brew cask list font-hack-nerd-font ||:
 	brew cask list iterm2 ||:
 	brew cask list visual-studio-code ||:
 	# Additional dependencies
-	brew list github/gh/gh
+	brew list github/gh/gh ||:
+	#brew list weaveworks/tap/eksctl ||:
 	brew cask list atom ||:
 	brew cask list cheatsheet ||:
 	brew cask list dbeaver-community ||:
@@ -196,44 +207,44 @@ dev-check:: ## Check if the development dependencies are installed
 	brew cask list gitkraken ||:
 	brew cask list google-chrome ||:
 	brew cask list intellij-idea-ce ||:
-	brew cask list java ||:
 	brew cask list keepingyouawake ||:
+	brew cask list microsoft-remote-desktop-beta ||:
 	brew cask list postman ||:
 	brew cask list pycharm ||:
 	brew cask list sourcetree ||:
 	brew cask list spectacle ||:
 	brew cask list tunnelblick ||:
 
-dev-config:: ## Configure development dependencies
+macos-config:: ## Configure development dependencies
 	make \
-		_dev-config-mac \
-		_dev-config-zsh \
-		_dev-config-oh-my-zsh \
-		_dev-config-command-line \
-		_dev-config-iterm2 \
-		_dev-config-visual-studio-code \
-		_dev-config-firefox
-	make dev-info
+		_macos-config-mac \
+		_macos-config-zsh \
+		_macos-config-oh-my-zsh \
+		_macos-config-command-line \
+		_macos-config-iterm2 \
+		_macos-config-visual-studio-code \
+		_macos-config-firefox
+	make macos-info
 
-dev-fix:: ## Fix development dependencies
-	make _dev-fix-vagrant-virtualbox
+macos-fix:: ## Fix development dependencies
+	make _macos-fix-vagrant-virtualbox
 
-dev-info:: ## Show "Setting up your macOS using Make DevOps" manual
+macos-info:: ## Show "Setting up your macOS using Make DevOps" manual
 	info=$(LIB_DIR)/macos/README.md
 	html=$(TMP_DIR)/make-devops-doc-$(shell echo $$info | md5sum | cut -c1-7).html
 	perl $(BIN_DIR)/markdown --html4tags $$info > $$html
 	cp -f $$html ~/Desktop/Setting\ up\ your\ macOS\ using\ Make\ DevOps.html
 	open -a "Safari" ~/Desktop/Setting\ up\ your\ macOS\ using\ Make\ DevOps.html
 
-dev-disable-gatekeeper:: ## Disable Gatekeeper
+macos-disable-gatekeeper:: ## Disable Gatekeeper
 	sudo spctl --master-disable
 
-dev-enable-gatekeeper:: ## Enable Gatekeeper
+macos-enable-gatekeeper:: ## Enable Gatekeeper
 	sudo spctl --master-enable
 
 # ==============================================================================
 
-_dev-config-mac:
+_macos-config-mac:
 	sudo defaults write /Library/Preferences/com.apple.alf globalstate -int 1
 	networksetup -setdnsservers Wi-Fi 8.8.8.8
 	defaults write -g com.apple.trackpad.scaling -float 5.0
@@ -243,12 +254,14 @@ _dev-config-mac:
 	defaults write -g KeyRepeat -int 2
 	sudo mdutil -i off /
 	sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.metadata.mds.plist
+	# Add images as attachments in Mail
+	defaults write com.apple.mail DisableInlineAttachmentViewing -bool yes
 
-_dev-config-zsh:
+_macos-config-zsh:
 	cat /etc/shells | grep $$(brew --prefix)/bin/zsh > /dev/null 2>&1 || sudo sh -c "echo $$(brew --prefix)/bin/zsh >> /etc/shells"
 	chsh -s $$(brew --prefix)/bin/zsh
 
-_dev-config-oh-my-zsh:
+_macos-config-oh-my-zsh:
 	ZSH=$(DEV_OHMYZSH_DIR) sh -c "$$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" "" --unattended ||:
 	git clone https://github.com/romkatv/powerlevel10k.git $(DEV_OHMYZSH_DIR)/custom/themes/powerlevel10k ||:
 	cp ~/.zshrc ~/.zshrc.bak.$$(date -u +"%Y%m%d%H%M%S") ||:
@@ -281,7 +294,7 @@ _dev-config-oh-my-zsh:
 	echo "POWERLEVEL9K_CUSTOM_TEXAS_BACKGROUND=balck" >> ~/.zshrc
 	echo "POWERLEVEL9K_CUSTOM_TEXAS_FOREGROUND=yellow" >> ~/.zshrc
 	echo "POWERLEVEL9K_MODE=nerdfont-complete" >> ~/.zshrc
-	echo "POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(context dir vcs)" >> ~/.zshrc
+	echo "POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs)" >> ~/.zshrc
 	echo "POWERLEVEL9K_SHORTEN_DIR_LENGTH=3" >> ~/.zshrc
 	echo "POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status custom_texas virtualenv root_indicator background_jobs time)" >> ~/.zshrc
 	echo "POWERLEVEL9K_PROMPT_ON_NEWLINE=true" >> ~/.zshrc
@@ -290,22 +303,14 @@ _dev-config-oh-my-zsh:
 	echo "source \$$ZSH/oh-my-zsh.sh" >> ~/.zshrc
 	echo "# END: Custom configuration" >> ~/.zshrc
 
-_dev-config-command-line:
+_macos-config-command-line:
 	sudo chown -R $$(id -u) $$(brew --prefix)/*
 	# configure Python
 	brew link python
 	rm -f $$(brew --prefix)/bin/python
 	ln $$(brew --prefix)/bin/python3 $$(brew --prefix)/bin/python
 	curl -s https://bootstrap.pypa.io/get-pip.py | sudo $$(brew --prefix)/bin/python3
-	$$(brew --prefix)/bin/pip3 install $(PYTHON_PACKAGES) \
-		black \
-		boto3 \
-		bpython \
-		configparser \
-		flake8 \
-		mypy \
-		pygments \
-		pylint
+	$$(brew --prefix)/bin/pip3 install $(PYTHON_BASE_PACKAGES)
 	# configure Go
 	curl -sSL https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer | bash ||:
 	# configure Java
@@ -364,10 +369,10 @@ _dev-config-command-line:
 		(
 			echo
 			echo "# export: AWS platform variables"
-			echo "export AWS_ACCOUNT_ID_LIVE_PARENT=123456789"
-			echo "export AWS_ACCOUNT_ID_MGMT=123456789"
-			echo "export AWS_ACCOUNT_ID_NONPROD=123456789"
-			echo "export AWS_ACCOUNT_ID_PROD=123456789"
+			echo "export AWS_ACCOUNT_ID_LIVE_PARENT=000000000000"
+			echo "export AWS_ACCOUNT_ID_MGMT=000000000000"
+			echo "export AWS_ACCOUNT_ID_NONPROD=000000000000"
+			echo "export AWS_ACCOUNT_ID_PROD=000000000000"
 			echo
 		) > $(DEV_OHMYZSH_DIR)/plugins/$(DEVOPS_PROJECT_NAME)/aws-platform.zsh
 	fi
@@ -375,12 +380,12 @@ _dev-config-command-line:
 		cp $(PROJECT_DIR)/*.code-workspace.template $(PROJECT_DIR)/$(PROJECT_NAME).code-workspace
 	fi
 
-_dev-config-iterm2:
+_macos-config-iterm2:
 	curl -fsSL https://raw.githubusercontent.com/stefaniuk/dotfiles/master/lib/resources/iterm/com.googlecode.iterm2.plist -o /tmp/com.googlecode.iterm2.plist
 	defaults import com.googlecode.iterm2 /tmp/com.googlecode.iterm2.plist
 	rm /tmp/com.googlecode.iterm2.plist
 
-_dev-config-visual-studio-code:
+_macos-config-visual-studio-code:
 	# Install extensions
 	code --force --install-extension alefragnani.bookmarks
 	code --force --install-extension alexkrechik.cucumberautocomplete
@@ -443,7 +448,7 @@ _dev-config-visual-studio-code:
 	# List them all
 	code --list-extensions --show-versions
 
-_dev-config-firefox:
+_macos-config-firefox:
 	function firefox_install_extension {
 		url=$$1
 		file=$$2
@@ -469,24 +474,24 @@ _dev-config-firefox:
 		https://addons.mozilla.org/firefox/downloads/file/1509811/redux_devtools-2.17.1-fx.xpi \
 		redux_devtools.xpi ||:
 
-_dev-fix-vagrant-virtualbox:
+_macos-fix-vagrant-virtualbox:
 	plugin=/opt/vagrant/embedded/gems/2.2.6/gems/vagrant-2.2.6/plugins/providers/virtualbox/plugin.rb
 	meta=/opt/vagrant/embedded/gems/2.2.6/gems/vagrant-2.2.6/plugins/providers/virtualbox/driver/meta.rb
 	if [ -f $$plugin ] && [ -f $$meta ]; then
 		sudo sed -i 's;autoload :Version_4_0, File.expand_path("../driver/version_4_0", __FILE__);autoload :Version_6_1, File.expand_path("../driver/version_6_1", __FILE__);g' $$plugin
 		sudo sed -i 's;"4.0" => Version_4_0,;"6.1" => Version_6_1,;g' $$meta
-		sudo cp $(LIB_DIR)/fix/version_6_1.rb /opt/vagrant/embedded/gems/2.2.6/gems/vagrant-2.2.6/plugins/providers/virtualbox/driver
+		sudo cp $(LIB_DIR)/macos/version_6_1.rb /opt/vagrant/embedded/gems/2.2.6/gems/vagrant-2.2.6/plugins/providers/virtualbox/driver
 	fi
 
 # ==============================================================================
 
 .SILENT: \
-	dev-check \
-	dev-config \
-	dev-info \
-	dev-install-additional \
-	dev-install-corporate \
-	dev-install-essential \
-	dev-prepare \
-	dev-setup \
-	dev-update
+	macos-check \
+	macos-config \
+	macos-info \
+	macos-install-additional \
+	macos-install-corporate \
+	macos-install-essential \
+	macos-prepare \
+	macos-setup \
+	macos-update

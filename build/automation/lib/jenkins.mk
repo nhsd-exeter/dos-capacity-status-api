@@ -1,10 +1,8 @@
-JENKINS_JOB_NAME := $(shell echo "$(JOB_NAME)" | sed "s/[^a-zA-Z0-9]/-/g" | sed 's/--*/-/g')
+JENKINS_JOB_NAME = $(shell echo "$(JOB_NAME)" | sed "s/[^a-zA-Z0-9]/-/g" | sed 's/--*/-/g')
 JENKINS_WORKSPACE_BUCKET_NAME = $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME)-jenkins-workspace
 JENKINS_WORKSPACE_BUCKET_URI = $(JENKINS_WORKSPACE_BUCKET_NAME)/$(or $(JENKINS_JOB_NAME), local)/$(BUILD_BRANCH)
 
 jenkins-upload-workspace: ### Upload the project workspace to a storage - optional: ARCHIVE=true
-	eval "$$(make aws-assume-role-export-variables)"
-	make aws-session-fail-if-invalid
 	make _jenkins-create-workspace-storage
 	if [[ "$(ARCHIVE)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then
 		make _jenkins-upload-workspace-archived

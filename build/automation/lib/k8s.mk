@@ -1,8 +1,8 @@
 K8S_APP_NAMESPACE = $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(PROFILE)
-K8S_DIR := $(or $(K8S_DIR), deployment/stacks)
-K8S_JOB_NAMESPACE = $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-job-$(PROFILE)
+K8S_DIR = $(PROJECT_DIR)/deployment/stacks
+K8S_JOB_NAMESPACE = $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(PROFILE)-job
 K8S_KUBECONFIG_FILE = $(or $(TEXAS_K8S_KUBECONFIG_FILE), kubeconfig-lk8s-$(PROFILE)/cluster_kubeconfig)
-K8S_TTL_LENGTH := $(or $(K8S_TTL_LENGTH), 2 days)
+K8S_TTL_LENGTH = $(or $(TEXAS_K8S_TTL_LENGTH), 2 days)
 
 # ==============================================================================
 
@@ -35,16 +35,6 @@ k8s-undeploy-job: ### Remove Kubernetes resources from job namespace
 	fi
 
 k8s-replace-variables: ### Replace variables in base and overlay of a stack - mandatory: STACK=[name],PROFILE=[name]
-	function replace_variables {
-		file=$$1
-		for str in $$(cat $$file | grep -Eo "[A-Za-z0-9_]*_TO_REPLACE" | sort | uniq); do
-			key=$$(cut -d "=" -f1 <<<"$$str" | sed "s/_TO_REPLACE//g")
-			value=$$(echo $$(eval echo "\$$$$key"))
-			[ -z "$$value" ] && echo "WARNING: Variable $$key has no value" || sed -i \
-				"s;$${key}_TO_REPLACE;$${value//&/\\&};g" \
-				$$file ||:
-		done
-	}
 	rsync -rav \
 		--include=*.yaml \
 		$(K8S_DIR)/$(STACK)/base/template/* \
@@ -61,7 +51,7 @@ k8s-replace-variables: ### Replace variables in base and overlay of a stack - ma
 	)
 	export K8S_TTL=$$(make k8s-get-namespace-ttl)
 	for file in $${files[@]}; do
-		replace_variables $$file
+		make file-replace-variables FILE=$$file
 	done
 
 k8s-get-namespace-ttl: ### Get the length of time for the namespace to live
