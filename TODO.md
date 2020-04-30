@@ -17,7 +17,6 @@
 ## Other tasks
 
 - Security
-  - Create a new DB user in the DoS database only to be used by the API application to connect
   - API throttling (CSAPI-44)
 - Application
   - Let's revisit the domain model and consider again the naming of `serviceUid` (just `id`), `serviceName` (just `name`?), `capacityStatus` (just `status`?)
@@ -53,3 +52,4 @@
   - Configure Slack
 - Development
   - Externalise `flake8` and `black` configuration
+  - Consider renaming our development DoS DB to pathwaysdos to match the real version

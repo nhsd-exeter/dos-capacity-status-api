@@ -16,8 +16,8 @@ API_LOG_LEVEL = DEBUG
 DOS_DB_HOST = db-dos
 DOS_DB_NAME = postgres
 DOS_DB_PORT = 5432
-DOS_DB_USERNAME = uec_dos_api_cs_role
-DOS_DB_PASSWORD = uec_dos_api_cs_role_db_password
+DOS_DB_USERNAME = capacity_status_api
+DOS_DB_PASSWORD = capacity_status_api
 
 APP_ADMIN_PASSWORD = admin
 
