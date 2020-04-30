@@ -51,7 +51,7 @@ resource "aws_db_instance" "db_instance" {
 }
 
 resource "aws_db_parameter_group" "parameter_group" {
-  name   = "${var.service_prefix}-pg"
+  name   = "${var.service_prefix}-${var.cloud_env_type}-pg"
   family = "postgres11"
 
   parameter {
