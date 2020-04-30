@@ -13,7 +13,7 @@ SET standard_conforming_strings = on;
 -- Roles
 --
 CREATE ROLE uec_dos_api_cs_role;
-ALTER ROLE uec_dos_api_cs_role WITH NOSUPERUSER INHERIT NOCREATEROLE NOCREATEDB LOGIN NOREPLICATION NOBYPASSRLS PASSWORD 'uec_dos_api_cs_role';
+ALTER ROLE uec_dos_api_cs_role WITH NOSUPERUSER INHERIT NOCREATEROLE NOCREATEDB LOGIN NOREPLICATION NOBYPASSRLS PASSWORD 'uec_dos_api_cs_role_db_password';
 COMMENT ON ROLE uec_dos_api_cs_role IS 'Accessor role to the DoS DB for the DoS Capacity Status API.';
 
 -- User Configurations

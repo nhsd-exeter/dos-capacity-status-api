@@ -15,8 +15,8 @@ services:
       DB_HOST: db-dos
       DB_PORT: 5432
       DB_NAME: postgres
-      DB_USERNAME: uec_dos_api_cs_role
-      DB_PASSWORD: postgres
+      DOS_DB_USERNAME: uec_dos_api_cs_role
+      DOS_DB_PASSWORD: uec_dos_api_cs_role_db_password
       APP_ADMIN_PASSWORD: admin
       DJANGO_DEBUG: "True"
       HTTP_PROTOCOL: https
