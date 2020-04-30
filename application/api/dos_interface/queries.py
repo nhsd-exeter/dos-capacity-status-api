@@ -19,7 +19,14 @@ can_user_edit_service_sql = """SELECT EXISTS(SELECT 1 FROM users u
     );"""
 
 get_service_info_sql = """
-    SELECT
+    WITH RECURSIVE service_ancestry AS (
+            SELECT s.id, s.parentid, 0 depth FROM services s
+            WHERE s.uid = %s
+            UNION
+            SELECT s.id, s.parentid, d.depth+1 FROM services s
+            JOIN service_ancestry d on d.parentid = s.id
+        )
+    SELECT sa.depth,
         s.id,
         s.uid,
         s.name,
@@ -29,19 +36,11 @@ get_service_info_sql = """
         sc.modifieddate,
         sc.resetdatetime,
         cs.color
-    FROM services s
+    FROM service_ancestry sa
+    JOIN services s ON s.id = sa.id
     JOIN servicecapacities sc ON sc.serviceid = s.id
     JOIN capacitystatuses cs ON cs.capacitystatusid = sc.capacitystatusid
-    WHERE s.id IN (
-    WITH RECURSIVE service_ancestry AS (
-            SELECT s.id, s.parentid FROM services s
-            WHERE s.uid = %s
-            UNION
-            SELECT s.id, s.parentid FROM services s
-            JOIN service_ancestry d on d.parentid = s.id
-        )
-    SELECT id FROM service_ancestry
-);"""
+    ORDER BY sa.depth ASC;"""
 
 
 def can_user_edit_service(dos_user_id, service_uid):

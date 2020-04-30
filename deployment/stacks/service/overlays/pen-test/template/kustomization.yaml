@@ -1,0 +1,22 @@
+bases:
+  - ../../base
+
+patchesStrategicMerge:
+  - uec-dos-api-cs-proxy-ingress-customisation.yaml
+
+namespace: K8S_APP_NAMESPACE_TO_REPLACE
+
+configMapGenerator:
+  - name: uec-dos-api-cs-configmap
+    behavior: merge
+    literals:
+      - API_DB_HOST=API_DB_HOST_TO_REPLACE
+      - DOS_DB_HOST=DOS_DB_HOST_TO_REPLACE
+      - DJANGO_SECRET_KEY=DJANGO_SECRET_KEY_TO_REPLACE
+      - DJANGO_DEBUG=DJANGO_DEBUG_TO_REPLACE
+      - RESET_STATUS_IN_DEFAULT_MINS=SERVICE_RESET_STATUS_IN_DEFAULT_MINS_TO_REPLACE
+      - RESET_STATUS_IN_MINIMUM_MINS=SERVICE_RESET_STATUS_IN_MINIMUM_MINS_TO_REPLACE
+      - RESET_STATUS_IN_MAX_MINS=SERVICE_RESET_STATUS_IN_MAX_MINS_TO_REPLACE
+
+commonLabels:
+  env: dev

@@ -16,8 +16,8 @@ project-test: # Test project
 
 project-push-images: # Push Docker images to the ECR
 	make docker-login
-	make docker-push NAME=api VERSION=0.0.1
-	make docker-push NAME=proxy VERSION=0.0.1
+	make docker-push NAME=api VERSION=0.1.0
+	make docker-push NAME=proxy VERSION=0.1.0
 
 project-deploy: # Deploy to Kubernetes cluster - mandatory: PROFILE
 	[ local == $(PROFILE) ] && exit 1
@@ -52,7 +52,7 @@ api-build:
 		$(PROJECT_DIR)/certificate/* \
 		$(DOCKER_DIR)/api/assets/certificate
 	cd $(PROJECT_DIR)
-	make docker-image NAME=api VERSION=0.0.1
+	make docker-image NAME=api VERSION=0.1.0
 
 api-clean:
 	make docker-image-clean NAME=api
@@ -62,7 +62,7 @@ api-clean:
 		$(PROJECT_DIR)/application/static
 
 db-build:
-	make docker-image NAME=postgres VERSION=0.0.1 NAME_AS=db
+	make docker-image NAME=postgres VERSION=0.1.0 NAME_AS=db
 
 db-clean:
 	make docker-image-clean NAME=postgres
@@ -74,7 +74,7 @@ proxy-build:
 	cp -rf \
 		$(PROJECT_DIR)/application/static \
 		$(DOCKER_DIR)/proxy/assets/application
-	make docker-image NAME=proxy VERSION=0.0.1
+	make docker-image NAME=proxy VERSION=0.1.0
 
 proxy-clean:
 	make docker-image-clean NAME=proxy
