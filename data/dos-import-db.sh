@@ -19,3 +19,4 @@ psql "postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME" -f data/a
 psql "postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME" -f data/aws-rds-sql/07-create_test_user.sql
 psql "postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME" -f data/aws-rds-sql/08-create_inactive_test_user.sql
 psql "postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME" -f data/aws-rds-sql/09-assign_inactive_service_to_test_user.sql
+psql "postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME" -f data/aws-rds-sql/10-api-dos-db-role.sql

@@ -16,6 +16,16 @@ http {
                 ALLOWED_HOSTS_TO_REPLACE
     }
 
+    map $time_iso8601 $time_iso8601_p1 {
+      ~([^+]+) $1;
+    }
+    map $time_iso8601 $time_iso8601_p2 {
+      ~\+([0-9:]+)$ $1;
+    }
+    map $msec $millisec {
+      ~\.([0-9]+)$ $1;
+    }
+
     server {
         listen 443 ssl;
         server_name localhost;
@@ -50,7 +60,7 @@ http {
             proxy_set_header   X-Client-IP $http_x_forwarded_for;
             proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header   X-Forwarded-Host $server_name;
-            proxy_set_header   X-Request-Received $time_local;
+            proxy_set_header   X-Request-Received $time_iso8601_p1.$millisec+$time_iso8601_p2;
         }
         location /health {
             return 200 'healthcheck success from proxy server';

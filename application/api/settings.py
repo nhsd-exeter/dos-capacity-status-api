@@ -108,8 +108,8 @@ DATABASES = {
         "HOST": os.getenv("DOS_DB_HOST", "db-dos"),
         "PORT": os.getenv("DOS_DB_PORT", "5432"),
         "NAME": os.getenv("DOS_DB_NAME", "postgres"),
-        "USER": os.getenv("DOS_DB_USERNAME", "postgres"),
-        "PASSWORD": os.getenv("DOS_DB_PASSWORD", "postgres"),
+        "USER": os.getenv("DOS_DB_USERNAME", "capacity_status_api"),
+        "PASSWORD": os.getenv("DOS_DB_PASSWORD", "capacity_status_api"),
     },
 }
 

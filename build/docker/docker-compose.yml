@@ -15,8 +15,8 @@ services:
       DB_HOST: db-dos
       DB_PORT: 5432
       DB_NAME: postgres
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
+      DOS_DB_USERNAME: capacity_status_api
+      DOS_DB_PASSWORD: capacity_status_api
       APP_ADMIN_PASSWORD: admin
       DJANGO_DEBUG: "True"
       HTTP_PROTOCOL: https
