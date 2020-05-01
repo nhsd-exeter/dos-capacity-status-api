@@ -34,6 +34,10 @@ ssl-generate-certificate: ### Generate self-signed certificate - mandatory: DIR=
 		-out $(DIR)/$(NAME).p12
 	openssl x509 -text < $(DIR)/$(NAME).crt
 
+ssl-trust-certificate-project: ### Trust self-signed certificate for the project - optional: FILE=[path to .pem file]
+	make ssl-trust-certificate \
+		FILE=$(CERTIFICATE_DIR)/certificate.pem
+
 ssl-trust-certificate: ### Trust self-signed certificate - mandatory: FILE=[path to .pem file]
 	sudo security add-trusted-cert -d \
 		-r trustRoot \
