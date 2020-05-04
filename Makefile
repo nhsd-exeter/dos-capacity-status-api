@@ -6,7 +6,6 @@ include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 project-build: project-config project-stop # Build project
 	make \
 		api-build \
-		db-build \
 		proxy-build
 
 project-test: # Test project
@@ -32,7 +31,6 @@ project-deploy: # Deploy to Kubernetes cluster - mandatory: PROFILE
 project-clean: # Clean up project
 	make \
 		api-clean \
-		db-clean \
 		proxy-clean
 	rm -rfv $(HOME)/.python/pip
 
@@ -49,7 +47,7 @@ api-build:
 		manage.py \
 		requirements.txt
 	cp -f \
-		$(PROJECT_DIR)/certificate/* \
+		$(CERTIFICATE_DIR)/certificate.* \
 		$(DOCKER_DIR)/api/assets/certificate
 	cd $(PROJECT_DIR)
 	make docker-image NAME=api VERSION=0.0.1
@@ -61,15 +59,9 @@ api-clean:
 		$(DOCKER_DIR)/api/assets/certificate/certificate.* \
 		$(PROJECT_DIR)/application/static
 
-db-build:
-	make docker-image NAME=postgres VERSION=0.0.1 NAME_AS=db
-
-db-clean:
-	make docker-image-clean NAME=postgres
-
 proxy-build:
 	cp -f \
-		$(PROJECT_DIR)/certificate/* \
+		$(CERTIFICATE_DIR)/certificate.* \
 		$(DOCKER_DIR)/proxy/assets/certificate
 	cp -rf \
 		$(PROJECT_DIR)/application/static \
@@ -126,15 +118,9 @@ api-start:
 project-config:
 	make docker-config
 
-project-generate-development-certificate:
-	make ssl-generate-certificate \
-		DIR=$(PROJECT_DIR)/certificate \
-		NAME=certificate \
-		DOMAINS='localhost,DNS:*.k8s-nonprod.texasplatform.uk,DNS:proxy:443'
+project-generate-development-certificate: ssl-generate-certificate-project
 
-project-trust-certificate:
-	make ssl-trust-certificate \
-		FILE=$(PROJECT_DIR)/certificate/certificate.pem
+project-trust-certificate: ssl-trust-certificate-project
 
 project-create-ecr:
 	make docker-create-repository NAME=api
@@ -148,9 +134,6 @@ dev-setup:
 dev-clean:
 	make python-virtualenv-clean
 	rm -rf $(APPLICATION_DIR)/static
-
-dev-db-build:
-	make db-clean db-build
 
 dev-db-start:
 	make docker-compose-start-single-service NAME=db-dos

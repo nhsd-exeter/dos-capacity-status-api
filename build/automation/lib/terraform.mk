@@ -1,5 +1,5 @@
-TERRAFORM_DIR := $(or $(TERRAFORM_DIR), infrastructure/stacks)
-TERRAFORM_STATE_KEY = $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME)
+TERRAFORM_DIR = $(PROJECT_DIR)/infrastructure/stacks
+TERRAFORM_STATE_KEY = $(PROJECT_GROUP)-$(PROJECT_NAME)/$(PROFILE)
 TERRAFORM_STATE_LOCK = $(or $(TEXAS_TERRAFORM_STATE_LOCK), terraform-service-state-lock-$(PROFILE))
 TERRAFORM_STATE_STORE = $(or $(TEXAS_TERRAFORM_STATE_STORE), terraform-service-state-store-$(PROFILE))
 
@@ -71,7 +71,7 @@ terraform-export-variables-from-shell: ### Convert environment variables as TF_V
 	fi
 
 terraform-export-variables-from-json: ### Convert JSON to Terraform input exported as TF_VAR_[name] variables - mandatory: JSON='{"key":"value"}'|JSON="$$(echo '$(JSON)')"; returns: [variables export]
-	for str in $$(echo '$(JSON)' | make -s docker-run-tools CMD="jq -rf $(JQ_PROGS_DIR_REL)/json-to-env-vars.jq"); do
+	for str in $$(echo '$(JSON)' | make -s docker-run-tools CMD="jq -rf $(JSON_DIR_REL)/json-to-env-vars.jq"); do
 		key=$$(cut -d "=" -f1 <<<"$$str" | tr '[:upper:]' '[:lower:]')
 		value=$$(cut -d "=" -f2- <<<"$$str")
 		echo "export TF_VAR_$${key}=$${value}"
@@ -116,14 +116,14 @@ terraform-delete-state: ### Delete the Terraform state - mandatory: STACKS=[comm
 _terraform-delete-state-store: ### Delete Terraform state store - mandatory: STACK=[name]; optional: PROFILE=[name]
 	# TODO: Use Docker tools image to run the AWS CLI command
 	aws s3 rm \
-		s3://$(TERRAFORM_STATE_STORE)/$(TERRAFORM_STATE_KEY)-$(STACK)-$(PROFILE) \
+		s3://$(TERRAFORM_STATE_STORE)/$(TERRAFORM_STATE_KEY)/$(STACK) \
 		--recursive
 
 _terraform-delete-state-lock: ### Delete Terraform state lock - mandatory: STACK=[name]; optional: PROFILE=[name]
 	# TODO: Use Docker tools image to run the AWS CLI command
 	aws dynamodb delete-item \
 		--table-name $(TERRAFORM_STATE_LOCK) \
-		--key '{"LockID": {"S": "$(TERRAFORM_STATE_STORE)/$(TERRAFORM_STATE_KEY)-$(STACK)-$(PROFILE)/terraform.state-md5"}}'
+		--key '{"LockID": {"S": "$(TERRAFORM_STATE_STORE)/$(TERRAFORM_STATE_KEY)/$(STACK)/terraform.state-md5"}}'
 
 terraform-clean: ### Clean Terraform files
 	find $(TERRAFORM_DIR) -type d -name '.terraform' -print0 | xargs -0 rm -rfv

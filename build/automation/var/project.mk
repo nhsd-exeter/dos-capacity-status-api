@@ -1,10 +1,11 @@
-PROJECT_GROUP := uec/dos-api
-PROJECT_GROUP_SHORT := uec-dos-api
-PROJECT_NAME := capacity-status
-PROJECT_NAME_SHORT := cs
+PROGRAMME = uec
+PROJECT_GROUP = uec/dos-api
+PROJECT_GROUP_SHORT = uec-dos-api
+PROJECT_NAME = capacity-status
+PROJECT_NAME_SHORT = cs
 
-TEXAS_SERVICE_TAG := $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)
-TEXAS_ROLE_PREFIX := UECCS
+TEXAS_ROLE_PREFIX = UECAPICS
+TEXAS_SERVICE_TAG = $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)
 
 # ==============================================================================
 # Business rules

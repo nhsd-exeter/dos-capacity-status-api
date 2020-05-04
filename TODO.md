@@ -3,9 +3,6 @@
 ## Priority list
 
 - Application
-  - Protect proxy `/admin` endpoint (CSAPI-62)
-  - Add logging in a format that can be picked up by existing DoS Splunk (CSAPI-7)
-  - Increase the max reset status period in mins to 5 hours (CSAPI-63)
   - PUT vs. PATCH
 - Documentation
   - Generate API Documentation automatically (CSAPI-9)
