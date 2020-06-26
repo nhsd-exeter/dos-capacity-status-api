@@ -3,22 +3,35 @@ include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 
 # ==============================================================================
 
-project-build: project-config project-stop # Build project
+build: project-config # Build project
 	make \
 		api-build \
 		proxy-build
 
-project-test: # Test project
+restart: stop start # Restart project
+
+start: project-start # Start project
+
+stop: project-stop # Stop project
+
+log: project-log # Show project logs
+
+migrate:
+	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+		DIR=application \
+		CMD="python manage.py migrate"
+
+test: # Test project
 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
 		DIR=application \
 		CMD="python manage.py test api"
 
-project-push-images: # Push Docker images to the ECR
+push: # Push project artefacts to the registry
 	make docker-login
 	make docker-push NAME=api VERSION=0.0.1
 	make docker-push NAME=proxy VERSION=0.0.1
 
-project-deploy: # Deploy to Kubernetes cluster - mandatory: PROFILE
+deploy: # Deploy project - mandatory: PROFILE=[name]
 	[ local == $(PROFILE) ] && exit 1
 	eval "$$(make aws-assume-role-export-variables)"
 	make k8s-kubeconfig-get
@@ -28,7 +41,7 @@ project-deploy: # Deploy to Kubernetes cluster - mandatory: PROFILE
 	# TODO: What's the URL?
 	echo "The URL is $(UI_URL)"
 
-project-clean: # Clean up project
+clean: # Clean up project
 	make \
 		api-clean \
 		proxy-clean
@@ -47,7 +60,7 @@ api-build:
 		manage.py \
 		requirements.txt
 	cp -f \
-		$(CERTIFICATE_DIR)/certificate.* \
+		$(SSL_CERTIFICATE_DIR)/certificate.* \
 		$(DOCKER_DIR)/api/assets/certificate
 	cd $(PROJECT_DIR)
 	make docker-image NAME=api VERSION=0.0.1
@@ -61,7 +74,7 @@ api-clean:
 
 proxy-build:
 	cp -f \
-		$(CERTIFICATE_DIR)/certificate.* \
+		$(SSL_CERTIFICATE_DIR)/certificate.* \
 		$(DOCKER_DIR)/proxy/assets/certificate
 	cp -rf \
 		$(PROJECT_DIR)/application/static \
@@ -75,25 +88,6 @@ proxy-clean:
 		$(DOCKER_DIR)/proxy/assets/certificate/certificate.*
 
 # ==============================================================================
-
-project-migrate:
-	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
-		DIR=application \
-		CMD="python manage.py migrate"
-
-project-restart:
-	make \
-		project-stop \
-		project-start
-
-project-start:
-	make docker-compose-start
-
-project-stop:
-	make docker-compose-stop
-
-project-log:
-	make docker-compose-log
 
 project-populate-secret-variables:
 	make secret-fetch-and-export-variables NAME=uec-dos-api-capacity-status-$(PROFILE)
@@ -115,14 +109,11 @@ api-start:
 
 # ==============================================================================
 
-project-config:
-	make docker-config
-
 project-generate-development-certificate: ssl-generate-certificate-project
 
 project-trust-certificate: ssl-trust-certificate-project
 
-project-create-ecr:
+create-artefact-repository: ## Create Docker repositories to store artefacts
 	make docker-create-repository NAME=api
 	make docker-create-repository NAME=proxy
 
