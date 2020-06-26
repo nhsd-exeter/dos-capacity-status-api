@@ -45,9 +45,7 @@ def _get_request_execution_time(request):
     return (datetime.now(timezone.utc) - request_received).total_seconds()
 
 
-def log_reporting_info(
-    service_uid, request, action="saveCapacityStatus", status="success"
-):
+def log_reporting_info(service_uid, request, action="saveCapacityStatus", status="success"):
 
     report_data = {"ORG_ID": "org_id=" + str(service_uid)}
     report_data["REQUEST_ID"] = request.META["HTTP_X_REQUEST_ID"]

@@ -49,7 +49,8 @@ response_entities_desc = {
         of time in minutes as defined by the resetStatusIn value given in the request payload. If this value is not provided, the reset time will default to \
         %d hours from the time the capacity status is updated. A capacity status change to Red or Amber for a service can be set to persist for a maximum period of %d hours \
         per request before automatically being reset back to Green. This means that if a service needs to be Red or Amber for over %d hours, multiple \
-        requests through this API for that service will be required. </li>" % (default_reset_status_in/60, max_reset_status_in/60, max_reset_status_in/60),
+        requests through this API for that service will be required. </li>"
+    % (default_reset_status_in / 60, max_reset_status_in / 60, max_reset_status_in / 60),
     "notes": "<li><B>Notes</B> - a free text field providing the opportunity for any additional notes to be logged regarding the capacity status change. \
         Notes given in the request payload will be appended to the text: Capacity status set by the Capacity Service API -. </li>",
     "last_updated": "<li><B>Last updated date/time</B> - a timestamp of when the service was updated by the API.</li>",
@@ -110,7 +111,8 @@ service_uid_path_param = openapi.Parameter(
     type=openapi.TYPE_STRING,
 )
 
-validation_error_response = 'Bad Request - when the request fails one or more validation rules specified by the API. \
+validation_error_response = (
+    'Bad Request - when the request fails one or more validation rules specified by the API. \
                 Validation errors are grouped together by request payload field. An example validation error \
                 response for an invalid capacity status and reset status in value would therefore look like: </BR>\
 <pre>{ </BR>\
@@ -120,7 +122,9 @@ validation_error_response = 'Bad Request - when the request fails one or more va
     "resetStatusIn": [</BR>\
         "VAL-0004 - ResetStatusIn outside of limits - the reset time given is outside the minimum limit (%d minutes) defined by the CapacityStatusRequestPayload model."</BR>\
     ]</BR>\
-}</pre>' % (min_reset_status_in)
+}</pre>'
+    % (min_reset_status_in)
+)
 
 authentication_error_response = 'Unauthorized - when a user is either no longer active in DoS or is not authenticated to use this API. \
                 An authentication error response would look like: </BR>\
