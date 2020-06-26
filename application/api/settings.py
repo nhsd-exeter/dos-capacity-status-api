@@ -23,11 +23,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "=tapo65h_g^cf4sxjawp-tl&z@1@5*&)p5gn2kax!^udtvs27c")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DJANGO_DEBUG", False)
+DEBUG = False
 
 ALLOWED_HOSTS = [
     ".amazonaws.com",
     "localhost",
+    "uec-dos-api-cs-demo-uec-dos-api-cs-proxy-ingress.k8s-prod.texasplatform.uk",
 ]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

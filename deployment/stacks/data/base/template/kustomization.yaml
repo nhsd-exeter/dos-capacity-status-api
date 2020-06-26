@@ -1,0 +1,19 @@
+namespace: K8S_NAMESPACE_TO_REPLACE
+
+commonLabels:
+  env: demo
+
+resources:
+  - namespace.yaml
+  - data-job.yaml
+  - network-policy/uec-dos-api-cs-default-deny-ingress.yaml
+
+configMapGenerator:
+  - name: data-configmap
+    literals:
+      - PROFILE=PROFILE_TO_REPLACE
+      - DB_HOST=API_DB_HOST_TO_REPLACE
+      - DB_PORT=API_DB_PORT_TO_REPLACE
+      - DB_NAME=postgres
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=API_DB_PASSWORD_TO_REPLACE
