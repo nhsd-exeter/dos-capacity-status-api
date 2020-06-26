@@ -1,0 +1,36 @@
+user:
+  postgres:
+    exists: true
+    uid: 999
+    gid: 999
+    home: /var/lib/postgresql
+    shell: /bin/false
+
+package:
+  ca-certificates:
+    installed: true
+  curl:
+    installed: true
+  gnupg:
+    installed: true
+  wget:
+    installed: true
+
+file:
+  /usr/local/bin/gosu:
+    exists: true
+    mode: "0755"
+
+process:
+  postgres:
+    running: true
+
+port:
+  tcp:5432:
+    listening: true
+    ip:
+      - 0.0.0.0
+
+command:
+  'psql postgres://test:test@localhost:5432/test -c "select version();"':
+    exit-status: 0

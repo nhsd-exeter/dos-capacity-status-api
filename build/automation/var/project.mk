@@ -4,8 +4,9 @@ PROJECT_GROUP_SHORT = uec-dos-api
 PROJECT_NAME = capacity-status
 PROJECT_NAME_SHORT = cs
 
-TEXAS_ROLE_PREFIX = UECAPICS
-TEXAS_SERVICE_TAG = $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)
+ROLE_PREFIX = UECAPICS
+SERVICE_TAG = $(PROJECT_GROUP_SHORT)
+PROJECT_TAG = $(PROJECT_NAME)
 
 # ==============================================================================
 # Business rules

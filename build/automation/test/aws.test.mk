@@ -1,53 +1,58 @@
-TEST_AWS_SECRET_MANAGER_JSON := $(TMP_DIR)/secret.json
-TEST_AWS_BUCKET_FILE_NAME := aws-bucket-file
-TEST_AWS_BUCKET_FILE_PATH := $(shell echo $(abspath $(TMP_DIR)/$(TEST_AWS_BUCKET_FILE_NAME)) | sed "s;$(PROJECT_DIR);;g")
+TEST_AWS_SECRET_MANAGER_JSON = $(TMP_DIR)/secret.json
+TEST_AWS_BUCKET_FILE_NAME = aws-bucket-file
+TEST_AWS_BUCKET_FILE_PATH = $(shell echo $(abspath $(TMP_DIR)/$(TEST_AWS_BUCKET_FILE_NAME)) | sed "s;$(PROJECT_DIR);;g")
 
-test-aws: \
-	test-aws-setup \
-	test-aws-session-fail-if-invalid \
-	test-aws-session-fail-if-invalid-error \
-	test-aws-assume-role-export-variables \
-	test-aws-account-check-id \
-	test-aws-account-get-id \
-	test-aws-secret-create-value \
-	test-aws-secret-create-object \
-	test-aws-secret-put-get-value \
-	test-aws-secret-put-get-object \
-	test-aws-secret-put-get-and-format \
-	test-aws-secret-exists-false \
-	test-aws-secret-exists-true \
-	test-aws-iam-policy-create \
-	test-aws-iam-policy-exists-true \
-	test-aws-iam-policy-exists-false \
-	test-aws-iam-role-create \
-	test-aws-iam-role-exists-true \
-	test-aws-iam-role-exists-false \
-	test-aws-iam-role-attach-policy \
-	test-aws-s3-exists \
-	test-aws-s3-create \
-	test-aws-s3-upload-download \
-	test-aws-rds-create-snapshot \
-	test-aws-rds-get-snapshot-status \
-	test-aws-rds-wait-for-snapshot \
-	test-aws-cognito-get-userpool-id \
-	test-aws-cognito-get-client-id \
-	test-aws-cognito-get-client-secret \
-	test-aws-ecr-get-login-password \
-	test-aws-ses-verify-email-identity \
-	test-aws-teardown
+test-aws:
+	make test-aws-setup
+	tests=( \
+		test-aws-session-fail-if-invalid \
+		test-aws-session-fail-if-invalid-error \
+		test-aws-assume-role-export-variables \
+		test-aws-account-check-id \
+		test-aws-account-get-id \
+		test-aws-secret-create-value \
+		test-aws-secret-create-object \
+		test-aws-secret-put-get-value \
+		test-aws-secret-put-get-object \
+		test-aws-secret-put-get-and-format \
+		test-aws-secret-exists-false \
+		test-aws-secret-exists-true \
+		test-aws-iam-policy-create \
+		test-aws-iam-policy-exists-true \
+		test-aws-iam-policy-exists-false \
+		test-aws-iam-role-create \
+		test-aws-iam-role-exists-true \
+		test-aws-iam-role-exists-false \
+		test-aws-iam-role-attach-policy \
+		test-aws-s3-exists \
+		test-aws-s3-create \
+		test-aws-s3-upload-download \
+		test-aws-rds-describe-instance \
+		test-aws-rds-create-snapshot \
+		test-aws-rds-get-snapshot-status \
+		test-aws-rds-wait-for-snapshot \
+		test-aws-cognito-get-userpool-id \
+		test-aws-cognito-get-client-id \
+		test-aws-cognito-get-client-secret \
+		test-aws-ecr-get-login-password \
+		test-aws-ses-verify-email-identity \
+	)
+	for test in $${tests[*]}; do
+		mk_test_initialise $$test
+		make $$test
+	done
+	make test-aws-teardown
 
 test-aws-setup:
-	make docker-config
-	make docker-compose-start YML=$(TEST_DIR)/docker-compose.localstack.yml
-	sleep 5
+	make localstack-start
 	# Prerequisites
-	make docker-image NAME=tools
+	make docker-build NAME=tools FROM_CACHE=true
 
 test-aws-teardown:
-	rm -f $(TEST_AWS_SECRET_MANAGER_JSON)
-	rm -f $(TEST_AWS_BUCKET_FILE_PATH)*
-	make docker-compose-stop YML=$(TEST_DIR)/docker-compose.localstack.yml
-	rm -rf $(TMP_DIR)/localstack
+	make localstack-stop
+	rm -rf \
+		$(TEST_AWS_BUCKET_FILE_PATH)* \
+		$(TEST_AWS_SECRET_MANAGER_JSON)
 
 # ==============================================================================
 
@@ -59,7 +64,7 @@ test-aws-session-fail-if-invalid:
 	# act
 	make aws-session-fail-if-invalid && ret_code=0 || ret_code=1
 	# assert
-	mk_test $(@) 0 = $$ret_code
+	mk_test "0 = $$ret_code"
 
 test-aws-session-fail-if-invalid-error:
 	# arrange
@@ -69,27 +74,23 @@ test-aws-session-fail-if-invalid-error:
 	# act
 	make aws-session-fail-if-invalid && ret_code=0 || ret_code=1
 	# assert
-	mk_test $(@) 1 = $$ret_code
+	mk_test "1 = $$ret_code"
 
 test-aws-assume-role-export-variables:
-	# # act
-	# export=$$(make aws-assume-role-export-variables)
-	# # assert
-	# mk_test $(@) -n "$$export"
-	mk_test_skip $(@) ||:
+	mk_test_skip
 
 test-aws-account-check-id:
-	mk_test_skip $(@) ||:
+	mk_test_skip
 
 test-aws-account-get-id:
-	mk_test_skip $(@) ||:
+	mk_test_skip
 
 test-aws-secret-create-value:
 	# act
 	make aws-secret-create NAME=DB_PASSWORD VALUE=p45w0rd
 	secret="$$(make aws-secret-get NAME=DB_PASSWORD)"
 	# assert
-	mk_test $(@) "p45w0rd" = "$$secret"
+	mk_test "p45w0rd = $$secret"
 
 test-aws-secret-create-object:
 	# arrange
@@ -98,14 +99,14 @@ test-aws-secret-create-object:
 	make aws-secret-create NAME=service/deployment-$(@) VALUE=file://$(TEST_AWS_SECRET_MANAGER_JSON)
 	secret=$$(make aws-secret-get NAME=service/deployment-$(@))
 	# assert
-	mk_test $(@) '{"DB_USERNAME":"admin","DB_PASSWORD":"secret"}' = $$secret
+	mk_test "{\"DB_USERNAME\":\"admin\",\"DB_PASSWORD\":\"secret\"} = $$secret"
 
 test-aws-secret-put-get-value:
 	# act
 	make aws-secret-put NAME=DB_PASSWORD VALUE=p45w0rd
 	secret="$$(make aws-secret-get NAME=DB_PASSWORD)"
 	# assert
-	mk_test $(@) "p45w0rd" = "$$secret"
+	mk_test "p45w0rd = $$secret"
 
 test-aws-secret-put-get-object:
 	# arrange
@@ -114,7 +115,7 @@ test-aws-secret-put-get-object:
 	make aws-secret-put NAME=service/deployment-$(@) VALUE=file://$(TEST_AWS_SECRET_MANAGER_JSON)
 	secret=$$(make aws-secret-get NAME=service/deployment-$(@))
 	# assert
-	mk_test $(@) '{"DB_USERNAME":"admin","DB_PASSWORD":"secret"}' = $$secret
+	mk_test "{\"DB_USERNAME\":\"admin\",\"DB_PASSWORD\":\"secret\"} = $$secret"
 
 test-aws-secret-put-get-and-format:
 	# arrange
@@ -123,13 +124,13 @@ test-aws-secret-put-get-and-format:
 	make aws-secret-put NAME=service/deployment-$(@) VALUE=file://$(TEST_AWS_SECRET_MANAGER_JSON)
 	secret="$$(make aws-secret-get-and-format NAME=service/deployment-$(@))"
 	# assert
-	mk_test $(@) 4 -eq $$(echo "$$secret" | wc -l)
+	mk_test "1 -eq $$(echo $$secret | grep DB_USERNAME | wc -l)"
 
 test-aws-secret-exists-false:
 	# act
 	output="$$(make aws-secret-exists NAME=service/deployment-$(@))"
 	# assert
-	mk_test $(@) false = "$$output"
+	mk_test "false = $$output"
 
 test-aws-secret-exists-true:
 	# arrange
@@ -137,7 +138,7 @@ test-aws-secret-exists-true:
 	# act
 	output="$$(make aws-secret-exists NAME=service/deployment-$(@))"
 	# assert
-	mk_test $(@) true = "$$output"
+	mk_test "true = $$output"
 
 test-aws-iam-policy-create:
 	# act
@@ -147,7 +148,7 @@ test-aws-iam-policy-create:
 		FILE=build/automation/lib/aws/elasticsearch-s3-snapshot-policy-template.json \
 		BUCKET_NAME=test-bucket)
 	# assert
-	mk_test $(@) 1 -eq $$(echo "$$output" | grep -E '"PolicyName".*"$(@)-test-policy"' | wc -l)
+	mk_test "1 -eq $$(echo \"$$output\" | grep -E '\"PolicyName\".*\"$(@)-test-policy\"' | wc -l)"
 
 test-aws-iam-policy-exists-true:
 	# arrange
@@ -158,13 +159,13 @@ test-aws-iam-policy-exists-true:
 	# act
 	output=$$(make aws-iam-policy-exists NAME=$(@)-test-policy)
 	# assert
-	mk_test $(@) true = "$$output"
+	mk_test "true = $$output"
 
 test-aws-iam-policy-exists-false:
 	# act
 	output=$$(make aws-iam-policy-exists NAME=$(@)-test-policy-non-existent)
 	# assert
-	mk_test $(@) false = "$$output"
+	mk_test "false = $$output"
 
 test-aws-iam-role-create:
 	# act
@@ -173,7 +174,7 @@ test-aws-iam-role-create:
 		DESCRIPTION="This is a test" \
 		FILE=build/automation/lib/aws/elasticsearch-s3-snapshot-role.json)
 	# assert
-	mk_test $(@) 1 -eq $$(echo "$$output" | grep -E '"RoleName".*"$(@)-test-role"' | wc -l)
+	mk_test "1 -eq $$(echo \"$$output\" | grep -E '\"RoleName\".*\"$(@)-test-role\"' | wc -l)"
 
 test-aws-iam-role-exists-true:
 	# arrange
@@ -184,13 +185,13 @@ test-aws-iam-role-exists-true:
 	# act
 	output=$$(make aws-iam-role-exists NAME=$(@)-test-role)
 	# assert
-	mk_test $(@) true = "$$output"
+	mk_test "true = $$output"
 
 test-aws-iam-role-exists-false:
 	# act
 	output=$$(make aws-iam-role-exists NAME=$(@)-test-role-non-existent)
 	# assert
-	mk_test $(@) false = "$$output"
+	mk_test "false = $$output"
 
 test-aws-iam-role-attach-policy:
 	# arrange
@@ -208,20 +209,20 @@ test-aws-iam-role-attach-policy:
 		POLICY_NAME=$(@)-test-policy
 	code=$$?
 	# assert
-	mk_test $(@) 0 -eq $$code
+	mk_test "0 -eq $$code"
 
 test-aws-s3-exists:
 	# act
 	output=$$(make aws-s3-exists NAME=$(@)-bucket)
 	# assert
-	mk_test $(@) false = "$$output"
+	mk_test "false = $$output"
 
 test-aws-s3-create:
 	# act
 	make aws-s3-create NAME=$(@)-bucket
 	# assert
 	output=$$(make aws-s3-exists NAME=$(@)-bucket)
-	mk_test $(@) true = "$$output"
+	mk_test "true = $$output"
 
 test-aws-s3-upload-download:
 	# arrange
@@ -237,31 +238,34 @@ test-aws-s3-upload-download:
 	# assert
 	hash1=$$(md5sum $(TEST_AWS_BUCKET_FILE_PATH).upload | awk '{ print $$1 }')
 	hash2=$$(md5sum $(TEST_AWS_BUCKET_FILE_PATH).download | awk '{ print $$1 }')
-	mk_test $(@) "$$hash1" = "$$hash2"
+	mk_test "$$hash1 = $$hash2"
+
+test-aws-rds-describe-instance:
+	mk_test_skip
 
 test-aws-rds-create-snapshot:
-	mk_test_skip $(@) ||:
+	mk_test_skip
 
 test-aws-rds-get-snapshot-status:
-	mk_test_skip $(@) ||:
+	mk_test_skip
 
 test-aws-rds-wait-for-snapshot:
-	mk_test_skip $(@) ||:
+	mk_test_skip
 
 test-aws-cognito-get-userpool-id:
-	mk_test_skip $(@) ||:
+	mk_test_skip
 
 test-aws-cognito-get-client-id:
-	mk_test_skip $(@) ||:
+	mk_test_skip
 
 test-aws-cognito-get-client-secret:
-	mk_test_skip $(@) ||:
+	mk_test_skip
 
 test-aws-ecr-get-login-password:
-	mk_test_skip $(@) ||:
+	mk_test_skip
 
 test-aws-ses-verify-email-identity:
-	mk_test_skip $(@) ||:
+	mk_test_skip
 
 # ==============================================================================
 
