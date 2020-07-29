@@ -38,6 +38,10 @@ http {
             autoindex   on;
             root        /application;
         }
+        location ~ /static/admin {
+            autoindex   on;
+            root        /application;
+        }
         location ~ /admin {
 
             if ($allow_host = 0) {
