@@ -34,12 +34,12 @@
     brew install make
     export PATH=/usr/local/opt/make/libexec/gnubin:$PATH
     cd capacity-status-api
-    make dev-install-essential
+    make macos-install-essential
 
 #### Full setup
 
     cd capacity-status-api
-    make dev-setup
+    make macos-setup
 
 ### Recommendations
 
@@ -52,10 +52,10 @@
 
     cd dos-capacity-status-api
     make project-trust-certificate
-    make project-build
-    make project-start project-log # Press Ctrl-C to exit
+    make build
+    make start log # Press Ctrl-C to exit
     open https://localhost:8443/api/v0.0.1/capacity/apidoc/
-    make project-stop
+    make stop
 
 ### Dev Routine
 
