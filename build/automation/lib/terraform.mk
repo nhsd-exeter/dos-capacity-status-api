@@ -3,69 +3,77 @@ TERRAFORM_DIR_REL = $(shell echo $(TERRAFORM_DIR) | sed "s;$(PROJECT_DIR);;g")
 TERRAFORM_STATE_KEY = $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)/$(PROFILE)
 TERRAFORM_STATE_LOCK = $(or $(TEXAS_TERRAFORM_STATE_LOCK), terraform-service-state-lock-$(PROFILE))
 TERRAFORM_STATE_STORE = $(or $(TEXAS_TERRAFORM_STATE_STORE), terraform-service-state-store-$(PROFILE))
+TERRAFORM_VERSION = 0.12.27
 
 # ==============================================================================
 
-k8s-create-module-from-template: ### Create Terraform module from template - mamdatory: TEMPLATE=[module template name]
-	mkdir -p $(INFRASTRUCTURE_DIR)/modules
-	if [ ! -d $(INFRASTRUCTURE_DIR)/modules/$(TEMPLATE) ]; then
+terraform-create-module-from-template: ### Create Terraform module from template - mandatory: TEMPLATE=[module template name]
+	rm -rf $(INFRASTRUCTURE_DIR)/modules/$(TEMPLATE)
+	mkdir -p $(INFRASTRUCTURE_DIR_REL)/modules
+	if [ ! -d $(INFRASTRUCTURE_DIR_REL)/modules/$(TEMPLATE) ]; then
 		cp -rfv \
-			$(LIB_DIR)/terraform/template/modules/$(TEMPLATE) \
-			$(INFRASTRUCTURE_DIR)/modules
-		cp -fv $(LIB_DIR)/terraform/template/.gitignore $(INFRASTRUCTURE_DIR)
-		make -s file-replace-variables-in-dir DIR=$(INFRASTRUCTURE_DIR)/modules/$(TEMPLATE) SUFFIX=_TEMPLATE_TO_REPLACE
+			$(LIB_DIR_REL)/terraform/template/modules/$(TEMPLATE) \
+			$(INFRASTRUCTURE_DIR_REL)/modules
+		cp -fv $(LIB_DIR_REL)/terraform/template/.gitignore $(INFRASTRUCTURE_DIR_REL)
+		make -s file-replace-variables-in-dir DIR=$(INFRASTRUCTURE_DIR_REL)/modules/$(TEMPLATE) SUFFIX=_TEMPLATE_TO_REPLACE
 	fi
 
-k8s-create-stack-from-template: ### Create Terraform stack from template - mamdatory: NAME=[new stack name],TEMPLATE=[module template name]
-	mkdir -p $(INFRASTRUCTURE_DIR)/stacks
-	if [ ! -d $(INFRASTRUCTURE_DIR)/stacks/$(TEMPLATE) ]; then
+terraform-create-stack-from-template: ### Create Terraform stack from template - mandatory: STACK=[new stack name],TEMPLATE=[module template name]
+	rm -rf $(INFRASTRUCTURE_DIR)/stacks/$(STACK)
+	mkdir -p $(INFRASTRUCTURE_DIR_REL)/stacks
+	if [ ! -d $(INFRASTRUCTURE_DIR_REL)/stacks/$(TEMPLATE) ]; then
 		cp -rfv \
-			$(LIB_DIR)/terraform/template/stacks/$(TEMPLATE) \
-			$(INFRASTRUCTURE_DIR)/stacks/$(NAME)
-		cp -fv $(LIB_DIR)/terraform/template/.gitignore $(INFRASTRUCTURE_DIR)
-		make -s file-replace-variables-in-dir DIR=$(INFRASTRUCTURE_DIR)/stacks/$(NAME) SUFFIX=_TEMPLATE_TO_REPLACE
+			$(LIB_DIR_REL)/terraform/template/stacks/$(TEMPLATE) \
+			$(INFRASTRUCTURE_DIR_REL)/stacks/$(STACK)
+		cp -fv $(LIB_DIR_REL)/terraform/template/.gitignore $(INFRASTRUCTURE_DIR_REL)
+		make -s file-replace-variables-in-dir DIR=$(INFRASTRUCTURE_DIR_REL)/stacks/$(STACK) SUFFIX=_TEMPLATE_TO_REPLACE
 	fi
 
 # ==============================================================================
 
-terraform-apply-auto-approve: ### Set up infrastructure - mandatory: STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],INIT=false,OPTS=[Terraform options]
+terraform-apply-auto-approve: ### Set up infrastructure - mandatory: STACK|STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],INIT=false,OPTS=[Terraform options]
 	make terraform-apply \
-		STACKS="$(or $(STACKS), $(INFRASTRUCTURE_STACKS))" \
+		STACKS="$(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS)))" \
 		CMD="apply" \
 		OPTS="-auto-approve $(OPTS)"
 
-terraform-apply: ### Set up infrastructure - mandatory: STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],INIT=false,OPTS=[Terraform options]
+terraform-apply: ### Set up infrastructure - mandatory: STACK|STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],INIT=false,OPTS=[Terraform options]
 	make _terraform-stacks \
-		STACKS="$(or $(STACKS), $(INFRASTRUCTURE_STACKS))" \
+		STACKS="$(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS)))" \
 		CMD="apply $(OPTS)"
 
-terraform-destroy-auto-approve: ### Tear down infrastructure - mandatory: STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],INIT=false,OPTS=[Terraform options]
+terraform-destroy-auto-approve: ### Tear down infrastructure - mandatory: STACK|STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],INIT=false,OPTS=[Terraform options]
 	make terraform-destroy \
-		STACKS="$(or $(STACKS), $(INFRASTRUCTURE_STACKS))" \
+		STACKS="$(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS)))" \
 		CMD="destroy" \
 		OPTS="-auto-approve $(OPTS)"
 
-terraform-destroy: ### Tear down infrastructure - mandatory: STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],INIT=false,OPTS=[Terraform options]
+terraform-destroy: ### Tear down infrastructure - mandatory: STACK|STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],INIT=false,OPTS=[Terraform options]
 	make _terraform-stacks \
-		STACKS="$(or $(STACKS), $(INFRASTRUCTURE_STACKS))" \
+		STACKS="$(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS)))" \
 		CMD="destroy $(OPTS)"
 
-terraform-plan: ### Show plan - mandatory: STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],INIT=false,OPTS=[Terraform options]
+terraform-plan: ### Show plan - mandatory: STACK|STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],INIT=false,OPTS=[Terraform options]
 	make _terraform-stacks \
-		STACKS="$(or $(STACKS), $(INFRASTRUCTURE_STACKS))" \
+		STACKS="$(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS)))" \
 		CMD="plan $(OPTS)"
 
-terraform-show: ### Show state - mandatory: STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],INIT=false,OPTS=[Terraform options]
-	make _terraform-stacks \
-		STACKS="$(or $(STACKS), $(INFRASTRUCTURE_STACKS))" \
-		CMD="show"
+terraform-output: ### Extract output variables - mandatory: STACK|STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],INIT=false,OPTS=[Terraform options]
+	make -s _terraform-stacks \
+		STACKS="$(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS)))" \
+		CMD="output $(OPTS)"
 
-terraform-unlock: ### Remove state lock - mandatory: STACKS|INFRASTRUCTURE_STACKS=[comma-separated names],ID=[lock ID]; optional: PROFILE=[name],INIT=false,OPTS=-force
+terraform-show: ### Show state - mandatory: STACK|STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],INIT=false,OPTS=[Terraform options]
+	make -s _terraform-stacks \
+		STACKS="$(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS)))" \
+		CMD="show $(OPTS)"
+
+terraform-unlock: ### Remove state lock - mandatory: STACK|STACKS|INFRASTRUCTURE_STACKS=[comma-separated names],ID=[lock ID]; optional: PROFILE=[name],INIT=false,OPTS=-force
 	make _terraform-stacks \
-		STACKS="$(or $(STACKS), $(INFRASTRUCTURE_STACKS))" \
+		STACKS="$(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS)))" \
 		CMD="force-unlock $(ID) $(OPTS)"
 
-terraform-fmt: ### Format Terraform code - optional: DIR,OPTS=[Terraform options]
+terraform-fmt: docker-config ### Format Terraform code - optional: DIR,OPTS=[Terraform options]
 	make docker-run-terraform \
 		CMD="fmt -recursive $(OPTS)"
 
@@ -73,30 +81,30 @@ terraform-clean: ### Clean Terraform files
 	find $(TERRAFORM_DIR) -type d -name '.terraform' -print0 | xargs -0 rm -rfv
 	find $(TERRAFORM_DIR) -type f -name '*terraform.tfstate*' -print0 | xargs -0 rm -rfv
 
-terraform-delete-state: ### Delete the Terraform state - mandatory: STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name]
+terraform-delete-state: ### Delete the Terraform state - mandatory: STACK|STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name]
 	# set up
 	eval "$$(make aws-assume-role-export-variables)"
 	# delete state
-	for stack in $$(echo $(or $(STACKS), $(INFRASTRUCTURE_STACKS)) | tr "," "\n"); do
+	for stack in $$(echo $(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS))) | tr "," "\n"); do
 		make _terraform-delete-state-store STACK="$$stack"
 		make _terraform-delete-state-lock STACK="$$stack"
 	done
 
 # ==============================================================================
 
-terraform-export-variables: ### Get environment variables as TF_VAR_[name] variables - returns: [variables export]
+terraform-export-variables: ### Get environment variables as TF_VAR_[name] variables - return: [variables export]
 	make terraform-export-variables-from-shell PATTERN="^(AWS|TX|TEXAS)"
 	make terraform-export-variables-from-shell PATTERN="^(DB|DATABASE|APP|APPLICATION|UI|API|SERVER|HOST|URL)"
 	make terraform-export-variables-from-shell PATTERN="^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)"
 
-terraform-export-variables-from-secret: ### Get secret as TF_VAR_[name] variables - mandatory: NAME=[secret name]; returns: [variables export]
+terraform-export-variables-from-secret: ### Get secret as TF_VAR_[name] variables - mandatory: NAME=[secret name]; return: [variables export]
 	if [ -n "$(NAME)" ]; then
 		secret=$$(make secret-fetch NAME=$(NAME))
 		exports=$$(make terraform-export-variables-from-json JSON="$$secret")
 		echo "$$exports"
 	fi
 
-terraform-export-variables-from-shell: ### Convert environment variables as TF_VAR_[name] variables - mandatory: VARS=[comma-separated environment variable names]|PATTERN="^AWS_"; returns: [variables export]
+terraform-export-variables-from-shell: ### Convert environment variables as TF_VAR_[name] variables - mandatory: VARS=[comma-separated environment variable names]|PATTERN="^AWS_"; return: [variables export]
 	if [ -n "$(PATTERN)" ]; then
 		for str in $$(env | grep -iE "$(PATTERN)"); do
 			key=$$(cut -d "=" -f1 <<<"$$str" | tr '[:upper:]' '[:lower:]')
@@ -112,7 +120,7 @@ terraform-export-variables-from-shell: ### Convert environment variables as TF_V
 		done
 	fi
 
-terraform-export-variables-from-json: ### Convert JSON to Terraform input exported as TF_VAR_[name] variables - mandatory: JSON='{"key":"value"}'|JSON="$$(echo '$(JSON)')"; returns: [variables export]
+terraform-export-variables-from-json: ### Convert JSON to Terraform input exported as TF_VAR_[name] variables - mandatory: JSON='{"key":"value"}'|JSON="$$(echo '$(JSON)')"; return: [variables export]
 	for str in $$(echo '$(JSON)' | make -s docker-run-tools CMD="jq -rf $(JQ_DIR_REL)/json-to-env-vars.jq"); do
 		key=$$(cut -d "=" -f1 <<<"$$str" | tr '[:upper:]' '[:lower:]')
 		value=$$(cut -d "=" -f2- <<<"$$str")
@@ -121,12 +129,12 @@ terraform-export-variables-from-json: ### Convert JSON to Terraform input export
 
 # ==============================================================================
 
-_terraform-stacks: ### Set up infrastructure for a given list of stacks - mandatory: STACKS|INFRASTRUCTURE_STACKS=[comma-separated names],CMD=[Terraform command]; optional: INIT=false,PROFILE=[name]
+_terraform-stacks: ### Set up infrastructure for a given list of stacks - mandatory: STACK|STACKS|INFRASTRUCTURE_STACKS=[comma-separated names],CMD=[Terraform command]; optional: INIT=false,PROFILE=[name]
 	# set up
 	eval "$$(make aws-assume-role-export-variables)"
 	eval "$$(make terraform-export-variables)"
 	# run stacks
-	for stack in $$(echo $(or $(STACKS), $(INFRASTRUCTURE_STACKS)) | tr "," "\n"); do
+	for stack in $$(echo $(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS))) | tr "," "\n"); do
 		make _terraform-stack STACK="$$stack" CMD="$(CMD)"
 	done
 
@@ -171,4 +179,6 @@ _terraform-delete-state-lock: ### Delete Terraform state lock - mandatory: STACK
 	terraform-export-variables \
 	terraform-export-variables-from-json \
 	terraform-export-variables-from-secret \
-	terraform-export-variables-from-shell
+	terraform-export-variables-from-shell \
+	terraform-output \
+	terraform-show

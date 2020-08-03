@@ -1,25 +1,28 @@
 DOCKER_COMPOSE_YML = $(DOCKER_DIR)/docker-compose.yml
-DOCKER_DIR = $(PROJECT_DIR)/build/docker
+DOCKER_DIR = $(abspath $(PROJECT_DIR)/build/docker)
+DOCKER_DIR_REL = $(shell echo $(DOCKER_DIR) | sed "s;$(PROJECT_DIR);;g")
 DOCKER_LIB_DIR = $(LIB_DIR)/docker
 DOCKER_LIB_IMAGE_DIR = $(LIB_DIR)/docker/image
 DOCKER_NETWORK = $(PROJECT_GROUP_SHORT)/$(PROJECT_NAME_SHORT)/$(BUILD_ID)
 DOCKER_REGISTRY = $(AWS_ECR)/$(PROJECT_GROUP_SHORT)/$(PROJECT_NAME_SHORT)
 DOCKER_LIBRARY_REGISTRY = nhsd
 
-DOCKER_ALPINE_VERSION = 3.11.6
+DOCKER_ALPINE_VERSION = 3.12.0
 DOCKER_COMPOSER_VERSION = 1.10.6
 DOCKER_DOTNET_VERSION = 3.1.201
 DOCKER_ELASTICSEARCH_VERSION = 7.7.0
-DOCKER_GRADLE_VERSION = 6.4.1-jdk14
+DOCKER_GRADLE_VERSION = 6.5.0-jdk$(JAVA_VERSION)
 DOCKER_LOCALSTACK_VERSION = $(LOCALSTACK_VERSION)
-DOCKER_MAVEN_VERSION = 3.6.3-jdk-14
+DOCKER_MAVEN_VERSION = 3.6.3-openjdk-$(JAVA_VERSION)-slim
 DOCKER_NGINX_VERSION = 1.19.0-alpine
 DOCKER_NODE_VERSION = 14.4.0-alpine
-DOCKER_OPENJDK_VERSION = 14.0.1-jdk
-DOCKER_POSTGRES_VERSION = 12.3
+DOCKER_OPENJDK_VERSION = $(JAVA_VERSION)-alpine
+DOCKER_POSTGRES_VERSION = $(POSTGRES_VERSION)-alpine
+DOCKER_POSTMAN_NEWMAN_VERSION = $(POSTMAN_NEWMAN_VERSION)-alpine
 DOCKER_PULUMI_VERSION = v2.3.0
-DOCKER_PYTHON_VERSION = $(PYTHON_VERSION)-slim
-DOCKER_TERRAFORM_VERSION = $(or $(TEXAS_TERRAFORM_VERSION), 0.12.25)
+DOCKER_PYTHON_VERSION = $(PYTHON_VERSION)-alpine
+DOCKER_TERRAFORM_VERSION = $(or $(TEXAS_TERRAFORM_VERSION), $(TERRAFORM_VERSION))
+DOCKER_WIREMOCK_VERSION = $(WIREMOCK_VERSION)-alpine
 
 DOCKER_LIBRARY_ELASTICSEARCH_VERSION = $(shell cat $(DOCKER_LIB_IMAGE_DIR)/elasticsearch/VERSION 2> /dev/null)
 DOCKER_LIBRARY_NGINX_VERSION = $(shell cat $(DOCKER_LIB_IMAGE_DIR)/nginx/VERSION 2> /dev/null)
@@ -72,7 +75,7 @@ docker-build docker-image: ### Build Docker image - mandatory: NAME; optional: V
 	fi
 	# Dockerfile
 	make NAME=$(NAME) \
-		docker-create-dockerfile \
+		docker-create-dockerfile FILE=Dockerfile$(shell [ -n "$(EXAMPLE)" ] && echo .example) \
 		docker-set-image-version VERSION=$(VERSION)
 	# Cache
 	cache_from=
@@ -90,7 +93,7 @@ docker-build docker-image: ### Build Docker image - mandatory: NAME; optional: V
 		--build-arg BUILD_HASH=$(BUILD_HASH) \
 		--build-arg BUILD_REPO=$(BUILD_REPO) \
 		$(BUILD_OPTS) $$cache_from \
-		--file $$dir/Dockerfile.$(shell [ -z "$(EXAMPLE)" ] && echo effective || echo example) \
+		--file $$dir/Dockerfile.effective \
 		--tag $$reg/$(NAME)$(shell [ -n "$(EXAMPLE)" ] && echo -example):$$(make docker-get-image-version) \
 		$$dir
 	# Tag
@@ -184,10 +187,10 @@ docker-prune: docker-clean ### Clean Docker resources - optional: ALL=true
 
 # ==============================================================================
 
-docker-create-dockerfile: ### Create effective Dockerfile - mandatory: NAME
+docker-create-dockerfile: ### Create effective Dockerfile - mandatory: NAME; optional FILE=[Dockerfile name, defaults to Dockerfile]
 	dir=$$(pwd)
 	cd $$(make _docker-get-dir)
-	cat Dockerfile $(DOCKER_LIB_DIR)/Dockerfile.metadata > Dockerfile.effective
+	cat $(or $(FILE), Dockerfile) $(DOCKER_LIB_DIR)/image/Dockerfile.metadata > Dockerfile.effective
 	sed -i " \
 		s#FROM $(DOCKER_LIBRARY_REGISTRY)/elasticsearch:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/elasticsearch:${DOCKER_LIBRARY_ELASTICSEARCH_VERSION}#g; \
 		s#FROM $(DOCKER_LIBRARY_REGISTRY)/nginx:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/nginx:${DOCKER_LIBRARY_NGINX_VERSION}#g; \
@@ -198,12 +201,16 @@ docker-create-dockerfile: ### Create effective Dockerfile - mandatory: NAME
 		s#FROM $(DOCKER_LIBRARY_REGISTRY)/tools:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/tools:${DOCKER_LIBRARY_TOOLS_VERSION}#g; \
 		s#FROM alpine:latest#FROM alpine:${DOCKER_ALPINE_VERSION}#g; \
 		s#FROM elasticsearch:latest#FROM elasticsearch:${DOCKER_ELASTICSEARCH_VERSION}#g; \
+		s#FROM gradle:latest#FROM gradle:${DOCKER_GRADLE_VERSION}#g; \
+		s#FROM maven:latest#FROM maven:${DOCKER_MAVEN_VERSION}#g; \
 		s#FROM mcr.microsoft.com/dotnet/core/sdk:latest#FROM mcr.microsoft.com/dotnet/core/sdk:${DOCKER_DOTNET_VERSION}#g; \
 		s#FROM nginx:latest#FROM nginx:${DOCKER_NGINX_VERSION}#g; \
 		s#FROM node:latest#FROM node:${DOCKER_NODE_VERSION}#g; \
 		s#FROM openjdk:latest#FROM openjdk:${DOCKER_OPENJDK_VERSION}#g; \
 		s#FROM postgres:latest#FROM postgres:${DOCKER_POSTGRES_VERSION}#g; \
+		s#FROM postman/newman:latest#FROM postman/newman:${DOCKER_POSTMAN_NEWMAN_VERSION}#g; \
 		s#FROM python:latest#FROM python:${DOCKER_PYTHON_VERSION}#g; \
+		s#FROM rodolpheche/wiremock:latest#FROM rodolpheche/wiremock:${DOCKER_WIREMOCK_VERSION}#g; \
 	" Dockerfile.effective
 	cd $$dir
 
@@ -232,6 +239,23 @@ docker-set-image-version: ### Set effective Docker image version - mandatory: NA
 	fi
 
 # ==============================================================================
+
+docker-image-pull-or-build: ### Pull or build image - mandatory: NAME; optional VERSION|TAG=[defaults to 'latest'],LATEST=true
+	version=$(or $(or $(VERSION), $(TAG)), latest)
+	image=$(DOCKER_LIBRARY_REGISTRY)/$(NAME):$$version
+	if [ -z "$$(docker images --filter=reference="$$image" --quiet)" ]; then
+		make docker-pull NAME=$(NAME) VERSION=$$version ||:
+	fi
+	if [ -z "$$(docker images --filter=reference="$$image" --quiet)" ]; then
+			make docker-build NAME=$(NAME) || ( \
+				echo "ERROR: No image $$image found"; \
+				exit 1 \
+			)
+	fi
+	if [ -n "$$(docker images --filter=reference="$$image" --quiet)" ]; then
+		[[ "$(LATEST)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]] && \
+			make docker-tag NAME=$(NAME) SOURCE=$$version TARGET=latest ||:
+	fi
 
 docker-image-keep-latest-only: ### Remove other images than latest - mandatory: NAME
 	reg=$$(make _docker-get-reg)
@@ -298,6 +322,40 @@ docker-image-load: ### Load image from a flat file - mandatory: NAME; optional: 
 	gunzip -c $$dir/$(NAME)-$$version-image.tar.gz | docker load
 
 # ==============================================================================
+
+docker-run: ### Run specified image - mandatory: IMAGE; optional: CMD,SH=true,DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],CONTAINER=[container name]
+	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo $$(echo '$(IMAGE)' | md5sum | cut -c1-7)-$(BUILD_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
+	if [[ ! "$(SH)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then
+		docker run --interactive $(_TTY) --rm \
+			--name $$container \
+			--user $$(id -u):$$(id -g) \
+			--env-file <(env | grep -Ei "^(AWS|TX|TEXAS)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+			--env-file <(env | grep -Ei "^(DB|DATABASE|APP|APPLICATION|UI|API|SERVER|HOST|URL)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+			--env-file <(env | grep -Ei "^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+			--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
+			--volume $(PROJECT_DIR):/project \
+			--network $(DOCKER_NETWORK) \
+			--workdir /project/$(shell echo $(abspath $(DIR)) | sed "s;$(PROJECT_DIR);;g") \
+			$(ARGS) \
+			$(IMAGE) \
+				$(CMD)
+	else
+		docker run --interactive $(_TTY) --rm \
+			--name $$container \
+			--user $$(id -u):$$(id -g) \
+			--env-file <(env | grep -Ei "^(AWS|TX|TEXAS)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+			--env-file <(env | grep -Ei "^(DB|DATABASE|APP|APPLICATION|UI|API|SERVER|HOST|URL)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+			--env-file <(env | grep -Ei "^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+			--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
+			--volume $(PROJECT_DIR):/project \
+			--network $(DOCKER_NETWORK) \
+			--workdir /project/$(shell echo $(abspath $(DIR)) | sed "s;$(PROJECT_DIR);;g") \
+			$(ARGS) \
+			$(IMAGE) \
+				/bin/sh -c " \
+					$(CMD) \
+				"
+	fi
 
 docker-run-composer: ### Run composer container - mandatory: CMD; optional: DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
 	mkdir -p $(HOME)/.composer
@@ -400,6 +458,12 @@ docker-run-node: ### Run node container - mandatory: CMD; optional: DIR,ARGS=[Do
 				su \$$(id -nu $$(id -u)) -c 'cd /project/$(DIR); $(CMD)' \
 			"
 
+docker-run-postman: ### Run postman (newman) container - mandatory: DIR,CMD
+	make docker-run IMAGE=postman/newman:$(DOCKER_POSTMAN_NEWMAN_VERSION) \
+		ARGS="--volume $(DIR):/etc/newman" \
+		DIR="$(DIR)" \
+		CMD="$(CMD)"
+
 docker-run-pulumi: ### Run pulumi container - mandatory: CMD; optional: DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo pulumi/pulumi:$(DOCKER_PULUMI_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo pulumi-$(BUILD_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
@@ -489,10 +553,7 @@ docker-run-terraform: ### Run terraform container - mandatory: CMD; optional: DI
 docker-run-postgres: ### Run postgres container - mandatory: CMD; optional: DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo $(DOCKER_LIBRARY_REGISTRY)/postgres:$(DOCKER_LIBRARY_POSTGRES_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo postgres-$(BUILD_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
-	if [ -z "$$(docker images --filter=reference="$$image" --quiet)" ]; then
-		make docker-pull NAME=postgres VERSION=$(DOCKER_LIBRARY_POSTGRES_VERSION) > /dev/null 2>&1
-		make docker-build NAME=postgres FROM_CACHE=true > /dev/null 2>&1
-	fi
+	make docker-image-pull-or-build NAME=postgres VERSION=$(DOCKER_LIBRARY_POSTGRES_VERSION) LATEST=true > /dev/null 2>&1
 	docker run --interactive $(_TTY) --rm \
 		--name $$container \
 		--user $$(id -u):$$(id -g) \
@@ -511,10 +572,7 @@ docker-run-tools: ### Run tools (Python) container - mandatory: CMD; optional: S
 	mkdir -p $(HOME)/{.aws,.python/pip/{cache,packages}}
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo $(DOCKER_LIBRARY_REGISTRY)/tools:$(DOCKER_LIBRARY_TOOLS_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo tools-$(BUILD_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
-	if [ -z "$$(docker images --filter=reference="$$image" --quiet)" ]; then
-		make docker-pull NAME=tools VERSION=$(DOCKER_LIBRARY_TOOLS_VERSION) > /dev/null 2>&1
-		make docker-build NAME=tools FROM_CACHE=true > /dev/null 2>&1
-	fi
+	make docker-image-pull-or-build NAME=tools VERSION=$(DOCKER_LIBRARY_TOOLS_VERSION) LATEST=true > /dev/null 2>&1
 	if [[ ! "$(SH)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then
 		docker run --interactive $(_TTY) --rm \
 			--name $$container \
@@ -631,7 +689,7 @@ _docker-get-docker-compose-yml:
 	if [ "$(BUILD_ID)" != 0 ]; then
 		make -s docker-run-tools ARGS="--env BUILD_ID=$(BUILD_ID)" CMD=" \
 			$(BIN_DIR_REL)/docker-compose-processor.py \
-				$$(echo $$yml | sed "s;$(PROJECT_DIR);;g") \
+				$$(echo $$yml | sed 's;//;/;g' | sed "s;$(PROJECT_DIR);;g") \
 				$(TMP_DIR_REL)/docker-compose-$(BUILD_ID).yml \
 		"
 		yml=$(TMP_DIR)/docker-compose-$(BUILD_ID).yml

@@ -1,7 +1,7 @@
 test-jenkins:
 	make test-jenkins-setup
 	tests=( \
-		test-jenkins-create-pipline-from-template \
+		test-jenkins-create-pipeline-from-template \
 		test-jenkins-upload-workspace-archived \
 		test-jenkins-upload-workspace-exploded \
 	)
@@ -14,7 +14,7 @@ test-jenkins:
 test-jenkins-setup:
 	make localstack-start
 	# Prerequisites
-	make docker-build NAME=tools FROM_CACHE=true
+	make docker-pull NAME=tools VERSION=$(DOCKER_LIBRARY_TOOLS_VERSION)
 
 test-jenkins-teardown:
 	make localstack-stop
@@ -24,7 +24,7 @@ test-jenkins-teardown:
 
 # ==============================================================================
 
-test-jenkins-create-pipline-from-template:
+test-jenkins-create-pipeline-from-template:
 	mk_test_skip
 
 test-jenkins-upload-workspace-archived:

@@ -2,6 +2,11 @@ project-config: ### Configure project environment
 	make \
 		git-config \
 		docker-config
+	if [ ! -f $(PROJECT_DIR)/$(PROJECT_NAME).code-workspace ]; then
+		cp -fv \
+			$(PROJECT_DIR)/$(PROJECT_NAME).code-workspace.template \
+			$(PROJECT_DIR)/$(PROJECT_NAME).code-workspace
+	fi
 
 project-start: ### Start Docker Compose
 	make docker-compose-start
@@ -18,31 +23,34 @@ project-deploy: ### Deploy application service stack to the Kubernetes cluster -
 # ==============================================================================
 
 project-create-profile: ### Create profile file - mandatory: NAME=[profile name]
-	if [ ! -f $(VAR_DIR)/profile/$(NAME).mk ]; then
-		cp $(VAR_DIR)/profile/dev.mk.default $(VAR_DIR)/profile/$(NAME).mk
-	fi
+	cp -fv $(VAR_DIR_REL)/profile/dev.mk.default $(VAR_DIR_REL)/profile/$(NAME).mk
+
+project-create-contract-test: ### Create contract test project structure from template
+	rm -rf $(APPLICATION_TEST_DIR)/contract
+	make -s test-create-contract
 
 project-create-image: ### Create image from template - mandatory: NAME=[image name],TEMPLATE=[library template image name]
 	make -s docker-create-from-template NAME=$(NAME) TEMPLATE=$(TEMPLATE)
 
-project-create-deployment: ### Create deployment from template - mamdatory: NAME=[deployment name],PROFILE=[profile name]
-	rm -rf $(DEPLOYMENT_DIR)/stacks/$(NAME)
-	make -s k8s-create-base-from-template STACK=$(NAME)
-	make -s k8s-create-overlay-from-template STACK=$(NAME) PROFILE=$(PROFILE)
+project-create-deployment: ### Create deployment from template - mandatory: STACK=[deployment name],PROFILE=[profile name]
+	rm -rf $(DEPLOYMENT_DIR)/stacks/$(STACK)
+	make -s k8s-create-base-from-template STACK=$(STACK)
+	make -s k8s-create-overlay-from-template STACK=$(STACK) PROFILE=$(PROFILE)
 	make project-create-profile NAME=$(PROFILE)
 
-project-create-infrastructure: ### Create infrastructure from template - mamdatory: NAME=[infrastructure name],TEMPLATE=[library template infrastructure name]
-	rm -rf $(INFRASTRUCTURE_DIR)/modules/$(TEMPLATE)
-	make -s k8s-create-module-from-template TEMPLATE=$(TEMPLATE)
-	rm -rf $(INFRASTRUCTURE_DIR)/stacks/$(NAME)
-	make -s k8s-create-stack-from-template NAME=$(NAME) TEMPLATE=$(TEMPLATE)
+project-create-infrastructure: ### Create infrastructure from template - mandatory: STACK=[infrastructure name],TEMPLATE=[library template infrastructure name]
+	make -s terraform-create-module-from-template TEMPLATE=$(TEMPLATE)
+	make -s terraform-create-stack-from-template NAME=$(STACK) TEMPLATE=$(TEMPLATE)
 
-project-create-pipline: ### Create pipline
-	make -s jenkins-create-pipline-from-template
+project-create-pipeline: ### Create pipeline
+	make -s jenkins-create-pipeline-from-template
 
 # ==============================================================================
 
 .SILENT: \
+	project-create-contract-test \
 	project-create-deployment \
 	project-create-image \
-	project-create-pipline
+	project-create-infrastructure \
+	project-create-pipeline \
+	project-create-profile

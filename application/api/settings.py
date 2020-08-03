@@ -28,6 +28,7 @@ DEBUG = False
 ALLOWED_HOSTS = [
     ".amazonaws.com",
     "localhost",
+    "cs.local",
     "uec-dos-api-cs-demo-uec-dos-api-cs-proxy-ingress.k8s-prod.texasplatform.uk",
     "cs.api.directoryofservices.nhs.uk",
 ]

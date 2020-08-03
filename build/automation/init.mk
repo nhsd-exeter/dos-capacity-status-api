@@ -15,7 +15,10 @@ help-project-supporting: ## Show development supporting targets
 devops-print-variables: ### Print all the variables
 	$(foreach v, $(sort $(.VARIABLES)),
 		$(if $(filter-out default automatic, $(origin $v)),
-			$(info $v=$($v) ($(value $v)))
+			$(if $(and $(patsubst %_PASSWORD,,$v), $(patsubst %_SECRET,,$v)),
+				$(info $v=$($v) ($(value $v)) [$(flavor $v),$(origin $v)]),
+				$(info $v=****** (******) [$(flavor $v),$(origin $v)])
+			)
 		)
 	)
 
@@ -32,6 +35,8 @@ devops-test-suite: ### Run the DevOps unit test suite - optional: DEBUG=true
 		test-k8s \
 		test-jenkins \
 		test-python \
+		test-java \
+		test-postgres \
 		test-techradar \
 		test-project \
 	"
@@ -98,8 +103,6 @@ devops-synchronise: ### Synchronise the DevOps automation toolchain scripts used
 			build/* \
 			$(PARENT_PROJECT_DIR)/build
 		[ -f $(PARENT_PROJECT_DIR)/build/automation/etc/certificate/*.pem ] && rm -fv $(PARENT_PROJECT_DIR)/build/automation/etc/certificate/.gitignore
-		[ ! -f $(PARENT_PROJECT_DIR)/build/docker/docker-compose.yml ] && cp -v build/automation/lib/project/template/build/docker/docker-compose.yml $(PARENT_PROJECT_DIR)/build/docker/docker-compose.yml ||:
-		[ ! -f $(PARENT_PROJECT_DIR)/build/Jenkinsfile ] && cp -v build/automation/lib/project/template/build/Jenkinsfile $(PARENT_PROJECT_DIR)/build/Jenkinsfile ||:
 		cp -fv LICENSE.md $(PARENT_PROJECT_DIR)/build/automation/LICENSE.md
 		# Copy additionals
 		if [[ "$(ALL)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then
@@ -119,13 +122,21 @@ devops-synchronise: ### Synchronise the DevOps automation toolchain scripts used
 	}
 	function cleanup() {
 		cd $(PARENT_PROJECT_DIR)
-		# Clean up old project files
+		# Remove not needed project files
+		rm -f \
+			$(PARENT_PROJECT_DIR)/build/docker/.gitkeep
+		# Remove empty project directories
+		rmdir \
+			$(PARENT_PROJECT_DIR)/build/docker \
+			||:
+		# Remove old project files and directories
 		rm -rf \
 			~/bin/docker-compose-processor \
 			~/bin/texas-mfa \
 			~/bin/texas-mfa-clear.sh \
 			~/bin/toggle-natural-scrolling.sh \
 			$(PARENT_PROJECT_DIR)/build/automation/bin/markdown.pl \
+			$(PARENT_PROJECT_DIR)/build/automation/etc/githooks/scripts/*.default \
 			$(PARENT_PROJECT_DIR)/build/automation/etc/platform-texas* \
 			$(PARENT_PROJECT_DIR)/build/automation/lib/dev.mk \
 			$(PARENT_PROJECT_DIR)/build/automation/lib/docker/nginx \
@@ -254,12 +265,19 @@ VAR_DIR := $(abspath $(DEVOPS_PROJECT_DIR)/var)
 VAR_DIR_REL := $(shell echo $(VAR_DIR) | sed "s;$(PROJECT_DIR);;g")
 
 APPLICATION_DIR := $(abspath $(or $(APPLICATION_DIR), $(PROJECT_DIR)/application))
+APPLICATION_DIR_REL := $(shell echo $(APPLICATION_DIR) | sed "s;$(PROJECT_DIR);;g")
 APPLICATION_TEST_DIR := $(abspath $(or $(APPLICATION_TEST_DIR), $(PROJECT_DIR)/test))
+APPLICATION_TEST_DIR_REL := $(shell echo $(APPLICATION_TEST_DIR) | sed "s;$(PROJECT_DIR);;g")
 CONFIG_DIR := $(abspath $(or $(CONFIG_DIR), $(PROJECT_DIR)/config))
+CONFIG_DIR_REL := $(shell echo $(CONFIG_DIR) | sed "s;$(PROJECT_DIR);;g")
 DATA_DIR := $(abspath $(or $(DATA_DIR), $(PROJECT_DIR)/data))
+DATA_DIR_REL := $(shell echo $(DATA_DIR) | sed "s;$(PROJECT_DIR);;g")
 DEPLOYMENT_DIR := $(abspath $(or $(DEPLOYMENT_DIR), $(PROJECT_DIR)/deployment))
-GITHOOKS_DIR_REL := $(shell echo $(abspath $(ETC_DIR)/githooks) | sed "s;$(PROJECT_DIR);;g")
+DEPLOYMENT_DIR_REL := $(shell echo $(DEPLOYMENT_DIR) | sed "s;$(PROJECT_DIR);;g")
+GITHOOKS_DIR := $(abspath $(ETC_DIR)/githooks)
+GITHOOKS_DIR_REL := $(shell echo $(GITHOOKS_DIR) | sed "s;$(PROJECT_DIR);;g")
 INFRASTRUCTURE_DIR := $(abspath $(or $(INFRASTRUCTURE_DIR), $(PROJECT_DIR)/infrastructure))
+INFRASTRUCTURE_DIR_REL := $(shell echo $(INFRASTRUCTURE_DIR) | sed "s;$(PROJECT_DIR);;g")
 JQ_DIR_REL := $(shell echo $(abspath $(LIB_DIR)/jq) | sed "s;$(PROJECT_DIR);;g")
 
 PROFILE := $(or $(PROFILE), local)
@@ -315,6 +333,13 @@ ifeq ("$(_DEVOPS_RUN_TEST)", "true")
 else
 	AWSCLI := aws
 endif
+
+ifneq ($(BUILD_ID), 1)
+x := $(shell echo TEST; echo xxx > $(TMP_DIR)/build-date.var)
+endif
+
+xxx:
+	echo $(x)
 
 # ==============================================================================
 # Check if all the required variables are set
@@ -376,27 +401,27 @@ ifeq (true, $(shell [ "Darwin" == "$$(uname)" ] && echo true))
 # macOS: Xcode Command Line Tools
 ifneq (0, $(shell xcode-select -p > /dev/null 2>&1; echo $$?))
 $(info )
-$(info Installation of the Xcode Command Line Tools has just been triggered automatically...)
+$(info $(shell tput setaf 4; echo "Installation of the Xcode Command Line Tools has just been triggered automatically..."; tput sgr0))
 $(info )
 $(error $(shell tput setaf 1; echo "ERROR: Please, before proceeding install the Xcode Command Line Tools"; tput sgr0))
 endif
 # macOS: Homebrew
 ifneq (0, $(shell which brew > /dev/null 2>&1; echo $$?))
 $(info )
-$(info /usr/bin/ruby -e "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)")
+$(info Run $(shell tput setaf 4; echo '/usr/bin/ruby -e "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"'; tput sgr0))
 $(info )
 $(error $(shell tput setaf 1; echo "ERROR: Please, before proceeding install the brew package manager. Copy and paste in your terminal the above command, then execute it"; tput sgr0))
 endif
 # macOS: GNU Make
 ifeq (true, $(shell [ ! -f /usr/local/opt/make/libexec/gnubin/make ] && echo true))
 $(info )
-$(info brew install make)
+$(info Run $(shell tput setaf 4; echo "brew install make"; tput sgr0))
 $(info )
 $(error $(shell tput setaf 1; echo "ERROR: Please, before proceeding install the GNU make tool. Copy and paste in your terminal the above command, then execute it"; tput sgr0))
 endif
 ifeq (, $(findstring oneshell, $(.FEATURES)))
 $(info )
-$(info export PATH=$(PATH))
+$(info Run $(shell tput setaf 4; echo "export PATH=$(PATH)"; tput sgr0))
 $(info )
 $(error $(shell tput setaf 1; echo "ERROR: Please, before proceeding make sure GNU make is included in your \$$PATH. Copy and paste in your terminal the above command, then execute it"; tput sgr0))
 endif

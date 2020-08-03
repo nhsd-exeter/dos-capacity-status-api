@@ -84,7 +84,7 @@ macos-install-essential:: ## Install essential development dependencies - option
 	brew $$install zsh-autosuggestions ||:
 	brew $$install zsh-completions ||:
 	brew $$install zsh-syntax-highlighting ||:
-	brew cask $$install adoptopenjdk13 ||:
+	brew cask $$install adoptopenjdk$(JAVA_VERSION) ||:
 	brew cask $$install docker ||:
 	brew cask $$install font-hack-nerd-font ||:
 	brew cask $$install iterm2 ||:
@@ -98,13 +98,13 @@ macos-install-additional:: ## Install additional development dependencies - opti
 		install="reinstall --force"
 	fi
 	brew update
-	#brew tap weaveworks/tap ||:
+	brew tap weaveworks/tap ||:
 	brew $$install github/gh/gh ||:
-	#brew $$install weaveworks/tap/eksctl ||:
+	brew $$install weaveworks/tap/eksctl ||:
 	brew cask $$install appcleaner ||:
 	brew cask $$install atom ||:
-	brew cask $$install bettertouchtool ||:
-	brew cask $$install cheatsheet ||:
+	#brew cask $$install bettertouchtool ||:
+	#brew cask $$install cheatsheet ||:
 	brew cask $$install dbeaver-community ||:
 	brew cask $$install dcommander ||:
 	brew cask $$install drawio
@@ -117,7 +117,7 @@ macos-install-additional:: ## Install additional development dependencies - opti
 	brew cask $$install istat-menus ||:
 	brew cask $$install karabiner-elements ||:
 	brew cask $$install keepingyouawake ||:
-	brew cask $$install microsoft-remote-desktop-beta ||:
+	#brew cask $$install microsoft-remote-desktop-beta ||:
 	brew cask $$install postman ||:
 	brew cask $$install pycharm ||:
 	brew cask $$install sourcetree ||:
@@ -201,23 +201,24 @@ macos-check:: ## Check if the development dependencies are installed
 	brew list zsh-autosuggestions ||:
 	brew list zsh-completions ||:
 	brew list zsh-syntax-highlighting ||:
-	brew cask list adoptopenjdk13 ||:
+	brew cask list adoptopenjdk$(JAVA_VERSION) ||:
 	brew cask list docker ||:
 	brew cask list font-hack-nerd-font ||:
 	brew cask list iterm2 ||:
 	brew cask list visual-studio-code ||:
 	# Additional dependencies
 	brew list github/gh/gh ||:
-	#brew list weaveworks/tap/eksctl ||:
+	brew list weaveworks/tap/eksctl ||:
 	brew cask list atom ||:
-	brew cask list cheatsheet ||:
+	#brew cask list bettertouchtool ||:
+	#brew cask list cheatsheet ||:
 	brew cask list dbeaver-community ||:
 	brew cask list drawio ||:
 	brew cask list gitkraken ||:
 	brew cask list google-chrome ||:
 	brew cask list intellij-idea-ce ||:
 	brew cask list keepingyouawake ||:
-	brew cask list microsoft-remote-desktop-beta ||:
+	#brew cask list microsoft-remote-desktop-beta ||:
 	brew cask list postman ||:
 	brew cask list pycharm ||:
 	brew cask list sourcetree ||:
@@ -325,9 +326,9 @@ _macos-config-command-line:
 	# configure Java
 	eval "$$(jenv init -)"
 	jenv enable-plugin export
-	jenv add $$(/usr/libexec/java_home)
+	jenv add $$(/usr/libexec/java_home -v$(JAVA_VERSION))
 	jenv versions # ls -1 /Library/Java/JavaVirtualMachines
-	jenv global $$(jenv versions | sed 's/*//' | sed 's/^[ \t]*//;s/[ \t]*$$//' | grep '^[0-9]' | awk '{ print $$1 }' | sort -n | head -n 1)
+	jenv global $(JAVA_VERSION).0
 	# configure Git
 	make git-config
 	# configure shell
@@ -363,7 +364,7 @@ _macos-config-command-line:
 		echo "# env: Go"
 		echo ". $$HOME/.gvm/scripts/gvm"
 		echo "# env: Java"
-		echo "export PATH=\$$HOME/.jenv/bin:\$$PATH"
+		echo "export JAVA_HOME=$$(/usr/libexec/java_home -v$(JAVA_VERSION))"
 		echo "eval \"\$$(jenv init -)\""
 		echo "# env: Node"
 		echo "export NVM_DIR=\$$HOME/.nvm"
@@ -456,6 +457,8 @@ _macos-config-visual-studio-code:
 	code --force --install-extension zhuangtongfa.material-theme
 	# List them all
 	code --list-extensions --show-versions
+	# Copy user key bindings
+	cp -fv $(PROJECT_DIR)/build/automation/lib/macos/vscode-keybindings.json ~/Library/Application\ Support/Code/User/keybindings.json
 
 _macos-config-firefox:
 	# function firefox_install_extension {
