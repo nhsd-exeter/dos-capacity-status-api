@@ -145,13 +145,13 @@ dev-build:
 dev-migrate:
 	cd $(APPLICATION_DIR)
 	export API_DB_HOST=localhost
-	export DOS_DB_HOST=localhost
+	export DB_DOS_HOST=localhost
 	python manage.py migrate
 
 dev-start:
 	cd $(APPLICATION_DIR)
 	export API_DB_HOST=localhost
-	export DOS_DB_HOST=localhost
+	export DB_DOS_HOST=localhost
 	export RESET_STATUS_IN_DEFAULT_MINS=$(SERVICE_RESET_STATUS_IN_DEFAULT_MINS)
 	export RESET_STATUS_IN_MINIMUM_MINS=$(SERVICE_RESET_STATUS_IN_MINIMUM_MINS)
 	export RESET_STATUS_IN_MAX_MINS=$(SERVICE_RESET_STATUS_IN_MAX_MINS)
@@ -161,7 +161,7 @@ dev-create-user:
 	password=$$(make secret-random)
 	cd $(APPLICATION_DIR)
 	export API_DB_HOST=localhost
-	export DOS_DB_HOST=localhost
+	export DB_DOS_HOST=localhost
 	python manage.py user test $$password TestUser
 
 dev-smoke-test:
