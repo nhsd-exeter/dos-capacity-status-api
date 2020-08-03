@@ -29,6 +29,7 @@ http {
     server {
         listen 443 ssl;
         server_name localhost;
+        server_tokens off;
         ssl_certificate      /certificate/certificate.pem;
         ssl_certificate_key  /certificate/certificate.key;
 
