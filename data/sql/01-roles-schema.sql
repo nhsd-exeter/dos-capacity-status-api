@@ -34,7 +34,7 @@ COMMENT ON ROLE release_manager IS 'Release manager role to own all applications
 -- User Config "pathwaysdos"
 --
 
- ALTER ROLE pathwaysdos SET search_path TO 'pathwaysdos', 'extn_pgcrypto';
+ALTER ROLE pathwaysdos SET search_path TO 'pathwaysdos', 'extn_pgcrypto';
 
 --
 -- User Config "release_manager"

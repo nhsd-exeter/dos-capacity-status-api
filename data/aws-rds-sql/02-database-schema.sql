@@ -225,10 +225,10 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 CREATE FUNCTION pathwaysdos.assignservicesuid() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
- BEGIN
-   new.uid := nextval('services_uid_seq');
-   return NEW;
- END;
+BEGIN
+  new.uid := nextval('services_uid_seq');
+  return NEW;
+END;
 $$;
 
 
@@ -302,20 +302,20 @@ CREATE FUNCTION pgagent.upsert_pga_jobagent() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 declare
-       existing record;
+      existing record;
 begin
-     if (select EXISTS(select 1 from pgagent.pga_jobagent where jagpid  = NEW.jagpid)) then
+    if (select EXISTS(select 1 from pgagent.pga_jobagent where jagpid  = NEW.jagpid)) then
 
         --found; update, and return null to prevent insert
         UPDATE pgagent.pga_jobagent SET
             jaglogintime= NEW.jaglogintime, jagstation = NEW.jagstation
-         WHERE jagpid  = NEW.jagpid;
+        WHERE jagpid  = NEW.jagpid;
 
-         return null;
+        return null;
 
-     end if;
+    end if;
 
-     return new;
+    return new;
 end
 $$;
 

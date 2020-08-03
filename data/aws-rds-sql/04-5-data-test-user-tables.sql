@@ -7,7 +7,7 @@ insert into pathwaysdos.users (id, username, firstname, lastname, email, created
 select 1000000001, 'EditUser', 'EditUser', 'EditUser', null, now(),'ACTIVE'
 where not exists (select 'x' from pathwaysdos.users where id = 1000000001 or username = 'EditUser');
 
- -- Grant required permissions to the new test users --
+-- Grant required permissions to the new test users --
 insert into pathwaysdos.userpermissions (userid, permissionid)
 select 1000000001, per.id from pathwaysdos.permissions per where per.name = 'editCapacity';
 
