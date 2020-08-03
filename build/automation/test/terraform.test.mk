@@ -13,6 +13,8 @@ test-terraform:
 		test-terraform-plan-before-apply \
 		test-terraform-apply \
 		test-terraform-plan-after-apply \
+		test-terraform-output \
+		test-terraform-show \
 		test-terraform-destroy \
 		test-terraform-unlock \
 	)
@@ -25,7 +27,7 @@ test-terraform:
 test-terraform-setup:
 	make localstack-start
 	# Prerequisites
-	make docker-build NAME=tools FROM_CACHE=true
+	make docker-pull NAME=tools VERSION=$(DOCKER_LIBRARY_TOOLS_VERSION)
 
 test-terraform-teardown:
 	make localstack-stop
@@ -134,6 +136,12 @@ test-terraform-plan-after-apply:
 	str="No changes\. Infrastructure is up-to-date\."
 	count=$$(echo "$$output" | grep "$$str" | wc -l)
 	mk_test "1 = $$count"
+
+test-terraform-output:
+	mk_test_skip
+
+test-terraform-show:
+	mk_test_skip
 
 test-terraform-destroy:
 	# act

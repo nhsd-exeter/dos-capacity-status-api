@@ -7,6 +7,7 @@ test-docker:
 		test-docker-config \
 		test-docker-build \
 		test-docker-image-name-as \
+		test-docker-image-pull-or-build \
 		test-docker-image-keep-latest-only \
 		test-docker-login \
 		test-docker-create-repository \
@@ -23,10 +24,13 @@ test-docker:
 		test-docker-image-load \
 		test-docker-tag \
 		test-docker-get-variables-from-file \
+		test-docker-run \
+		test-docker-run-composer \
 		test-docker-run-dotnet \
 		test-docker-run-gradle \
 		test-docker-run-mvn \
 		test-docker-run-node \
+		test-docker-run-postman \
 		test-docker-run-pulumi \
 		test-docker-run-python-single-cmd \
 		test-docker-run-python-multiple-cmd \
@@ -85,6 +89,14 @@ test-docker-image-name-as:
 	make docker-build NAME=$(TEST_DOCKER_IMAGE) NAME_AS=$(TEST_DOCKER_IMAGE)-copy FROM_CACHE=true
 	# assert
 	mk_test "2 -eq $$(docker images --filter=reference=$(DOCKER_LIBRARY_REGISTRY)/$(TEST_DOCKER_IMAGE)-copy:* --quiet | wc -l)"
+
+test-docker-image-pull-or-build:
+	# arrange
+	docker rmi --force $$(docker images --filter=reference=$(DOCKER_LIBRARY_REGISTRY)/tools:* --quiet) 2> /dev/null ||:
+	# act
+	make docker-image-pull-or-build NAME=tools VERSION=$(DOCKER_LIBRARY_TOOLS_VERSION) LATEST=true
+	# assert
+	mk_test "2 -eq $$(docker images --filter=reference=$(DOCKER_LIBRARY_REGISTRY)/tools:* --quiet | wc -l)"
 
 test-docker-image-keep-latest-only:
 	# act
@@ -210,6 +222,20 @@ test-docker-get-variables-from-file:
 	# assert
 	mk_test "PROJECT_NAME= = $$(echo \"$$vars\" | grep -o PROJECT_NAME=)"
 
+test-docker-run:
+	mk_test_skip
+
+test-docker-run-composer:
+	# arrange
+	make docker-config
+	# act
+	output=$$(
+		make -s docker-run-composer \
+			CMD="--version" \
+		| grep -Eo "[0-9]+\.[0-9]+\.[0-9]+" | wc -l)
+	# assert
+	mk_test "0 -lt $$output"
+
 test-docker-run-dotnet:
 	# arrange
 	make docker-config
@@ -254,6 +280,17 @@ test-docker-run-node:
 	# assert
 	mk_test "0 -lt $$output"
 
+test-docker-run-postman:
+	# arrange
+	make docker-config
+	# act
+	output=$$(
+		make -s docker-run-postman \
+			CMD="--version" \
+		| grep -Eo "[0-9]+\.[0-9]+\.[0-9]+" | wc -l)
+	# assert
+	mk_test "0 -lt $$output"
+
 test-docker-run-pulumi:
 	# arrange
 	make docker-config
@@ -261,7 +298,7 @@ test-docker-run-pulumi:
 	output=$$(
 		make -s docker-run-pulumi \
 			CMD="pulumi version" \
-		| grep -Eo "v[(0-9)]*.[(0-9)]*.[(0-9)]*" | wc -l)
+		| grep -Eo "v[0-9]+\.[0-9]+\.[0-9]+" | wc -l)
 	# assert
 	mk_test "0 -lt $$output"
 
@@ -315,8 +352,8 @@ test-docker-run-tools-single-cmd:
 	# act
 	output=$$(
 		make -s docker-run-tools \
-			CMD="apt list --installed" \
-		| sed 's/\x1b\[[0-9;]*m//g' | grep -E -- '^curl/now' | wc -l)
+			CMD="cat /etc/alpine-release" \
+		| grep -Eo "[0-9]+\.[0-9]+\.[0-9]+" | wc -l)
 	# assert
 	mk_test "1 -eq $$output"
 
@@ -326,8 +363,8 @@ test-docker-run-tools-multiple-cmd:
 	# act
 	output=$$(
 		make -s docker-run-tools SH=y \
-			CMD="cat /etc/issue && apt list --installed" \
-		| sed 's/\x1b\[[0-9;]*m//g' | grep -Ei -- '^(debian gnu/linux|curl/now)' | wc -l)
+			CMD="cat /etc/alpine-release && cat /etc/alpine-release" \
+		| grep -Eo "[0-9]+\.[0-9]+\.[0-9]+" | wc -l)
 	# assert
 	mk_test "2 -eq $$output"
 
