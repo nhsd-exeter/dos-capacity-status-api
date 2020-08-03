@@ -13,11 +13,11 @@ API_DB_USERNAME = postgres
 API_DB_PASSWORD = postgres
 API_LOG_LEVEL = DEBUG
 
-DOS_DB_HOST = db-dos
-DOS_DB_NAME = postgres
-DOS_DB_PORT = 5432
-DOS_DB_USERNAME = capacity_status_api
-DOS_DB_PASSWORD = capacity_status_api
+DB_DOS_HOST = db-dos
+DB_DOS_NAME = postgres
+DB_DOS_PORT = 5432
+DB_DOS_USERNAME = $(API_DB_USERNAME)
+DB_DOS_PASSWORD = $(API_DB_PASSWORD)
 
 APP_ADMIN_PASSWORD = admin
 

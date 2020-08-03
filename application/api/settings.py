@@ -107,11 +107,11 @@ DATABASES = {
     "dos": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "OPTIONS": {"options": "-c search_path=pathwaysdos"},
-        "HOST": os.getenv("DOS_DB_HOST", "db-dos"),
-        "PORT": os.getenv("DOS_DB_PORT", "5432"),
-        "NAME": os.getenv("DOS_DB_NAME", "postgres"),
-        "USER": os.getenv("DOS_DB_USERNAME", "capacity_status_api"),
-        "PASSWORD": os.getenv("DOS_DB_PASSWORD", "capacity_status_api"),
+        "HOST": os.getenv("DB_DOS_HOST", "db-dos"),
+        "PORT": os.getenv("DB_DOS_PORT", "5432"),
+        "NAME": os.getenv("DB_DOS_NAME", "postgres"),
+        "USER": os.getenv("DB_DOS_USERNAME", "capacity_status_api"),
+        "PASSWORD": os.getenv("DB_DOS_PASSWORD", "capacity_status_api"),
     },
 }
 

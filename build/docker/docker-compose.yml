@@ -14,9 +14,9 @@ services:
       XDG_CACHE_HOME: /tmp/.cache
       DB_HOST: db-dos
       DB_PORT: 5432
-      DB_NAME: postgres
-      DOS_DB_USERNAME: capacity_status_api
-      DOS_DB_PASSWORD: capacity_status_api
+      DB_NAME: $DB_DOS_NAME
+      DB_DOS_USERNAME: $DB_DOS_USERNAME
+      DB_DOS_PASSWORD: $DB_DOS_PASSWORD
       APP_ADMIN_PASSWORD: admin
       DJANGO_DEBUG: "True"
       HTTP_PROTOCOL: https
@@ -36,9 +36,9 @@ services:
     hostname: dos-db
     environment:
       PROFILE: $PROFILE
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: $DB_DOS_NAME
+      POSTGRES_USER: $DB_DOS_USERNAME
+      POSTGRES_PASSWORD: $DB_DOS_PASSWORD
     volumes:
       - $DATA_DIR/sql:/docker-entrypoint-initdb.d:ro
     ports:
