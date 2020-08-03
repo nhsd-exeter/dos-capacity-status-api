@@ -54,7 +54,8 @@
     make project-trust-certificate
     make build
     make start log # Press Ctrl-C to exit
-    open https://localhost:8443/api/v0.0.1/capacity/apidoc/
+    open https://cs.local:443/api/v0.0.1/capacity/apidoc/
+    open https://cs.local:443/api/v0.0.1/capacity/admin/login/
     make stop
 
 ### Dev Routine

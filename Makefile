@@ -2,6 +2,7 @@ PROJECT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 
 # ==============================================================================
+# Project targets: Dev workflow
 
 build: project-config # Build project
 	make \
@@ -31,6 +32,14 @@ push: # Push project artefacts to the registry
 	make docker-push NAME=api VERSION=0.0.1
 	make docker-push NAME=proxy VERSION=0.0.1
 
+# ==============================================================================
+# Project targets: Ops workflow
+
+plan: # Show the creation instance plan - mandatory: PROFILE=[profile name]
+	make terraform-plan \
+		PROFILE=dev \
+		NAME=$(or $(NAME), test)
+
 deploy: # Deploy project - mandatory: PROFILE=[name]
 	[ local == $(PROFILE) ] && exit 1
 	eval "$$(make aws-assume-role-export-variables)"
@@ -49,13 +58,14 @@ deploy-job: # Deploy project - mandatory: PROFILE=[name]
 	eval "$$(make project-populate-secret-variables)"
 	make k8s-deploy-job STACK=data
 
+# ==============================================================================
+# Supporting targets and variables
+
 clean: # Clean up project
 	make \
 		api-clean \
 		proxy-clean
 	rm -rfv $(HOME)/.python/pip
-
-# ==============================================================================
 
 api-build:
 	make docker-run-python \
@@ -95,12 +105,12 @@ proxy-clean:
 		$(DOCKER_DIR)/proxy/assets/application/static \
 		$(DOCKER_DIR)/proxy/assets/certificate/certificate.*
 
-# ==============================================================================
+# ---
 
 project-populate-secret-variables:
 	make secret-fetch-and-export-variables NAME=uec-dos-api-capacity-status-$(PROFILE)
 
-# ==============================================================================
+# ---
 
 # TODO: Do we really need this target?
 project-clean-deploy: project-clean project-build project-push-images project-deploy
@@ -115,7 +125,7 @@ api-start:
 		CMD="python manage.py runserver 0.0.0.0:8000" \
 		ARGS="--publish 8000:8000"
 
-# ==============================================================================
+# ---
 
 project-generate-development-certificate: ssl-generate-certificate-project
 
@@ -125,7 +135,7 @@ create-artefact-repository: ## Create Docker repositories to store artefacts
 	make docker-create-repository NAME=api
 	make docker-create-repository NAME=proxy
 
-# ==============================================================================
+# ---
 
 dev-setup:
 	make python-virtualenv

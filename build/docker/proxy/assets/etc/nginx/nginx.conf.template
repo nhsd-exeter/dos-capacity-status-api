@@ -1,76 +1,87 @@
 worker_processes 4;
 events {
-    worker_connections 1024;
+  worker_connections 1024;
 }
 http {
-    include             mime.types;
-    default_type        application/octet-stream;
-    sendfile            on;
-    keepalive_timeout   65;
-    upstream API_HOST_TO_REPLACE {
-        server API_HOST_TO_REPLACE:8443;
+  include mime.types;
+  default_type application/octet-stream;
+  sendfile on;
+  keepalive_timeout 65;
+  upstream API_HOST_TO_REPLACE {
+    server API_HOST_TO_REPLACE:8443;
+  }
+
+  map $http_x_forwarded_for $allow_host1 {
+    ALLOWED_HOSTS_TO_REPLACE
+    default 0;
+  }
+  map $host $allow_host2 {
+    ALLOWED_HOSTS_TO_REPLACE
+    default 0;
+  }
+
+  map $time_iso8601 $time_iso8601_p1 {
+    ~([^+]+) $1;
+  }
+  map $time_iso8601 $time_iso8601_p2 {
+    ~\+([0-9:]+)$ $1;
+  }
+  map $msec $millisec {
+    ~\.([0-9]+)$ $1;
+  }
+
+  server {
+    listen 443 ssl;
+    server_name localhost;
+    server_tokens off;
+    ssl_certificate /certificate/certificate.pem;
+    ssl_certificate_key /certificate/certificate.key;
+
+    add_header X-Request-ID $request_id;
+
+    location /static/ {
+      autoindex on;
+      root /application;
     }
-
-    map $http_x_forwarded_for $allow_host {
-                default       0;
-                ALLOWED_HOSTS_TO_REPLACE
+    location ~ /static/admin {
+      autoindex on;
+      root /application;
     }
+    location ~ /admin {
 
-    map $time_iso8601 $time_iso8601_p1 {
-      ~([^+]+) $1;
+      set $test 0;
+      if ($allow_host1 = 1) {
+        set $test 1;
+      }
+      if ($allow_host2 = 1) {
+        set $test 1;
+      }
+      if ($test = 0) {
+        return 403;
+      }
+
+      proxy_pass https://API_HOST_TO_REPLACE;
+      proxy_redirect off;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Host $server_name;
     }
-    map $time_iso8601 $time_iso8601_p2 {
-      ~\+([0-9:]+)$ $1;
+    location /api {
+      proxy_pass https://API_HOST_TO_REPLACE;
+      proxy_redirect off;
+      proxy_set_header Host $host;
+      proxy_set_header X-Request-ID $request_id;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Client-IP $http_x_forwarded_for;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Host $server_name;
+      proxy_set_header X-Request-Received $time_iso8601_p1.$millisec+$time_iso8601_p2;
     }
-    map $msec $millisec {
-      ~\.([0-9]+)$ $1;
+    location /health {
+      return 200 'healthcheck success from proxy server';
+      add_header Content-Type text/plain;
     }
-
-    server {
-        listen 443 ssl;
-        server_name localhost;
-        server_tokens off;
-        ssl_certificate      /certificate/certificate.pem;
-        ssl_certificate_key  /certificate/certificate.key;
-
-        add_header X-Request-ID $request_id;
-
-        location /static/ {
-            autoindex   on;
-            root        /application;
-        }
-        location ~ /static/admin {
-            autoindex   on;
-            root        /application;
-        }
-        location ~ /admin {
-
-            if ($allow_host = 0) {
-                return 403;
-            }
-
-            proxy_pass         https://API_HOST_TO_REPLACE;
-            proxy_redirect     off;
-            proxy_set_header   Host $host;
-            proxy_set_header   X-Real-IP $remote_addr;
-            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header   X-Forwarded-Host $server_name;
-        }
-        location /api {
-            proxy_pass         https://API_HOST_TO_REPLACE;
-            proxy_redirect     off;
-            proxy_set_header   Host $host;
-            proxy_set_header   X-Request-ID $request_id;
-            proxy_set_header   X-Real-IP $remote_addr;
-            proxy_set_header   X-Client-IP $http_x_forwarded_for;
-            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header   X-Forwarded-Host $server_name;
-            proxy_set_header   X-Request-Received $time_iso8601_p1.$millisec+$time_iso8601_p2;
-        }
-        location /health {
-            return 200 'healthcheck success from proxy server';
-            add_header Content-Type text/plain;
-        }
-    }
-    include servers/*;
+  }
+  include servers/*;
 }
