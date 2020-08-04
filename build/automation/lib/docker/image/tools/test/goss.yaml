@@ -1,0 +1,51 @@
+user:
+  tools:
+    exists: true
+    uid: 999
+    gid: 999
+    home: /tmp
+    shell: /bin/false
+
+package:
+  bash:
+    installed: true
+  bind-tools:
+    installed: true
+  ca-certificates:
+    installed: true
+  curl:
+    installed: true
+  git:
+    installed: true
+  gnupg:
+    installed: true
+  iputils:
+    installed: true
+  make:
+    installed: true
+  net-tools:
+    installed: true
+  netcat-openbsd:
+    installed: true
+  wget:
+    installed: true
+
+command:
+  pip list | grep -iE 'awscli-local.*0.6':
+    exit-status: 0
+  pip list | grep -iE 'awscli.*1.18':
+    exit-status: 0
+  pip list | grep -iE 'boto3.*1.14':
+    exit-status: 0
+  pip list | grep -iE 'requests.*2.24':
+    exit-status: 0
+  aws-iam-authenticator version:
+    exit-status: 0
+  jq --version:
+    exit-status: 0
+  yq --version:
+    exit-status: 0
+  kubectl version | grep Client:
+    exit-status: 0
+  gosu --version:
+    exit-status: 0

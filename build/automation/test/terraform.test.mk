@@ -1,48 +1,52 @@
-TEST_TERRAFORM_FORMATTING_INPUT := $(TMP_DIR)/terraform-input.tf
-TEST_TERRAFORM_FORMATTING_OUTPUT := $(TMP_DIR)/terraform-output.tf
+TF_VAR_localstack_host = $(LOCALSTACK_HOST)
 
-test-terraform: \
-	test-terraform-setup \
-	test-terraform-export-variables-aws \
-	test-terraform-export-variables-from-secret \
-	test-terraform-export-variables-from-shell-vars \
-	test-terraform-export-variables-from-shell-pattern \
-	test-terraform-export-variables-from-shell-pattern-and-vars \
-	test-terraform-export-variables-from-json \
-	test-terraform-fmt \
-	test-terraform-plan-before-apply \
-	test-terraform-apply \
-	test-terraform-plan-after-apply \
-	test-terraform-destroy \
-	test-terraform-unlock \
-	test-terraform-teardown
+test-terraform:
+	make test-terraform-setup
+	tests=( \
+		test-terraform-export-variables \
+		test-terraform-export-variables-from-secret \
+		test-terraform-export-variables-from-shell-vars \
+		test-terraform-export-variables-from-shell-pattern \
+		test-terraform-export-variables-from-shell-pattern-and-vars \
+		test-terraform-export-variables-from-json \
+		test-terraform-fmt \
+		test-terraform-plan-before-apply \
+		test-terraform-apply \
+		test-terraform-plan-after-apply \
+		test-terraform-output \
+		test-terraform-show \
+		test-terraform-destroy \
+		test-terraform-unlock \
+	)
+	for test in $${tests[*]}; do
+		mk_test_initialise $$test
+		make $$test
+	done
+	make test-terraform-teardown
 
 test-terraform-setup:
-	make docker-config
-	make docker-compose-start YML=$(TEST_DIR)/docker-compose.localstack.yml
-	sleep 5
+	make localstack-start
 	# Prerequisites
-	make docker-image NAME=tools
+	make docker-pull NAME=tools VERSION=$(DOCKER_LIBRARY_TOOLS_VERSION)
 
 test-terraform-teardown:
+	make localstack-stop
 	rm -f \
 		$(TEST_TERRAFORM_FORMATTING_INPUT) \
 		$(TEST_TERRAFORM_FORMATTING_OUTPUT)
-	make docker-compose-stop YML=$(TEST_DIR)/docker-compose.localstack.yml
-	rm -rf $(TMP_DIR)/localstack
 
 # ==============================================================================
 
-test-terraform-export-variables-aws:
+test-terraform-export-variables:
 	# arrange
 	export AWS_ACCESS_KEY_ID_test=value
 	export AWS_SECRET_ACCESS_KEY_test=value
 	export AWS_SESSION_TOKEN_test=value
 	# act
-	export=$$(make terraform-export-variables-aws)
+	export=$$(make terraform-export-variables)
 	# assert
 	count=$$(echo "$$export" | grep -E "TF_VAR_aws_[a-z_]*=value" | wc -l)
-	mk_test $(@) 3 = $$count
+	mk_test "3 = $$count"
 
 test-terraform-export-variables-from-secret:
 	# arrange
@@ -54,7 +58,7 @@ test-terraform-export-variables-from-secret:
 	export=$$(make terraform-export-variables-from-json JSON="$$secret")
 	# assert
 	hash=$$(echo -e "export TF_VAR__test_db_username=admin\nexport TF_VAR__test_db_password=secret" | md5sum | awk '{ print $$1 }')
-	mk_test $(@) $$hash = $$(echo "$$export" | md5sum | awk '{ print $$1 }')
+	mk_test "$$hash = $$(echo "$$export" | md5sum | awk '{ print $$1 }')"
 
 test-terraform-export-variables-from-shell-vars:
 	# arrange
@@ -64,7 +68,7 @@ test-terraform-export-variables-from-shell-vars:
 	export=$$(make terraform-export-variables-from-shell VARS=_TEST_DB_USERNAME,_TEST_DB_PASSWORD)
 	# assert
 	count=$$(echo "$$export" | grep TF_VAR__test_db_ | wc -l)
-	mk_test $(@) 2 = $$count
+	mk_test "2 = $$count"
 
 test-terraform-export-variables-from-shell-pattern:
 	# arrange
@@ -74,7 +78,7 @@ test-terraform-export-variables-from-shell-pattern:
 	export=$$(make terraform-export-variables-from-shell PATTERN="^_TEST_DB_")
 	# assert
 	count=$$(echo "$$export" | grep TF_VAR__test_db_ | wc -l)
-	mk_test $(@) 2 = $$count
+	mk_test "2 = $$count"
 
 test-terraform-export-variables-from-shell-pattern-and-vars:
 	# arrange
@@ -89,7 +93,7 @@ test-terraform-export-variables-from-shell-pattern-and-vars:
 	)
 	# assert
 	count=$$(echo "$$export" | grep TF_VAR__test_ | wc -l)
-	mk_test $(@) 6 = $$count
+	mk_test "6 = $$count"
 
 test-terraform-export-variables-from-json:
 	# arrange
@@ -98,7 +102,7 @@ test-terraform-export-variables-from-json:
 	export=$$(make terraform-export-variables-from-json JSON="$$json")
 	# assert
 	hash=$$(echo -e "export TF_VAR_db_username=admin\nexport TF_VAR_db_password=secret" | md5sum | awk '{ print $$1 }')
-	mk_test $(@) $$hash = $$(echo "$$export" | md5sum | awk '{ print $$1 }')
+	mk_test "$$hash = $$(echo "$$export" | md5sum | awk '{ print $$1 }')"
 
 test-terraform-fmt:
 	# arrange
@@ -107,7 +111,7 @@ test-terraform-fmt:
 	make terraform-fmt DIR=$$(echo $(TMP_DIR) | sed "s;$(PROJECT_DIR);;g")
 	# assert
 	make TEST_TERRAFORM_FORMATTING_OUTPUT
-	mk_test $(@) "$$(md5sum $(TEST_TERRAFORM_FORMATTING_OUTPUT) | awk '{ print $$1 }')" = "$$(md5sum $(TEST_TERRAFORM_FORMATTING_INPUT) | awk '{ print $$1 }')"
+	mk_test "$$(md5sum $(TEST_TERRAFORM_FORMATTING_OUTPUT) | awk '{ print $$1 }')" = "$$(md5sum $(TEST_TERRAFORM_FORMATTING_INPUT) | awk '{ print $$1 }')"
 
 test-terraform-plan-before-apply:
 	# act
@@ -115,7 +119,7 @@ test-terraform-plan-before-apply:
 	# assert
 	str="1 to add, 0 to change, 0 to destroy\."
 	count=$$(echo "$$output" | grep "$$str" | wc -l)
-	mk_test $(@) 1 = $$count
+	mk_test "1 = $$count"
 
 test-terraform-apply:
 	# act
@@ -123,7 +127,7 @@ test-terraform-apply:
 	# assert
 	str="Apply complete! Resources: 1 added, 0 changed, 0 destroyed\."
 	count=$$(echo "$$output" | grep "$$str" | wc -l)
-	mk_test $(@) 1 = $$count
+	mk_test "1 = $$count"
 
 test-terraform-plan-after-apply:
 	# act
@@ -131,7 +135,13 @@ test-terraform-plan-after-apply:
 	# assert
 	str="No changes\. Infrastructure is up-to-date\."
 	count=$$(echo "$$output" | grep "$$str" | wc -l)
-	mk_test $(@) 1 = $$count
+	mk_test "1 = $$count"
+
+test-terraform-output:
+	mk_test_skip
+
+test-terraform-show:
+	mk_test_skip
 
 test-terraform-destroy:
 	# act
@@ -139,19 +149,21 @@ test-terraform-destroy:
 	# assert
 	str="Destroy complete! Resources: 1 destroyed\."
 	count=$$(echo "$$output" | grep "$$str" | wc -l)
-	mk_test $(@) 1 = $$count
+	mk_test "1 = $$count"
 
 test-terraform-unlock:
-	mk_test_skip $(@) ||:
+	mk_test_skip
 
 # ==============================================================================
 
+TEST_TERRAFORM_FORMATTING_INPUT = $(TMP_DIR)/terraform-input.tf
 TEST_TERRAFORM_FORMATTING_INPUT:
 	echo 'resource "aws_s3_bucket" "b" {' > $(TEST_TERRAFORM_FORMATTING_INPUT)
 	echo '  bucket = "test-bucket"' >> $(TEST_TERRAFORM_FORMATTING_INPUT)
 	echo '      acl= "public-read"' >> $(TEST_TERRAFORM_FORMATTING_INPUT)
 	echo '}' >> $(TEST_TERRAFORM_FORMATTING_INPUT)
 
+TEST_TERRAFORM_FORMATTING_OUTPUT = $(TMP_DIR)/terraform-output.tf
 TEST_TERRAFORM_FORMATTING_OUTPUT:
 	echo 'resource "aws_s3_bucket" "b" {' > $(TEST_TERRAFORM_FORMATTING_OUTPUT)
 	echo '  bucket = "test-bucket"' >> $(TEST_TERRAFORM_FORMATTING_OUTPUT)

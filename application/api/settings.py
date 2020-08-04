@@ -23,11 +23,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "=tapo65h_g^cf4sxjawp-tl&z@1@5*&)p5gn2kax!^udtvs27c")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DJANGO_DEBUG", False)
+# TODO: get that from the make profile rather than hardcoding
+DEBUG = False
 
 ALLOWED_HOSTS = [
     ".amazonaws.com",
     "localhost",
+    "cs.local",
+    "uec-dos-api-cs-demo-uec-dos-api-cs-proxy-ingress.k8s-prod.texasplatform.uk",
+    "cs.api.directoryofservices.nhs.uk",
 ]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -105,11 +109,11 @@ DATABASES = {
     "dos": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "OPTIONS": {"options": "-c search_path=pathwaysdos"},
-        "HOST": os.getenv("DOS_DB_HOST", "db-dos"),
-        "PORT": os.getenv("DOS_DB_PORT", "5432"),
-        "NAME": os.getenv("DOS_DB_NAME", "postgres"),
-        "USER": os.getenv("DOS_DB_USERNAME", "capacity_status_api"),
-        "PASSWORD": os.getenv("DOS_DB_PASSWORD", "capacity_status_api"),
+        "HOST": os.getenv("DB_DOS_HOST", "db-dos"),
+        "PORT": os.getenv("DB_DOS_PORT", "5432"),
+        "NAME": os.getenv("DB_DOS_NAME", "postgres"),
+        "USER": os.getenv("DB_DOS_USERNAME", "capacity_status_api"),
+        "PASSWORD": os.getenv("DB_DOS_PASSWORD", "capacity_status_api"),
     },
 }
 

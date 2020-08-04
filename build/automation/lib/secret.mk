@@ -1,11 +1,20 @@
-secret-fetch-and-export-variables: ### Get secret and print variable exports - mandatory: NAME=[secret name]; returns: [variables export]
+secret-fetch-and-export-variables: ### Get secret and print variable exports - mandatory: NAME=[secret name]; return: [variables export]
+	# set up
+	eval "$$(make aws-assume-role-export-variables)"
+	# fetch
 	secret=$$(make aws-secret-get NAME=$(NAME))
 	make _secret-export-variables-from-json JSON="$$secret"
 
 secret-fetch: ### Get secret - mandatory: NAME=[secret name]
+	# set up
+	eval "$$(make aws-assume-role-export-variables)"
+	# fetch
 	make aws-secret-get NAME=$(NAME)
 
 secret-create: ### Set secret - mandatory: NAME=[secret name], VARS=[comma-separated environment variable names]
+	# set up
+	eval "$$(make aws-assume-role-export-variables)"
+	# create
 	file=$(TMP_DIR)/$(PROJECT_NAME)-$(@)-$(BUILD_HASH)-$(BUILD_ID).json
 	json=
 	for key in $$(echo "$(VARS)" | sed 's/,/\n/g'); do
@@ -27,8 +36,8 @@ secret-random: ### Generate random secret string - optional: LENGTH=[integer]
 
 # ==============================================================================
 
-_secret-export-variables-from-json: ### Convert JSON to environment variables - mandatory: JSON='{"key":"value"}'|JSON="$$(echo '$(JSON)')"; returns: [variables export]
-	for str in $$(echo '$(JSON)' | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]"); do
+_secret-export-variables-from-json: ### Convert JSON to environment variables - mandatory: JSON='{"key":"value"}'|JSON="$$(echo '$(JSON)')"; return: [variables export]
+	for str in $$(echo '$(JSON)' | make -s docker-run-tools CMD="jq -rf $(JQ_DIR_REL)/json-to-env-vars.jq"); do
 		key=$$(cut -d "=" -f1 <<<"$$str")
 		value=$$(cut -d "=" -f2- <<<"$$str")
 		echo "export $${key}=$${value}"

@@ -22,12 +22,8 @@ def get_config_profiles():
 def role_arn_to_session(aws_profile):
     config = ConfigParser()
     config.read([path.join(path.expanduser("~"), ".aws/config")])
-    role_arn = config.get(
-        "profile {aws_profile}".format(aws_profile=aws_profile), "role_arn"
-    )
-    mfa_serial = config.get(
-        "profile {aws_profile}".format(aws_profile=aws_profile), "mfa_serial"
-    )
+    role_arn = config.get("profile {aws_profile}".format(aws_profile=aws_profile), "role_arn")
+    mfa_serial = config.get("profile {aws_profile}".format(aws_profile=aws_profile), "mfa_serial")
     client = boto3.client("sts")
     response = client.assume_role(
         RoleArn=role_arn,
@@ -54,7 +50,7 @@ export TEXAS_SESSION_EXPIRY_TIME={expiry_time}
             secret_access_key=str(response["Credentials"]["SecretAccessKey"]),
             session_token=str(response["Credentials"]["SessionToken"]),
             profile=str(aws_profile),
-            expiry_time=expiry_time.strftime("%H:%M:%S"),
+            expiry_time=expiry_time.strftime("%Y%m%d%H%M%S"),
         )
     )
 

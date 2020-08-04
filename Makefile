@@ -2,23 +2,45 @@ PROJECT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 
 # ==============================================================================
+# Project targets: Dev workflow
 
-project-build: project-config project-stop # Build project
+build: project-config # Build project
 	make \
 		api-build \
 		proxy-build
 
-project-test: # Test project
+restart: stop start # Restart project
+
+start: project-start # Start project
+
+stop: project-stop # Stop project
+
+log: project-log # Show project logs
+
+migrate:
+	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+		DIR=application \
+		CMD="python manage.py migrate"
+
+test: # Test project
 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
 		DIR=application \
 		CMD="python manage.py test api"
 
-project-push-images: # Push Docker images to the ECR
+push: # Push project artefacts to the registry
 	make docker-login
 	make docker-push NAME=api VERSION=0.0.1
 	make docker-push NAME=proxy VERSION=0.0.1
 
-project-deploy: # Deploy to Kubernetes cluster - mandatory: PROFILE
+# ==============================================================================
+# Project targets: Ops workflow
+
+plan: # Show the creation instance plan - mandatory: PROFILE=[profile name]
+	make terraform-plan \
+		PROFILE=dev \
+		NAME=$(or $(NAME), test)
+
+deploy: # Deploy project - mandatory: PROFILE=[name]
 	[ local == $(PROFILE) ] && exit 1
 	eval "$$(make aws-assume-role-export-variables)"
 	make k8s-kubeconfig-get
@@ -28,18 +50,27 @@ project-deploy: # Deploy to Kubernetes cluster - mandatory: PROFILE
 	# TODO: What's the URL?
 	echo "The URL is $(UI_URL)"
 
-project-clean: # Clean up project
+deploy-job: # Deploy project - mandatory: PROFILE=[name]
+	[ local == $(PROFILE) ] && exit 1
+	eval "$$(make aws-assume-role-export-variables)"
+	make k8s-kubeconfig-get
+	eval "$$(make k8s-kubeconfig-export)"
+	eval "$$(make project-populate-secret-variables)"
+	make k8s-deploy-job STACK=data
+
+# ==============================================================================
+# Supporting targets and variables
+
+clean: # Clean up project
 	make \
 		api-clean \
 		proxy-clean
 	rm -rfv $(HOME)/.python/pip
 
-# ==============================================================================
-
 api-build:
 	make docker-run-python \
 		DIR=application \
-		CMD="pip install -r requirements.txt && python manage.py collectstatic --noinput" SH=true
+		CMD="pip install --upgrade pip && pip install -r requirements.txt && python manage.py collectstatic --noinput" SH=true
 	cd $(APPLICATION_DIR)
 	tar -czf $(PROJECT_DIR)/build/docker/api/assets/api-app.tar.gz \
 		api \
@@ -47,7 +78,7 @@ api-build:
 		manage.py \
 		requirements.txt
 	cp -f \
-		$(CERTIFICATE_DIR)/certificate.* \
+		$(SSL_CERTIFICATE_DIR)/certificate.* \
 		$(DOCKER_DIR)/api/assets/certificate
 	cd $(PROJECT_DIR)
 	make docker-image NAME=api VERSION=0.0.1
@@ -61,7 +92,7 @@ api-clean:
 
 proxy-build:
 	cp -f \
-		$(CERTIFICATE_DIR)/certificate.* \
+		$(SSL_CERTIFICATE_DIR)/certificate.* \
 		$(DOCKER_DIR)/proxy/assets/certificate
 	cp -rf \
 		$(PROJECT_DIR)/application/static \
@@ -74,31 +105,12 @@ proxy-clean:
 		$(DOCKER_DIR)/proxy/assets/application/static \
 		$(DOCKER_DIR)/proxy/assets/certificate/certificate.*
 
-# ==============================================================================
-
-project-migrate:
-	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
-		DIR=application \
-		CMD="python manage.py migrate"
-
-project-restart:
-	make \
-		project-stop \
-		project-start
-
-project-start:
-	make docker-compose-start
-
-project-stop:
-	make docker-compose-stop
-
-project-log:
-	make docker-compose-log
+# ---
 
 project-populate-secret-variables:
 	make secret-fetch-and-export-variables NAME=uec-dos-api-capacity-status-$(PROFILE)
 
-# ==============================================================================
+# ---
 
 # TODO: Do we really need this target?
 project-clean-deploy: project-clean project-build project-push-images project-deploy
@@ -113,20 +125,17 @@ api-start:
 		CMD="python manage.py runserver 0.0.0.0:8000" \
 		ARGS="--publish 8000:8000"
 
-# ==============================================================================
-
-project-config:
-	make docker-config
+# ---
 
 project-generate-development-certificate: ssl-generate-certificate-project
 
 project-trust-certificate: ssl-trust-certificate-project
 
-project-create-ecr:
+create-artefact-repository: ## Create Docker repositories to store artefacts
 	make docker-create-repository NAME=api
 	make docker-create-repository NAME=proxy
 
-# ==============================================================================
+# ---
 
 dev-setup:
 	make python-virtualenv
@@ -146,13 +155,13 @@ dev-build:
 dev-migrate:
 	cd $(APPLICATION_DIR)
 	export API_DB_HOST=localhost
-	export DOS_DB_HOST=localhost
+	export DB_DOS_HOST=localhost
 	python manage.py migrate
 
 dev-start:
 	cd $(APPLICATION_DIR)
 	export API_DB_HOST=localhost
-	export DOS_DB_HOST=localhost
+	export DB_DOS_HOST=localhost
 	export RESET_STATUS_IN_DEFAULT_MINS=$(SERVICE_RESET_STATUS_IN_DEFAULT_MINS)
 	export RESET_STATUS_IN_MINIMUM_MINS=$(SERVICE_RESET_STATUS_IN_MINIMUM_MINS)
 	export RESET_STATUS_IN_MAX_MINS=$(SERVICE_RESET_STATUS_IN_MAX_MINS)
@@ -162,7 +171,7 @@ dev-create-user:
 	password=$$(make secret-random)
 	cd $(APPLICATION_DIR)
 	export API_DB_HOST=localhost
-	export DOS_DB_HOST=localhost
+	export DB_DOS_HOST=localhost
 	python manage.py user test $$password TestUser
 
 dev-smoke-test:

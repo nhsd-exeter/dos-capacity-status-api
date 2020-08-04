@@ -1,0 +1,19 @@
+user:
+  python:
+    exists: true
+    uid: 999
+    gid: 999
+    home: /tmp
+    shell: /bin/false
+
+package:
+  bash:
+    installed: true
+  curl:
+    installed: true
+
+command:
+  gosu --version:
+    exit-status: 0
+  python --version:
+    exit-status: 0

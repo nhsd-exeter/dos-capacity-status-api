@@ -23,6 +23,7 @@ default_reset_status_in = settings.RESET_STATUS_IN_DEFAULT_MINS
 min_reset_status_in = settings.RESET_STATUS_IN_MINIMUM_MINS
 max_reset_status_in = settings.RESET_STATUS_IN_MAX_MINS
 
+
 class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
 
     CAPACITY_STATUS_CHOICES = (
@@ -51,14 +52,14 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
     )
     resetStatusIn = serializers.IntegerField(
         required=False,
-        default= default_reset_status_in,
-        min_value= min_reset_status_in,
-        max_value= max_reset_status_in,
+        default=default_reset_status_in,
+        min_value=min_reset_status_in,
+        max_value=max_reset_status_in,
         help_text="The amount of time, specified in 1 minute blocks up to and including %d hours (%d minutes), \
             from the time the capacity status is updated by the request to reset the capacity status of the \
             service back to GREEN. If no value is provided, the reset time will default to %d hours \
-            (%d minutes)." % (max_reset_status_in/60, max_reset_status_in, default_reset_status_in/60,
-            default_reset_status_in),
+            (%d minutes)."
+        % (max_reset_status_in / 60, max_reset_status_in, default_reset_status_in / 60, default_reset_status_in),
         error_messages={
             "invalid": validation_rules[3]["error_msg"],
             "min_value": validation_rules[4]["error_msg_min_value"],

@@ -15,6 +15,8 @@
 
 - Security
   - API throttling (CSAPI-44)
+  - Toggle Django debug mode using environment variable
+  - Use the library Docker NGINX image for proxy and make sure it is in the latest version
 - Application
   - Let's revisit the domain model and consider again the naming of `serviceUid` (just `id`), `serviceName` (just `name`?), `capacityStatus` (just `status`?)
 - Infrastructure
