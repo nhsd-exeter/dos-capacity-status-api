@@ -73,7 +73,7 @@ def get_dos_service_for_uid(service_uid, throwDoesNotExist=True):
 def get_service_info(service_uid):
     with connections["dos"].cursor() as cursor:
 
-        cursor.execute(get_service_info_sql, [str(service_uid)])
+        cursor.execute(get_service_info_sql, [str(int(service_uid))])
         result_set = _fetch_all_as_list_of_dicts(cursor)
 
     if not result_set:
