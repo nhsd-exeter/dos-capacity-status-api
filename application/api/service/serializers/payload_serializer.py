@@ -32,7 +32,7 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
         "GREEN",
     )
 
-    capacityStatus = serializers.ChoiceField(
+    status = serializers.ChoiceField(
         required=True,
         choices=CAPACITY_STATUS_CHOICES,
         help_text="The capacity status (RAG status) to set the service to. This value is not case sensitive.",
@@ -73,15 +73,15 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
     """
 
     def to_internal_value(self, data):
-        if "capacityStatus" in data:
-            data["capacityStatus"] = str(data["capacityStatus"]).upper()
+        if "status" in data:
+            data["status"] = str(data["status"]).upper()
         return super().to_internal_value(data)
 
     """
     Converts the JSON payload (provided for PUT and PATCH requests) into the correct format
-    for the serializer. Here we are taking the input fields of ResetStatusIn and capacityStatus
+    for the serializer. Here we are taking the input fields of ResetStatusIn and status
     and converting them to the correct values for the expected serializer fields for the
-    resetdatetime and capacitystatus.
+    resetdatetime and status.
     """
 
     def convertToModel(self, data):
@@ -96,7 +96,7 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
         data["resetdatetime"] = self._resetTime(datetime.now(), payload_data)
 
         # Set capacity status
-        data["capacitystatus"] = {"color": payload_data["capacityStatus"]}
+        data["status"] = {"color": payload_data["status"]}
 
         # Set notes to be default note string plus any additional notes that have been
         # included in the request data
@@ -117,7 +117,7 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
 
     def _resetTime(self, current_date, payload_data):
         new_reset_dt = None
-        if payload_data["capacityStatus"] != "GREEN":
+        if payload_data["status"] != "GREEN":
             reset_time = current_date + timedelta(minutes=payload_data["resetStatusIn"])
             new_reset_dt = reset_time.astimezone().strftime("%Y-%m-%dT%H:%M:%SZ")
         return new_reset_dt

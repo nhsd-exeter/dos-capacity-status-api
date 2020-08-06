@@ -18,7 +18,7 @@ class TestPayloadSerializer(unittest.TestCase):
         "Test reset_time method for RED status update"
 
         payload_data = {
-            "capacityStatus": "RED",
+            "status": "RED",
             "resetStatusIn": 300,
         }
         current_time = datetime.now()
@@ -35,7 +35,7 @@ class TestPayloadSerializer(unittest.TestCase):
         "Test reset_time method for AMBER status update"
 
         payload_data = {
-            "capacityStatus": "AMBER",
+            "status": "AMBER",
             "resetStatusIn": 300,
         }
         current_time = datetime.now()
@@ -52,7 +52,7 @@ class TestPayloadSerializer(unittest.TestCase):
         "Test reset_time method for GREEN status update"
 
         payload_data = {
-            "capacityStatus": "GREEN",
+            "status": "GREEN",
             "resetStatusIn": 300,
         }
         current_time = datetime.now()
@@ -67,7 +67,7 @@ class TestPayloadSerializer(unittest.TestCase):
         "Test serializer with full and valid payload turning to red status"
 
         full_payload_data = {
-            "capacityStatus": self.capacity_status,
+            "status": self.capacity_status,
             "resetStatusIn": self.reset_status_in,
             "notes": self.notes,
         }
@@ -87,7 +87,7 @@ class TestPayloadSerializer(unittest.TestCase):
 
         # Perform assertions
         self.assertDictEqual(
-            model_data["capacitystatus"], {"color": "RED"}, "Model capacity status data incorrectly set",
+            model_data["status"], {"color": "RED"}, "Model capacity status data incorrectly set",
         )
 
         model_reset_time_str = model_data["resetdatetime"]

@@ -15,7 +15,7 @@ class TestPatchSuccess(unittest.TestCase):
 
     def test_update_capacity_status_red(self):
 
-        data = '{"capacityStatus":"red"}'
+        data = '{"status":"red"}'
 
         response = client.patch(
             TestEnv.api_url,
@@ -32,7 +32,7 @@ class TestPatchSuccess(unittest.TestCase):
 
     def test_update_capacity_status_amber(self):
 
-        data = '{"capacityStatus":"amber"}'
+        data = '{"status":"amber"}'
 
         response = client.patch(
             TestEnv.api_url,
@@ -49,7 +49,7 @@ class TestPatchSuccess(unittest.TestCase):
 
     def test_update_capacity_status_amber_full(self):
 
-        data = '{"capacityStatus":"amber", "resetStatusIn":50, "notes":"some more notes"}'
+        data = '{"status":"amber", "resetStatusIn":50, "notes":"some more notes"}'
 
         response = client.patch(
             TestEnv.api_url,
@@ -71,7 +71,7 @@ class TestPatchSuccess(unittest.TestCase):
 
     def test_update_capacity_status_green(self):
 
-        data = '{"capacityStatus":"GreEn"}'
+        data = '{"status":"GreEn"}'
 
         response = client.patch(
             TestEnv.api_url,
@@ -88,7 +88,7 @@ class TestPatchSuccess(unittest.TestCase):
 
     def test_update_capacity_status_green_full(self):
 
-        data = '{"capacityStatus":"green", "resetStatusIn":50, "notes":"some more notes"}'
+        data = '{"status":"green", "resetStatusIn":50, "notes":"some more notes"}'
 
         response = client.patch(
             TestEnv.api_url,
@@ -110,7 +110,7 @@ class TestPatchSuccess(unittest.TestCase):
 
     def test_update_capacity_reset_time_0(self):
 
-        data = '{"capacityStatus":"ReD", "resetStatusIn":0}'
+        data = '{"status":"ReD", "resetStatusIn":0}'
 
         response = client.patch(
             TestEnv.api_url,
@@ -128,7 +128,7 @@ class TestPatchSuccess(unittest.TestCase):
 
     def test_update_capacity_reset_time_30(self):
 
-        data = '{"capacityStatus":"red", "resetStatusIn":30}'
+        data = '{"status":"red", "resetStatusIn":30}'
 
         response = client.patch(
             TestEnv.api_url,
@@ -146,7 +146,7 @@ class TestPatchSuccess(unittest.TestCase):
 
     def test_update_capacity_reset_time_1440(self):
 
-        data = '{"capacityStatus":"rEd", "resetStatusIn":1440}'
+        data = '{"status":"rEd", "resetStatusIn":1440}'
 
         response = client.patch(
             TestEnv.api_url,
@@ -164,7 +164,7 @@ class TestPatchSuccess(unittest.TestCase):
 
     def test_update_capacity_additional_notes_int(self):
 
-        data = '{"capacityStatus":"reD", "notes":1234}'
+        data = '{"status":"reD", "notes":1234}'
 
         response = client.patch(
             TestEnv.api_url,
@@ -182,7 +182,7 @@ class TestPatchSuccess(unittest.TestCase):
 
     def test_update_capacity_additional_notes_text(self):
 
-        data = '{"capacityStatus":"rEd", "resetStatusIn":50, "notes":"some more notes"}'
+        data = '{"status":"rEd", "resetStatusIn":50, "notes":"some more notes"}'
 
         response = client.patch(
             TestEnv.api_url,
@@ -202,7 +202,7 @@ class TestPatchSuccess(unittest.TestCase):
 
     def test_update_capacity_additional_notes_loads(self):
 
-        data = '{"capacityStatus":"reD","notes":"' + TestEnv.max_notes + '"}'
+        data = '{"status":"reD","notes":"' + TestEnv.max_notes + '"}'
         response = client.patch(
             TestEnv.api_url,
             content_type="application/json",

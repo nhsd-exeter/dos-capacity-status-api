@@ -17,13 +17,13 @@ class TestHelper(unittest.TestCase):
         modified_by="TestUser",
     ):
         self.assertEqual(
-            json_response["serviceUid"], service_uid,
+            json_response["id"], service_uid,
         )
         self.assertEqual(
-            json_response["serviceName"], service_name,
+            json_response["name"], service_name,
         )
         self.assertEqual(
-            json_response["capacityStatus"], capacity_status,
+            json_response["status"], capacity_status,
         )
         if expected_reset_date_time:
             (expected_reset_time_str_upper, expected_reset_time_str_lower,) = self._get_expected_reset_time(
