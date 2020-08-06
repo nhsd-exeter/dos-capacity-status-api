@@ -18,8 +18,8 @@ capacity_service_api_desc = "This is the Capacity Status API. </BR> \
     (in the case where the active service is in a GREEN capacity state) the reset date/time field \
     will not be included in the response. Refer to the endpoint specifications below for \
     API response details. </BR> \
-    All endpoints of this API require that the UID of the service to retrieve/update is given in \
-    the URL. If no such active service can be found in DoS for the given UID an HTTP-404 error code \
+    All endpoints of this API require that the ID of the service to retrieve/update is given in \
+    the URL. If no such active service can be found in DoS for the given ID an HTTP-404 error code \
     will be returned. </BR>\
     </BR> \
     <B>API Authentication</B></BR> \
@@ -104,10 +104,10 @@ description_get = (
     + description_model["get__business_logic_content"]
 )
 
-service_uid_path_param = openapi.Parameter(
-    "service__uid",
+service_id_path_param = openapi.Parameter(
+    "id",
     in_="path",
-    description="The service UID identifying the service to retrieve/update its capacity status information.",
+    description="The service ID identifying the service to retrieve/update its capacity status information.",
     type=openapi.TYPE_STRING,
 )
 

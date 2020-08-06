@@ -14,11 +14,11 @@ This is the response serializer. It is responsible for:
 
 class CapacityStatusResponseSerializer(serializers.Serializer):
 
-    serviceUid = serializers.IntegerField(required=True, help_text="The UID identifier of the service.",)
+    id = serializers.IntegerField(required=True, help_text="The ID of the service.",)
 
-    serviceName = serializers.CharField(required=True, help_text="The name of the service.",)
+    name = serializers.CharField(required=True, help_text="The name of the service.",)
 
-    capacityStatus = serializers.CharField(required=True, help_text="The current capacity status of the service.",)
+    status = serializers.CharField(required=True, help_text="The current capacity status of the service.",)
 
     resetDateTime = serializers.DateTimeField(
         required=False,
@@ -47,9 +47,9 @@ class CapacityStatusResponseSerializer(serializers.Serializer):
         service_data = data["service"]
         capacitystatus_data = data["capacitystatus"]
 
-        response_data["serviceUid"] = service_data["uid"]
-        response_data["serviceName"] = service_data["name"]
-        response_data["capacityStatus"] = capacitystatus_data["color"]
+        response_data["id"] = service_data["uid"]
+        response_data["name"] = service_data["name"]
+        response_data["status"] = capacitystatus_data["color"]
         if data["resetdatetime"] is not None:
             response_data["resetDateTime"] = data["resetdatetime"]
         if data["modifiedby"] is not None:
