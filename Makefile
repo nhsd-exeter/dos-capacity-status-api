@@ -27,6 +27,31 @@ test: # Test project
 		DIR=application \
 		CMD="python manage.py test api"
 
+test-dos-interface: # Test dos interface
+	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+		DIR=application \
+		CMD="python manage.py test api/dos_interface/"
+
+test-service: # Test service
+	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+		DIR=application \
+		CMD="python manage.py test api/service/"
+
+test-authentication: # Test dos interface
+	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+		DIR=application \
+		CMD="python manage.py test api/authentication/"
+
+test-regression-only: # Run only regression test suite
+	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+		DIR=application \
+		CMD="python manage.py test --tag=regression api"
+
+test-unit-only: # Run only unit test suite
+	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+		DIR=application \
+		CMD="python manage.py test --exclude-tag=regression api"
+
 push: # Push project artefacts to the registry
 	make docker-login
 	make docker-push NAME=api VERSION=0.0.1
