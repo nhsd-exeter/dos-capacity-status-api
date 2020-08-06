@@ -33,7 +33,7 @@ class TestPatchValidationVal0002(unittest.TestCase):
     def test_invalid_capacity_status_given_number(self):
         client = Client()
 
-        data = '{"capacityStatus":30}'
+        data = '{"status":30}'
 
         response = client.patch(
             TestEnv.api_url,
@@ -52,7 +52,7 @@ class TestPatchValidationVal0002(unittest.TestCase):
     def test_invalid_capacity_status_given_text(self):
         client = Client()
 
-        data = '{"capacityStatus":"PINK"}'
+        data = '{"status":"PINK"}'
 
         response = client.patch(
             TestEnv.api_url,
@@ -71,7 +71,7 @@ class TestPatchValidationVal0002(unittest.TestCase):
     def test_invalid_capacity_status_given_blank(self):
         client = Client()
 
-        data = '{"capacityStatus":""}'
+        data = '{"status":""}'
 
         response = client.patch(
             TestEnv.api_url,
@@ -94,7 +94,7 @@ class TestPatchValidationVal0003(unittest.TestCase):
     def test_invalid_reset_status_text(self):
         client = Client()
 
-        data = '{"capacityStatus":"red",\
+        data = '{"status":"red",\
             "resetStatusIn": "Text"}'
 
         response = client.patch(
@@ -114,7 +114,7 @@ class TestPatchValidationVal0003(unittest.TestCase):
     def test_invalid_reset_status_blank(self):
         client = Client()
 
-        data = '{"capacityStatus":"red",\
+        data = '{"status":"red",\
             "resetStatusIn": ""}'
 
         response = client.patch(
@@ -138,7 +138,7 @@ class TestPatchValidationVal0004(unittest.TestCase):
     def test_invalid_reset_status_in_given_too_low(self):
         client = Client()
 
-        data = '{"capacityStatus":"red",\
+        data = '{"status":"red",\
             "resetStatusIn": -1}'
 
         response = client.patch(
@@ -158,7 +158,7 @@ class TestPatchValidationVal0004(unittest.TestCase):
     def test_invalid_reset_status_in_given_too_high(self):
         client = Client()
 
-        data = '{"capacityStatus":"red",\
+        data = '{"status":"red",\
             "resetStatusIn": 2345}'
 
         response = client.patch(
@@ -184,7 +184,7 @@ class TestPatchValidationVal0005(unittest.TestCase):
 
         too_many_notes = TestEnv.max_notes + "a"
 
-        data = '{"capacityStatus":"red","notes":"' + too_many_notes + '"}'
+        data = '{"status":"red","notes":"' + too_many_notes + '"}'
         response = client.patch(
             TestEnv.api_url,
             content_type="application/json",
@@ -206,7 +206,7 @@ class TestPatchValidationVal0006(unittest.TestCase):
     def test_invalid_notes_blank(self):
         client = Client()
 
-        data = '{"capacityStatus":"red",\
+        data = '{"status":"red",\
             "notes":""}'
 
         response = client.patch(
@@ -230,7 +230,7 @@ class TestPatchValidationMultipleVals(unittest.TestCase):
     def test_multiple_invalid_inputs(self):
         client = Client()
 
-        data = '{"capacityStatus":"pink",\
+        data = '{"status":"pink",\
             "resetStatusIn":-1,\
             "notes":""}'
 

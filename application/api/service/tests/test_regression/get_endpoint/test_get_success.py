@@ -18,13 +18,13 @@ class TestGetSuccess(unittest.TestCase):
         self.assertEqual(response.status_code, 200, "Response status code is not as expected.")
 
         self.assertEqual(
-            json_response["serviceUid"], 110798,
+            json_response["id"], 110798,
         )
         self.assertEqual(
-            json_response["serviceName"], "Dentist - Sneinton Family Dental Practice (Nottingham)",
+            json_response["name"], "Dentist - Sneinton Family Dental Practice (Nottingham)",
         )
         self.assertEqual(
-            json_response["capacityStatus"], "GREEN",
+            json_response["status"], "GREEN",
         )
 
         reset_date_time_present = "resetDateTime" in json_response

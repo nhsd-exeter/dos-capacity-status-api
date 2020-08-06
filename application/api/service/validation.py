@@ -1,15 +1,15 @@
 validation_rules = {
     1: {
         "name": "VAL-0001",
-        "desc": "<B> VAL-0001</B> - A Capacity Status (capacityStatus) has not been given - \
+        "desc": "<B> VAL-0001</B> - A Capacity Status (status) has not been given - \
             returned when no Capacity Status is given.",
-        "error_msg": "VAL-0001 - A Capacity Status (capacityStatus) has not been given.",
+        "error_msg": "VAL-0001 - A Capacity Status (status) has not been given.",
     },
     2: {
         "name": "VAL-0002",
-        "desc": "<B> VAL-0002</B> - Invalid CapacityStatus value - returned when a capacity \
+        "desc": "<B> VAL-0002</B> - Invalid Capacity Status value - returned when a capacity \
             status other than that defined by the CapacityStatusRequestPayload model is given.",
-        "error_msg": "VAL-0002 - The given CapacityStatus value is invalid and must be a value \
+        "error_msg": "VAL-0002 - The given Capacity Status value is invalid and must be a value \
             as defined by the CapacityStatusRequestPayload model.",
     },
     3: {

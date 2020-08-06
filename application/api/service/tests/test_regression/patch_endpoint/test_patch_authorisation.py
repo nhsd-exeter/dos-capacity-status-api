@@ -10,7 +10,7 @@ class TestPatchView(unittest.TestCase):
     def test_user_not_authorised(self):
         client = Client()
 
-        data = '{"capacityStatus":"RED"}'
+        data = '{"status":"RED"}'
 
         response = client.patch(
             TestEnv.api_unauthorised_url,

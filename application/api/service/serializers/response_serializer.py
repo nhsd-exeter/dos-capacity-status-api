@@ -45,11 +45,11 @@ class CapacityStatusResponseSerializer(serializers.Serializer):
         response_data = data
 
         service_data = data["service"]
-        capacitystatus_data = data["capacitystatus"]
+        status_data = data["status"]
 
         response_data["id"] = service_data["uid"]
         response_data["name"] = service_data["name"]
-        response_data["status"] = capacitystatus_data["color"]
+        response_data["status"] = status_data["color"]
         if data["resetdatetime"] is not None:
             response_data["resetDateTime"] = data["resetdatetime"]
         if data["modifiedby"] is not None:
@@ -59,7 +59,6 @@ class CapacityStatusResponseSerializer(serializers.Serializer):
         if data["notes"] is None:
             response_data.pop("notes")
         response_data.pop("service")
-        response_data.pop("capacitystatus")
 
         logger.debug("Converted data from CapacityStatusResponseSerializer: %s", response_data)
 

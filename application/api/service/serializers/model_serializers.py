@@ -44,7 +44,7 @@ It is responsible for:
 class CapacityStatusModelSerializer(serializers.ModelSerializer):
 
     service = ServicesSerializer(read_only=True)
-    capacitystatus = CapacitystatusesSerializer(required=True)
+    status = CapacitystatusesSerializer(required=True)
 
     class Meta:
         model = ServiceCapacities
@@ -56,7 +56,7 @@ class CapacityStatusModelSerializer(serializers.ModelSerializer):
             "modifieddate",
             "service",
             "resetdatetime",
-            "capacitystatus",
+            "status",
         )
 
     """
@@ -70,12 +70,12 @@ class CapacityStatusModelSerializer(serializers.ModelSerializer):
             "Data passed into CapacityStatusModelSerializer for update: %s", validated_data,
         )
 
-        ragStatusColor = validated_data.get("capacitystatus", instance.capacitystatus)["color"]
+        ragStatusColor = validated_data.get("status", instance.status)["color"]
         capStatus = Capacitystatuses.objects.db_manager("dos").get(color=ragStatusColor)
 
         # Adapted from the super class's update method
         for attr, value in validated_data.items():
-            if attr == "capacitystatus":
+            if attr == "status":
                 setattr(instance, attr, capStatus)
             else:
                 setattr(instance, attr, value)

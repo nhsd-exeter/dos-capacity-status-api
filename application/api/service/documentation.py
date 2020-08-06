@@ -116,8 +116,8 @@ validation_error_response = (
                 Validation errors are grouped together by request payload field. An example validation error \
                 response for an invalid capacity status and reset status in value would therefore look like: </BR>\
 <pre>{ </BR>\
-    "capacityStatus": [</BR>\
-        "VAL-0002 - The given CapacityStatus value is invalid and must be a value as defined by the CapacityStatusRequestPayload model." </BR>\
+    "status": [</BR>\
+        "VAL-0002 - The given Capacity Status value is invalid and must be a value as defined by the CapacityStatusRequestPayload model." </BR>\
     ],</BR>\
     "resetStatusIn": [</BR>\
         "VAL-0004 - ResetStatusIn outside of limits - the reset time given is outside the minimum limit (%d minutes) defined by the CapacityStatusRequestPayload model."</BR>\
