@@ -1,6 +1,8 @@
 PROJECT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 
+OMIT := */tests/*,*/migrations/*,*apps.py,*asgi.py,*wsgi.py,*manage.py,*api/settings.py
+
 # ==============================================================================
 # Project targets: Dev workflow
 
@@ -51,6 +53,11 @@ test-unit-only: # Run only unit test suite
 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
 		DIR=application \
 		CMD="python manage.py test --exclude-tag=regression api"
+
+test-coverage: # Test coverage project
+	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+		DIR=application \
+		CMD="coverage run --source='.' --omit=$$(OMIT) manage.py test api/ && coverage report -m && coverage erase"
 
 push: # Push project artefacts to the registry
 	make docker-login
