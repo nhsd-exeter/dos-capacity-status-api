@@ -1,7 +1,7 @@
 from unittest import TestCase, mock
 from datetime import datetime
 from ..reporting import _get_request_execution_time, log_reporting_info, usage_reporting_logger
-from ..reporting import _retrieve_service_data, gmtime, api_logger
+from ..reporting import _retrieve_service_data, api_logger
 from time import gmtime as real_gmtime, strftime
 
 
@@ -47,7 +47,7 @@ class TestDosInterfaceReporting(TestCase):
     @mock.patch("api.dos_interface.reporting._get_request_execution_time")
     def test_log_reporting_info__sucess(self, mock_get_request_execution_time, mock_gmtime):
         mock_get_request_execution_time.return_value = 2.5
-        mock_gmtime.return_value = gmtime()
+        mock_gmtime.return_value = real_gmtime()
         usage_reporting_logger.info = mock.MagicMock()
 
         class Request:
