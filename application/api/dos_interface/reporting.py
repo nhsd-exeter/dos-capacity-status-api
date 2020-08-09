@@ -6,7 +6,7 @@ from time import gmtime, strftime
 
 import logging
 
-api_logger = logging.getLogger("api.dos_intface.reporting")
+api_logger = logging.getLogger("api.dos_interface.reporting")
 usage_reporting_logger = logging.getLogger("api.usage.reporting")
 
 
@@ -61,7 +61,6 @@ def log_reporting_info(service_uid, request, action="saveCapacityStatus", status
         return None
 
     execution_time = "execution_time=" + str(_get_request_execution_time(request))
-
     message = (
         strftime("%Y/%m/%d %H:%M:%S.000000%z", gmtime())
         + "|info|update|"

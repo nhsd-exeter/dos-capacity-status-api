@@ -7,7 +7,7 @@ from ..queries import can_user_edit_service, get_dos_service_for_uid, get_servic
 from api.dos_interface.models import Services
 
 
-class TestCanUserEditService(TestCase):
+class TestDosInterfaceQueries(TestCase):
     "Tests for dos query functions"
 
     def set_user_status(self, user_id=1000000001, status="ACTIVE"):
