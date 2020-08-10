@@ -92,7 +92,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
         return self._handle_cannot_edit_service_response(request, str(id))
 
     def patch(self, request, id, partial=True):
-        data = {"detail": "Method \"PATCH\" not allowed. Please use \"PUT\" instead."}
+        data = {"detail": 'Method "PATCH" not allowed. Please use "PUT" instead.'}
         return Response(data, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def get_user_from_request(self, request):
