@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
 
 from ..queries import can_user_edit_service, get_dos_service_for_uid, get_service_info, Users
+from ..queries import get_dos_user_for_user_id, get_dos_user_for_username
 
 from api.dos_interface.models import Services
 
@@ -88,6 +89,20 @@ class TestDosInterfaceQueries(TestCase):
         dos_user_id = 1000000001
         user_can_edit = can_user_edit_service(dos_user_id, service_uid)
         self.assertFalse(user_can_edit)
+
+    def test_get_dos_user_for_username(self):
+        "Test get_dos_user_for_username method, return dos user model"
+        username = "TestUser"
+        return_value = get_dos_user_for_username(username)
+        assert type(return_value) is Users
+        assert return_value.username == username
+
+    def test_get_dos_user_for_user_id(self):
+        "Test get_dos_user_for_user_id method, return dos user model"
+        user_id = 1000000001
+        return_value = get_dos_user_for_user_id(user_id)
+        assert type(return_value) is Users
+        assert return_value.id == user_id
 
     def test_get_dos_service_for_uid__success(self):
         "Test get_dos_service_for_uid, success"
