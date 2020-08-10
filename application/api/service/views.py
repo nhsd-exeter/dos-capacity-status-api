@@ -91,34 +91,9 @@ class CapacityStatusView(RetrieveUpdateAPIView):
             return error_response
         return self._handle_cannot_edit_service_response(request, str(id))
 
-    @swagger_auto_schema(
-        operation_description=description_post,
-        manual_parameters=[service_id_path_param],
-        responses={
-            200: CapacityStatusResponseSerializer,
-            400: validation_error_response,
-            401: authentication_error_response,
-            403: """Forbidden - when a user does not have permissions to update capacity
-                    information for the requested service.""",
-            404: """Not Found - when the requested service to update is either not active,
-                    or could not be found in DoS.""",
-            500: """Internal Server Error - when an unexpected error is encountered whilst
-                    processing the request.""",
-        },
-        request_body=CapacityStatusRequestPayloadSerializer,
-    )
     def patch(self, request, id, partial=True):
-        logger.info("Request sent from host: %s", request.META["HTTP_HOST"])
-        logger.info("Payload: %s", request.data)
-        self._check_and_default_request_meta_data(request)
-        if self._can_edit_service(request, str(id)):
-            error_response = self._update_service_capacity(request, id)
-            if not error_response:
-                response = self._serialized_update_capacity_response(id)
-                log_reporting_info(id, request)
-                return response
-            return error_response
-        return self._handle_cannot_edit_service_response(request, str(id))
+        data = {"detail": "Method \"PATCH\" not allowed. Please use \"PUT\" instead."}
+        return Response(data, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def get_user_from_request(self, request):
         user = request.user
