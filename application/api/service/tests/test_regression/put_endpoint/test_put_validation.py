@@ -4,15 +4,15 @@ from ..test_env import TestEnv
 
 
 @tag("regression")
-class TestPatchValidationVal0001(unittest.TestCase):
-    "Tests for the VAL-0001 validation code for the Patch endpoint"
+class TestPutValidationVal0001(unittest.TestCase):
+    "Tests for the VAL-0001 validation code for the Put endpoint"
 
     def test_invalid_capacity_status_given_none(self):
         client = Client()
 
         data = "{}"
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -27,15 +27,16 @@ class TestPatchValidationVal0001(unittest.TestCase):
         )
 
 
-class TestPatchValidationVal0002(unittest.TestCase):
-    "Tests for the VAL-0002 validation code for the Patch endpoint"
+@tag("regression")
+class TestPutValidationVal0002(unittest.TestCase):
+    "Tests for the VAL-0002 validation code for the Put endpoint"
 
     def test_invalid_capacity_status_given_number(self):
         client = Client()
 
         data = '{"status":30}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -54,7 +55,7 @@ class TestPatchValidationVal0002(unittest.TestCase):
 
         data = '{"status":"PINK"}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -73,7 +74,7 @@ class TestPatchValidationVal0002(unittest.TestCase):
 
         data = '{"status":""}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -88,8 +89,9 @@ class TestPatchValidationVal0002(unittest.TestCase):
         )
 
 
-class TestPatchValidationVal0003(unittest.TestCase):
-    "Tests for the VAL-0003 validation code for the Patch endpoint"
+@tag("regression")
+class TestPutValidationVal0003(unittest.TestCase):
+    "Tests for the VAL-0003 validation code for the Put endpoint"
 
     def test_invalid_reset_status_text(self):
         client = Client()
@@ -97,7 +99,7 @@ class TestPatchValidationVal0003(unittest.TestCase):
         data = '{"status":"red",\
             "resetStatusIn": "Text"}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -117,7 +119,7 @@ class TestPatchValidationVal0003(unittest.TestCase):
         data = '{"status":"red",\
             "resetStatusIn": ""}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -132,8 +134,9 @@ class TestPatchValidationVal0003(unittest.TestCase):
         )
 
 
-class TestPatchValidationVal0004(unittest.TestCase):
-    "Tests for the VAL-0004 validation code for the Patch endpoint"
+@tag("regression")
+class TestPutValidationVal0004(unittest.TestCase):
+    "Tests for the VAL-0004 validation code for the Put endpoint"
 
     def test_invalid_reset_status_in_given_too_low(self):
         client = Client()
@@ -141,7 +144,7 @@ class TestPatchValidationVal0004(unittest.TestCase):
         data = '{"status":"red",\
             "resetStatusIn": -1}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -161,7 +164,7 @@ class TestPatchValidationVal0004(unittest.TestCase):
         data = '{"status":"red",\
             "resetStatusIn": 2345}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -176,8 +179,9 @@ class TestPatchValidationVal0004(unittest.TestCase):
         )
 
 
-class TestPatchValidationVal0005(unittest.TestCase):
-    "Tests for the VAL-0005 validation code for the Patch endpoint"
+@tag("regression")
+class TestPutValidationVal0005(unittest.TestCase):
+    "Tests for the VAL-0005 validation code for the Put endpoint"
 
     def test_invalid_notes_greater_than_900(self):
         client = Client()
@@ -185,7 +189,7 @@ class TestPatchValidationVal0005(unittest.TestCase):
         too_many_notes = TestEnv.max_notes + "a"
 
         data = '{"status":"red","notes":"' + too_many_notes + '"}'
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -200,8 +204,9 @@ class TestPatchValidationVal0005(unittest.TestCase):
         )
 
 
-class TestPatchValidationVal0006(unittest.TestCase):
-    "Tests for the VAL-0006 validation code for the Patch endpoint"
+@tag("regression")
+class TestPutValidationVal0006(unittest.TestCase):
+    "Tests for the VAL-0006 validation code for the Put endpoint"
 
     def test_invalid_notes_blank(self):
         client = Client()
@@ -209,7 +214,7 @@ class TestPatchValidationVal0006(unittest.TestCase):
         data = '{"status":"red",\
             "notes":""}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -224,7 +229,8 @@ class TestPatchValidationVal0006(unittest.TestCase):
         )
 
 
-class TestPatchValidationMultipleVals(unittest.TestCase):
+@tag("regression")
+class TestPutValidationMultipleVals(unittest.TestCase):
     "Tests for multiple validation warnings being raised"
 
     def test_multiple_invalid_inputs(self):
@@ -234,7 +240,7 @@ class TestPatchValidationMultipleVals(unittest.TestCase):
             "resetStatusIn":-1,\
             "notes":""}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,

@@ -4,7 +4,7 @@ from ..test_env import TestEnv
 
 
 @tag("regression")
-class TestPatchView(unittest.TestCase):
+class TestPutView(unittest.TestCase):
     "Tests authorisation for the PATCH endpoint."
 
     def test_user_not_authorised(self):
@@ -12,7 +12,7 @@ class TestPatchView(unittest.TestCase):
 
         data = '{"status":"RED"}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_unauthorised_url,
             content_type="application/json",
             data=data,
