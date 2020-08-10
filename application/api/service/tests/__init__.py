@@ -6,6 +6,8 @@ from .test_regression.get_endpoint.test_get_success import *
 from .test_regression.get_endpoint.test_get_authentication import *
 from .test_regression.get_endpoint.test_get_404 import *
 
+from .test_regression.patch_endpoint.test_patch_405 import *
+
 from .test_regression.put_endpoint.test_put_404 import *
 from .test_regression.put_endpoint.test_put_authentication import *
 from .test_regression.put_endpoint.test_put_authorisation import *

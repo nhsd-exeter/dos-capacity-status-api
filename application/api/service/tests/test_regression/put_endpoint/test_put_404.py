@@ -5,7 +5,7 @@ from ..test_env import TestEnv
 
 @tag("regression")
 class TestPut404(unittest.TestCase):
-    "Tests for handling service not found scenario for the PATCH endpoint"
+    "Tests for handling service not found scenario for the PUT endpoint"
 
     def test_no_service_found(self):
         client = Client()

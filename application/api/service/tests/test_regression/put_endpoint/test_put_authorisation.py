@@ -5,7 +5,7 @@ from ..test_env import TestEnv
 
 @tag("regression")
 class TestPutView(unittest.TestCase):
-    "Tests authorisation for the PATCH endpoint."
+    "Tests authorisation for the PUT endpoint."
 
     def test_user_not_authorised(self):
         client = Client()
