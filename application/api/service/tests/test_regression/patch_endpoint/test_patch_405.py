@@ -2,6 +2,7 @@ import unittest
 from django.test import Client, tag
 from ..test_env import TestEnv
 
+
 @tag("regression")
 class TestPatch405(unittest.TestCase):
     "Tests for handling method not allowed scenario for the PATCH endpoint"
