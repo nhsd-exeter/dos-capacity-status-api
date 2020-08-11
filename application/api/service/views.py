@@ -122,10 +122,10 @@ class CapacityStatusView(RetrieveUpdateAPIView):
             return Response(msg, status=status.HTTP_404_NOT_FOUND)
         return None
 
-    def _get_service_capacity(self, id):
+    def _get_service_capacity(self, service_uid):
         try:
             capacitiesManager = ServiceCapacities.objects.db_manager("dos")
-            service_status = capacitiesManager.get(service__uid=id)
+            service_status = capacitiesManager.get(service__uid=service_uid)
             return service_status
         except ObjectDoesNotExist:
             return None
