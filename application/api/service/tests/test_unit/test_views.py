@@ -303,3 +303,47 @@ class CapacityStatusViews(TestCase):
     #     assert response.status_code is status.HTTP_200_OK
     #     print(response.data)
     #     # assert '' == response.data
+
+    @mock.patch("api.service.views.datetime")
+    def test__check_and_default_request_meta_data__fail__no_request_date(self, mock_datetime):
+        "Test the _check_and_default_request_meta_data function, fail for no request date in header"
+        logger.warning = mock.MagicMock()
+        mock_datetime.now.return_value = datetime(year=2020, month=1, day=1, hour=00, minute=00, second=00)
+        request = Request()
+        del request.META["HTTP_X_REQUEST_RECEIVED"]
+        view = CapacityStatusView()
+        view._check_and_default_request_meta_data(request)
+        calls = [
+            mock.call("No request received date in header. Defaulting to now"),
+        ]
+        logger.warning.assert_has_calls(calls)
+        error_msg = "Error should be for when the request doesn't have time"
+        assert str(mock_datetime.now()) == str(request.META["HTTP_X_REQUEST_RECEIVED"]), error_msg
+
+    def test__check_and_default_request_meta_data__fail__no_request_identifier(self):
+        "Test the _check_and_default_request_meta_data function, fail for no request identifier in header"
+        logger.warning = mock.MagicMock()
+        request = Request()
+        del request.META["HTTP_X_REQUEST_ID"]
+        view = CapacityStatusView()
+        view._check_and_default_request_meta_data(request)
+        calls = [
+            mock.call("No request identifier in header. Defaulting to xxx"),
+        ]
+        logger.warning.assert_has_calls(calls)
+        error_msg = "Error should be for when the request doesn't have time"
+        assert "xxx" == request.META["HTTP_X_REQUEST_ID"], error_msg
+
+    def test__check_and_default_request_meta_data__fail__no_client_ip(self):
+        "Test the _check_and_default_request_meta_data function, fail for no request client ip in header"
+        logger.warning = mock.MagicMock()
+        request = Request()
+        del request.META["HTTP_X_CLIENT_IP"]
+        view = CapacityStatusView()
+        view._check_and_default_request_meta_data(request)
+        calls = [
+            mock.call("No client ip in header. Defaulting to 127.0.0.1"),
+        ]
+        logger.warning.assert_has_calls(calls)
+        error_msg = "Error should be for when the request doesn't have an ip address"
+        assert "127.0.0.1" == request.META["HTTP_X_CLIENT_IP"], error_msg
