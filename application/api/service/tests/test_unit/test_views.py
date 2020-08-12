@@ -1,5 +1,6 @@
 from unittest import TestCase, mock
 from datetime import datetime
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from rest_framework.response import Response
 from ...views import CapacityStatusView, logger
@@ -23,6 +24,12 @@ class PutRequest(Request):
 
 class CapacityStatusViews(TestCase):
     "Tests for the Capacity Status Views Class"
+
+    # def set_user(self, user_id, status="ACTIVE"):
+    #     user = Users.objects.db_manager("dos").get(id=user_id)
+    #     user = DosUser(uid=user_id, status=status)
+    #     user.status = status
+    #     user.save()
 
     def test_get__fail__no_user(self):
         "Test the get endpoint function, fail for none existent user"
@@ -318,6 +325,22 @@ class CapacityStatusViews(TestCase):
         view = CapacityStatusView()
         response = view._get_service_or_none_from_capacity(service_capacity=None)
         assert response is None
+
+    @mock.patch("api.service.views.ServiceCapacities.objects.db_manager")
+    def test__get_service_capacity__fail__object_does_not_exist(self, mock_service_capacities_db_manager):
+        "Test the _get_service_capacity function, fail for no service object"
+        view = CapacityStatusView()
+        mock_capacities_manager = mock.MagicMock()
+        mock_service_capacities_db_manager.return_value = mock_capacities_manager
+        mock_capacities_manager.get.side_effect = ObjectDoesNotExist("Error Test")
+        response = view._get_service_capacity(service_uid=0)
+        assert response is None
+
+    # def test__get_service_capacity__success(self):
+    #     "Test the _get_service_capacity function"
+    #     self.set_user(user_id=100200300)
+    #     view = CapacityStatusView()
+    #     # response = view._get_service_capacity(service_uid=0)
 
     @mock.patch("api.service.views.datetime")
     def test__check_and_default_request_meta_data__fail__no_request_date(self, mock_datetime):
