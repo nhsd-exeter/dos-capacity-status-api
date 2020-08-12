@@ -304,6 +304,21 @@ class CapacityStatusViews(TestCase):
     #     print(response.data)
     #     # assert '' == response.data
 
+    def test_patch__fail(self):
+        "Test the patch function, fail for not being allowed"
+        request = Request()
+        view = CapacityStatusView()
+        response = view.patch(request, "1")
+        error_msg = "Error should be for Patch not allowed"
+        assert response.status_code is status.HTTP_405_METHOD_NOT_ALLOWED, error_msg
+        assert response.data == {"detail": 'Method "PATCH" not allowed. Please use "PUT" instead.'}, error_msg
+
+    def test__get_service_or_none_from_capacity(self):
+        "Test the _get_service_or_none_from_capacity function, fail for no service capacity"
+        view = CapacityStatusView()
+        response = view._get_service_or_none_from_capacity(service_capacity=None)
+        assert response is None
+
     @mock.patch("api.service.views.datetime")
     def test__check_and_default_request_meta_data__fail__no_request_date(self, mock_datetime):
         "Test the _check_and_default_request_meta_data function, fail for no request date in header"
