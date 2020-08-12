@@ -1,6 +1,8 @@
 from unittest import TestCase, mock
 from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist
+
+# from django.contrib.auth.models import User as AuthUser
 from rest_framework import status
 from rest_framework.response import Response
 from ...views import CapacityStatusView, logger
@@ -25,14 +27,12 @@ class PutRequest(Request):
 class CapacityStatusViews(TestCase):
     "Tests for the Capacity Status Views Class"
 
-    # def set_user(self, user_id, status="ACTIVE"):
-    #     user = Users.objects.db_manager("dos").get(id=user_id)
-    #     user = DosUser(uid=user_id, status=status)
-    #     user.status = status
-    #     user.save()
+    def get_test_dos_user_db(self):
+        user = DosUser.objects.db_manager("dos").get(id="1000000002")
+        return user
 
     def test_get__fail__no_user(self):
-        "Test the get endpoint function, fail for none existent user"
+        "Test the get endpoint function, fail for nonexistent user"
         logger.info = mock.MagicMock()
         request = Request()
         request.user = CapacityAuthDosUser()
@@ -311,6 +311,26 @@ class CapacityStatusViews(TestCase):
     #     print(response.data)
     #     # assert '' == response.data
 
+    # def test_put__success(self):
+    #     "Test the put endpoint function"
+    #     logger.info = mock.MagicMock()
+    #     request = PutRequest()
+    #     service_id = 149198
+    #     request.data = {"status": "AMBER"}
+    #     request.user = AuthUser.objects.db_manager("default").get(username="admin")
+    #     dos_user = get_dos_user(request.user)
+    #     view = CapacityStatusView()
+    #     response = view.put(request, service_id)
+
+    #     calls = [
+    #         mock.call("Request sent from host: %s", request.META["HTTP_HOST"]),
+    #         mock.call("Payload: %s", request.data),
+    #     ]
+    #     logger.info.assert_has_calls(calls)
+    #     assert type(response) is Response
+    #     print(response.data)
+    #     assert response.status_code is status.HTTP_200_OK
+
     def test_patch__fail(self):
         "Test the patch function, fail for not being allowed"
         request = Request()
@@ -336,11 +356,15 @@ class CapacityStatusViews(TestCase):
         response = view._get_service_capacity(service_uid=0)
         assert response is None
 
-    # def test__get_service_capacity__success(self):
-    #     "Test the _get_service_capacity function"
-    #     self.set_user(user_id=100200300)
-    #     view = CapacityStatusView()
-    #     # response = view._get_service_capacity(service_uid=0)
+    def test__get_service_capacity__success(self):
+        "Test the _get_service_capacity function"
+        view = CapacityStatusView()
+        response = view._get_service_capacity(service_uid="149198")
+        assert type(response) is ServiceCapacities
+        assert type(response.service) is Services
+        assert type(response.status) is Capacitystatuses
+        assert response.service.uid == "149198"
+        assert response.status.color == "RED"
 
     @mock.patch("api.service.views.datetime")
     def test__check_and_default_request_meta_data__fail__no_request_date(self, mock_datetime):
