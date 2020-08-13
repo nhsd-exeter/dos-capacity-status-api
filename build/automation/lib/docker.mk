@@ -707,25 +707,19 @@ _docker-is-lib-image:
 
 # ==============================================================================
 
-docker-image-get-digest: ### Get image digest by matching tag pattern - mandatory: NAME=[image name],VERSION|TAG
+docker-image-get-digest: ### Get image digest by matching tag pattern - mandatory: NAME=[image name],VERSION|TAG=[string to match]
 	[ $$(make _docker-is-lib-image) == false ] && make docker-login > /dev/null 2>&1
 	make aws-ecr-get-image-digest \
-		REPO=$$(make _docker-get-reg)/$(NAME) \
+		REPO=$$(make _docker-get-reg NAME=$(NAME))/$(NAME) \
 		TAG=$(or $(VERSION), $(TAG))
 
-docker-tag-as-release-candidate: ### Tag release candidate - mandatory: TAG,IMAGE=[image name]; optional: COMMIT=[git commit hash, defaults to HEAD]
+docker-tag-from-git-commit: ### Tag release candidate - mandatory: TAG,NAME=[image name]; optional: COMMIT=[git commit hash, defaults to HEAD]
 	commit=$(or $(COMMIT), master)
 	hash=$$(make git-commit-get-hash COMMIT=$$commit)
-	digest=$$(make docker-image-get-digest NAME=$(IMAGE) COMMIT=$$hash)
-	make docker-pull NAME=$(IMAGE) DIGEST=$$digest
-	make docker-tag DIGEST=$$digest TAG=
-
-docker-tag-as-environment-deployment: ### Tag environment deployment - mandatory: TAG,IMAGE=[image name],PROFILE=[profile name]; optional: COMMIT=[git release candidate tag name, defaults to HEAD]
-	[ $(PROFILE) = local ] && (echo "ERROR: Please, specify the PROFILE"; exit 1)
-	commit=$(or $(COMMIT), master)
-	hash=$$(make git-commit-get-hash COMMIT=$$commit)
-	digest=$$(make docker-image-get-digest NAME=$(IMAGE) COMMIT=$$hash)
-	make docker-pull NAME=$(IMAGE) DIGEST=$$digest
+	digest=$$(make docker-image-get-digest NAME=$(NAME) VERSION=$$hash | tail -n 1)
+	make docker-pull NAME=$(NAME) DIGEST=$$digest
+	make docker-tag DIGEST=$$digest TAG=$(TAG)
+	make docker-push NAME=$(NAME) TAG=$(TAG)
 
 # ==============================================================================
 
