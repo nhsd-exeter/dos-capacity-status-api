@@ -122,7 +122,7 @@ proxy-build:
 	cp -rf \
 		$(PROJECT_DIR)/application/static \
 		$(DOCKER_DIR)/proxy/assets/application
-	make docker-image NAME=proxy VERSION=0.0.1
+	make docker-image NAME=proxy
 
 proxy-clean:
 	make docker-image-clean NAME=proxy
