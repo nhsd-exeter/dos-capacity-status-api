@@ -32,7 +32,7 @@ class TestDosInterfaceReporting(TestCase):
                 msg = "key " + key + " as lower with or without underscores is NOT present"
                 assert lower in service_data[key] or no_underscore in service_data[key], msg
 
-        assert service_data["CLIENT_NAME"] == "TestUser"
+        assert service_data["CLIENT_NAME"] in ["EditUser", "TestUser"]
         assert "capacity" in service_data["CAPACITY_STATUS"]
 
     def test_get_request_execution_time(self):

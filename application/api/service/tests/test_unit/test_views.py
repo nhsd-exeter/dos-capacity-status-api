@@ -2,12 +2,13 @@ from unittest import TestCase, mock
 from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist
 
-# from django.contrib.auth.models import User as AuthUser
+from django.contrib.auth.models import User as AuthUser
 from rest_framework import status
 from rest_framework.response import Response
 from ...views import CapacityStatusView, logger
 from ....authentication.models import CapacityAuthDosUser
 from ....dos_interface.models import Users as DosUser, ServiceCapacities, Services, Capacitystatuses
+from ...serializers.model_serializers import CapacityStatusModelSerializer
 
 
 class Request:
@@ -27,9 +28,41 @@ class PutRequest(Request):
 class CapacityStatusViews(TestCase):
     "Tests for the Capacity Status Views Class"
 
-    def get_test_dos_user_db(self):
-        user = DosUser.objects.db_manager("dos").get(id="1000000002")
-        return user
+    auth_user = None
+    capacity_auth_user_link = None
+
+    def add_auth_user_to_database(self):
+        if self.auth_user is None:
+            self.auth_user = AuthUser.objects.db_manager("default").create(
+                password="stub_password",
+                is_superuser=False,
+                username="UnitTestUser",
+                first_name="Unit Test",
+                last_name="User",
+                email="unittestuser@test",
+                is_staff=False,
+                is_active=True,
+            )
+        return self.auth_user
+
+    def link_dos_user_to_capacity_auth_user(self, dos_user_id, dos_username):
+        if self.auth_user is None:
+            raise Exception("No auth user has been created for test")
+        if self.capacity_auth_user_link is None:
+            self.capacity_auth_user_link = CapacityAuthDosUser.objects.db_manager("default").create(
+                dos_user_id=dos_user_id, dos_username=dos_username, user_id=self.auth_user.id
+            )
+        else:
+            self.capacity_auth_user_link.dos_user_id = dos_user_id
+            self.capacity_auth_user_link.dos_username = dos_username
+            self.capacity_auth_user_link.save()
+        return self.capacity_auth_user_link
+
+    def tearDown(self):
+        if self.auth_user is not None:
+            self.auth_user.delete()
+
+        return super().tearDown()
 
     def test_get__fail__no_user(self):
         "Test the get endpoint function, fail for nonexistent user"
@@ -277,59 +310,71 @@ class CapacityStatusViews(TestCase):
         )
         assert "DoS user does not have authority to edit the service" in response.data, error_msg
 
-    # @mock.patch("api.service.views.get_dos_user")
-    # @mock.patch("api.service.views.get_dos_service_for_uid")
-    # def test_put__success(self, mock_get_service, mock_get_dos_user):
-    #     "Test the put endpoint function"
-    #     logger.info = mock.MagicMock()
-    #     request = PutRequest()
-    #     request.data = {"status": "red"}
-    #     request.user = CapacityAuthDosUser()
-    #     request.user.dos_user_id = 1010
-    #     request.user.dos_username = "dummy_dos_user"
-    #     service_id = 101010
-    #     view = CapacityStatusView()
-    #     view._can_edit_service = mock.MagicMock()
-    #     view._can_edit_service.return_value = True
-    #     mock_get_dos_user.return_value = DosUser(id=1010, username="dummy_dos_user", status="ACTIVE")
+    def test_put__success(self):
+        "Test the put endpoint function"
+        logger.info = mock.MagicMock()
+        request = PutRequest()
+        service_id = 149198
+        request.data = {"status": "AMBER"}
+        request.user = self.add_auth_user_to_database()
+        self.link_dos_user_to_capacity_auth_user("1000000002", "EditUser")
+        view = CapacityStatusView()
+        view.kwargs = {view.lookup_url_kwarg: service_id}
+        view.request = request
+        view.format_kwarg = None
+        response = view.put(request, service_id)
+        calls = [
+            mock.call("Request sent from host: %s", request.META["HTTP_HOST"]),
+            mock.call("Payload: %s", request.data),
+        ]
+        logger.info.assert_has_calls(calls)
+        assert type(response) is Response
+        assert response.status_code is status.HTTP_200_OK
+        expected_keys = [
+            "id",
+            "name",
+            "status",
+            "resetDateTime",
+            "notes",
+            "modifiedBy",
+            "modifiedDate",
+        ]
+        assert list(response.data.keys()) == expected_keys
+        assert response.data["id"] == service_id
+        for key in expected_keys:
+            if key != "id":
+                assert type(response.data[key]) is str and response.data[key] != ""
+        assert response.data["status"] == "AMBER"
+        assert response.data["modifiedBy"] == "EditUser"
+        datetime_format = "%Y-%m-%dT%H:%M:%SZ"
+        reset_datetime = datetime.strptime(response.data["resetDateTime"], datetime_format)
+        modified_datetime = datetime.strptime(response.data["modifiedDate"], datetime_format)
+        delta_to_reset = reset_datetime - modified_datetime
+        assert (delta_to_reset.seconds / 3600) == 4
 
-    #     service = Services(uid=str(service_id), name="Test GP", statusid=1)
-    #     mock_get_service.return_value = service
-
-    #     view.partial_update = mock.MagicMock()
-    #     response = view.put(request, service_id)
-    #     calls = [
-    #         mock.call("Request sent from host: %s", request.META["HTTP_HOST"]),
-    #         mock.call("Payload: %s", request.data),
-    #     ]
-    #     logger.info.assert_has_calls(calls)
-
-    #     # mock_get_service.assert_called_once_with(str(service_id), throwDoesNotExist=False)
-    #     assert type(response) is Response
-    #     print(response.status_code)
-    #     assert response.status_code is status.HTTP_200_OK
-    #     print(response.data)
-    #     # assert '' == response.data
-
-    # def test_put__success(self):
-    #     "Test the put endpoint function"
-    #     logger.info = mock.MagicMock()
-    #     request = PutRequest()
-    #     service_id = 149198
-    #     request.data = {"status": "AMBER"}
-    #     request.user = AuthUser.objects.db_manager("default").get(username="admin")
-    #     dos_user = get_dos_user(request.user)
-    #     view = CapacityStatusView()
-    #     response = view.put(request, service_id)
-
-    #     calls = [
-    #         mock.call("Request sent from host: %s", request.META["HTTP_HOST"]),
-    #         mock.call("Payload: %s", request.data),
-    #     ]
-    #     logger.info.assert_has_calls(calls)
-    #     assert type(response) is Response
-    #     print(response.data)
-    #     assert response.status_code is status.HTTP_200_OK
+    def test_put__fail_invalid_color(self):
+        "Test the put endpoint function, fails for invalid color"
+        logger.info = mock.MagicMock()
+        request = PutRequest()
+        service_id = 149198
+        request.data = {"status": "BLUE"}
+        request.user = self.add_auth_user_to_database()
+        self.link_dos_user_to_capacity_auth_user("1000000002", "EditUser")
+        view = CapacityStatusView()
+        view.kwargs = {view.lookup_url_kwarg: service_id}
+        view.request = request
+        view.format_kwarg = None
+        response = view.put(request, service_id)
+        calls = [
+            mock.call("Request sent from host: %s", request.META["HTTP_HOST"]),
+            mock.call("Payload: %s", request.data),
+        ]
+        logger.info.assert_has_calls(calls)
+        assert type(response) is Response
+        error_msg = "Should report a bad request for an invalid color"
+        assert response.status_code is status.HTTP_400_BAD_REQUEST, error_msg
+        assert "Capacity Status value is invalid" in response.data["status"][0]
+        assert response.data["status"][0].code == "invalid_choice"
 
     def test_patch__fail(self):
         "Test the patch function, fail for not being allowed"
@@ -364,7 +409,104 @@ class CapacityStatusViews(TestCase):
         assert type(response.service) is Services
         assert type(response.status) is Capacitystatuses
         assert response.service.uid == "149198"
-        assert response.status.color == "RED"
+        assert response.status.color in ["RED", "AMBER", "GREEN"]
+
+    def test__serialized_get_capacity_response(self):
+        "Test the _serialized_get_capacity function"
+        view = CapacityStatusView()
+        service = Services(uid="100", name="dummy_service")
+
+        capacity_status = Capacitystatuses(capacitystatusid=1, color="RED")
+        service_capacities = ServiceCapacities(
+            status=capacity_status,
+            service=service,
+            notes="Test notes",
+            resetdatetime=datetime.now(),
+            modifiedbyid=20,
+            modifiedby="dummy_test_user",
+            modifieddate=datetime.now(),
+        )
+        response = view._serialized_get_capacity_response(service_capacities)
+        assert response.status_code is status.HTTP_200_OK
+        datetime_format = "%Y-%m-%dT%H:%M:%S.%fZ"
+        expected_data = {
+            "id": int(service.uid),
+            "name": service.name,
+            "status": capacity_status.color,
+            "resetDateTime": datetime.strftime(service_capacities.resetdatetime, datetime_format),
+            "notes": service_capacities.notes,
+            "modifiedBy": service_capacities.modifiedby,
+            "modifiedDate": datetime.strftime(service_capacities.modifieddate, datetime_format),
+        }
+        assert response.data == expected_data
+
+    def test__serialized_get_capacity_response__bad_request(self):
+        "Test the _serialized_get_capacity function, bad request"
+        view = CapacityStatusView()
+        service = Services(uid="100", name="dummy_service")
+
+        capacity_status = Capacitystatuses(capacitystatusid=1, color=None)
+        service_capacities = ServiceCapacities(
+            status=capacity_status,
+            service=service,
+            notes="Test notes",
+            resetdatetime=datetime.now(),
+            modifiedbyid=20,
+            modifiedby="dummy_test_user",
+            modifieddate=datetime.now(),
+        )
+        response = view._serialized_get_capacity_response(service_capacities)
+        assert response.status_code is status.HTTP_400_BAD_REQUEST
+
+    @mock.patch("api.service.views.get_dos_user")
+    def test__update_service_capacity(self, mock_get_dos_user):
+        "Test the _update_service_capacity function, success"
+        request = PutRequest()
+        request.data = {"status": "RED"}
+        request.user = CapacityAuthDosUser()
+        request.user.dos_user_id = 1010
+        request.user.dos_username = "dummy_dos_user"
+        service_id = 101010
+        mock_get_dos_user.return_value = DosUser(id=1010, username="dummy_dos_user")
+        view = CapacityStatusView()
+        view.partial_update = mock.MagicMock()
+        response = view._update_service_capacity(request, service_id)
+        assert response is None
+
+    @mock.patch("api.service.views.get_dos_user")
+    def test__update_service_capacity__fail_invalid_color(self, mock_get_dos_user):
+        "Test the _update_service_capacity function, failed invalid color"
+        request = PutRequest()
+        request.data = {"status": "BLUE"}
+        request.user = CapacityAuthDosUser()
+        request.user.dos_user_id = 1010
+        request.user.dos_username = "dummy_dos_user"
+        service_id = 101010
+        mock_get_dos_user.return_value = DosUser(id=1010, username="dummy_dos_user")
+        view = CapacityStatusView()
+        view.partial_update = mock.MagicMock()
+        response = view._update_service_capacity(request, service_id)
+        assert type(response) is Response
+        assert response.status_code is status.HTTP_400_BAD_REQUEST
+
+    @mock.patch.object(CapacityStatusModelSerializer, "errors")
+    @mock.patch.object(CapacityStatusModelSerializer, "is_valid")
+    @mock.patch("api.service.views.get_dos_user")
+    def test__update_service_capacity__fail_invalid_model(self, mock_get_dos_user, mock_is_valid, mock_errors):
+        "Test the _update_service_capacity function, failed invalid capacity status model"
+        request = PutRequest()
+        request.data = {"status": "RED"}
+        request.user = CapacityAuthDosUser()
+        request.user.dos_user_id = 1010
+        request.user.dos_username = "dummy_dos_user"
+        service_id = 101010
+        mock_get_dos_user.return_value = DosUser(id=1010, username="dummy_dos_user")
+        mock_is_valid.return_value = False
+        mock_errors.return_value = {}
+        view = CapacityStatusView()
+        view.partial_update = mock.MagicMock()
+        response = view._update_service_capacity(request, service_id)
+        assert type(response) is Response
 
     @mock.patch("api.service.views.datetime")
     def test__check_and_default_request_meta_data__fail__no_request_date(self, mock_datetime):
