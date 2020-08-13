@@ -27,7 +27,7 @@ project-tag-as-release-candidate: ### Tag release candidate - mandatory: NAME|NA
 	make git-tag-create-release-candidate COMMIT=$$commit
 	tag=$$(make git-tag-get-release-candidate COMMIT=$$commit)
 	for image in $$(echo $(or $(NAMES), $(NAME)) | tr "," "\n"); do
-		make docker-tag-as-release-candidate \
+		make docker-tag-from-git-commit \
 			TAG=$$tag \
 			NAME=$$image \
 			COMMIT=$$commit
@@ -39,7 +39,7 @@ project-tag-as-environment-deployment: ### Tag environment deployment - mandator
 	make git-tag-create-environment-deployment COMMIT=$$commit
 	tag=$$(make git-tag-get-environment-deployment COMMIT=$$commit PROFILE=$(PROFILE))
 	for image in $$(echo $(or $(NAMES), $(NAME)) | tr "," "\n"); do
-		make docker-tag-as-environment-deployment \
+		make docker-tag-from-git-commit \
 			TAG=$$tag \
 			NAME=$$image \
 			COMMIT=$$commit
