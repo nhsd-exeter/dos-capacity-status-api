@@ -9,7 +9,6 @@ macos-setup devops-setup: ## Provision your MacBook (and become a DevOps ninja) 
 		macos-install-essential \
 		macos-install-additional \
 		macos-install-corporate \
-		macos-check \
 		macos-config \
 		macos-fix
 	make macos-enable-gatekeeper
@@ -19,11 +18,11 @@ macos-prepare:: ## Prepare for installation and configuration of the development
 	networksetup -setdnsservers Wi-Fi 8.8.8.8
 	sudo chown -R $$(id -u) $$(brew --prefix)/*
 
-macos-update:: ## Update all currently installed development dependencies
+macos-update:: ## Update/upgrade all currently installed development dependencies
 	which mas > /dev/null 2>&1 || brew install mas
 	mas upgrade $(mas list | grep -i xcode | awk '{ print $1 }')
 	brew update
-	brew upgrade
+	brew upgrade ||:
 	brew tap buo/cask-upgrade
 	brew cu --all --yes
 
@@ -32,7 +31,6 @@ macos-install-essential:: ## Install essential development dependencies - option
 	if [[ "$$REINSTALL" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then
 		install="reinstall --force"
 	fi
-	brew update
 	brew tap adoptopenjdk/openjdk ||:
 	brew tap blendle/blendle ||:
 	brew tap buo/cask-upgrade ||:
@@ -74,7 +72,7 @@ macos-install-essential:: ## Install essential development dependencies - option
 	brew $$install pyenv ||:
 	brew $$install pyenv-virtualenv ||:
 	brew $$install pyenv-which-ext ||:
-	brew $$install python@3.8 ||:
+	brew $$install python@$(PYTHON_VERSION_MAJOR).$(PYTHON_VERSION_MINOR) ||:
 	brew $$install shellcheck ||:
 	brew $$install terraform ||:
 	brew $$install tmux ||:
@@ -97,14 +95,11 @@ macos-install-additional:: ## Install additional development dependencies - opti
 	if [[ "$$REINSTALL" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then
 		install="reinstall --force"
 	fi
-	brew update
 	brew tap weaveworks/tap ||:
 	brew $$install github/gh/gh ||:
 	brew $$install weaveworks/tap/eksctl ||:
 	brew cask $$install appcleaner ||:
 	brew cask $$install atom ||:
-	#brew cask $$install bettertouchtool ||:
-	#brew cask $$install cheatsheet ||:
 	brew cask $$install dbeaver-community ||:
 	brew cask $$install dcommander ||:
 	brew cask $$install drawio
@@ -113,13 +108,11 @@ macos-install-additional:: ## Install additional development dependencies - opti
 	brew cask $$install gitkraken ||:
 	brew cask $$install google-chrome ||:
 	brew cask $$install hammerspoon ||:
-	brew cask $$install intellij-idea-ce ||:
 	brew cask $$install istat-menus ||:
 	brew cask $$install karabiner-elements ||:
 	brew cask $$install keepingyouawake ||:
 	#brew cask $$install microsoft-remote-desktop-beta ||:
 	brew cask $$install postman ||:
-	brew cask $$install pycharm ||:
 	brew cask $$install sourcetree ||:
 	brew cask $$install spectacle ||:
 	brew cask $$install tripmode ||:
@@ -191,7 +184,7 @@ macos-check:: ## Check if the development dependencies are installed
 	brew list pyenv ||:
 	brew list pyenv-virtualenv ||:
 	brew list pyenv-which-ext ||:
-	brew list python@3.8 ||:
+	brew list python@$(PYTHON_VERSION_MAJOR).$(PYTHON_VERSION_MINOR) ||:
 	brew list shellcheck ||:
 	brew list terraform ||:
 	brew list tmux ||:
@@ -209,21 +202,31 @@ macos-check:: ## Check if the development dependencies are installed
 	# Additional dependencies
 	brew list github/gh/gh ||:
 	brew list weaveworks/tap/eksctl ||:
+	brew cask list appcleaner ||:
 	brew cask list atom ||:
-	#brew cask list bettertouchtool ||:
-	#brew cask list cheatsheet ||:
 	brew cask list dbeaver-community ||:
-	brew cask list drawio ||:
+	brew cask list dcommander ||:
+	brew cask list drawio
+	brew cask list firefox-developer-edition ||:
+	brew cask list gimp ||:
 	brew cask list gitkraken ||:
 	brew cask list google-chrome ||:
-	brew cask list intellij-idea-ce ||:
+	brew cask list hammerspoon ||:
+	brew cask list istat-menus ||:
+	brew cask list karabiner-elements ||:
 	brew cask list keepingyouawake ||:
 	#brew cask list microsoft-remote-desktop-beta ||:
 	brew cask list postman ||:
-	brew cask list pycharm ||:
 	brew cask list sourcetree ||:
 	brew cask list spectacle ||:
+	brew cask list tripmode ||:
 	brew cask list tunnelblick ||:
+	brew cask list vanilla ||:
+	brew cask list vlc ||:
+	brew cask list wifi-explorer ||:
+	brew cask list vagrant ||:
+	brew cask list virtualbox ||:
+	brew cask list virtualbox-extension-pack ||:
 
 macos-config:: ## Configure development dependencies
 	make \
@@ -285,6 +288,7 @@ _macos-config-oh-my-zsh:
 	echo "    docker" >> ~/.zshrc
 	echo "    docker-compose" >> ~/.zshrc
 	echo "    virtualenv" >> ~/.zshrc
+	echo "    jenv" >> ~/.zshrc
 	echo "    terraform" >> ~/.zshrc
 	echo "    kubectl" >> ~/.zshrc
 	echo "    aws" >> ~/.zshrc
@@ -306,7 +310,7 @@ _macos-config-oh-my-zsh:
 	echo "POWERLEVEL9K_MODE=nerdfont-complete" >> ~/.zshrc
 	echo "POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs)" >> ~/.zshrc
 	echo "POWERLEVEL9K_SHORTEN_DIR_LENGTH=3" >> ~/.zshrc
-	echo "POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status custom_texas virtualenv root_indicator background_jobs time)" >> ~/.zshrc
+	echo "POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status virtualenv jenv custom_texas root_indicator background_jobs time)" >> ~/.zshrc
 	echo "POWERLEVEL9K_PROMPT_ON_NEWLINE=true" >> ~/.zshrc
 	echo "POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true" >> ~/.zshrc
 	echo "ZSH_THEME=powerlevel10k/powerlevel10k" >> ~/.zshrc
@@ -316,7 +320,7 @@ _macos-config-oh-my-zsh:
 _macos-config-command-line:
 	sudo chown -R $$(id -u) $$(brew --prefix)/*
 	# configure Python
-	brew link --overwrite --force python@3.8
+	brew link --overwrite --force python@$(PYTHON_VERSION_MAJOR).$(PYTHON_VERSION_MINOR)
 	rm -f $$(brew --prefix)/bin/python
 	ln $$(brew --prefix)/bin/python3 $$(brew --prefix)/bin/python
 	curl -s https://bootstrap.pypa.io/get-pip.py | $$(brew --prefix)/bin/python3
