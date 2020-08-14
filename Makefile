@@ -54,11 +54,6 @@ test-unit-only: # Run only unit test suite
 		DIR=application \
 		CMD="python manage.py test --exclude-tag=regression api"
 
-test-coverage: # Test coverage project
-	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
-		DIR=application \
-		CMD="coverage run --source='.' --omit=$$(OMIT) manage.py test api/ && coverage report -m && coverage erase"
-
 push: # Push project artefacts to the registry
 	make docker-login
 	make docker-push NAME=api VERSION=0.0.1
