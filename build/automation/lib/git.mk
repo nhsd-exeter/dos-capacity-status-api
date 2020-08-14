@@ -68,6 +68,18 @@ git-tag-create-environment-deployment: ### Tag environment deployment as `[YYYYm
 		git push origin $$tag
 	fi
 
+git-create-tag: ### Tag PR to master for auto pipeline
+	timestamp=$$(TZ=UTC date "+%Y%m%d%H%M%S")
+	commit=$$(make git-commit-get-hash)
+	tag=$$timestamp-$$commit
+	echo "$$tag"
+
+git-tag-master-commit: ### Tag any PR to master as `[YYYYmmddHHMMSS]-[commit-hash]` - mandatory: TAG=[timestamp-commithash]
+	tag=$(TAG)
+	commit=$$(make git-commit-get-hash)
+	git tag $$tag $$commit
+	git push origin $$tag
+
 git-tag-get-release-candidate: ### Get the latest release candidate tag for the whole repository or just the specified commit - optional: COMMIT=[commit]
 	if [ -z "$(COMMIT)" ]; then
 		git show-ref --tags -d | sed -e 's;.* refs/tags/;;' -e 's;\^{};;' | grep -- -rc$$ | sort -r | head -n 1
@@ -106,4 +118,5 @@ git-tag-clear: ### Remove tags from the specified commit - optional: COMMIT=[co
 	git-tag-get-release-candidate \
 	git-tag-is-environment-deployment \
 	git-tag-is-release-candidate \
-	git-tag-list
+	git-tag-list \
+	git-create-tag

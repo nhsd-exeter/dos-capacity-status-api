@@ -1,10 +1,34 @@
+#!/usr/bin/env groovy
+
 pipeline {
     agent any
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
+    }
+
+    environment {
+        GIT_COMMIT_HASH = ''
+        TIMESTAMP = ''
+        GIT_TAG = ''
+    }
+
+    // if (env.BRANCH_NAME != 'master') {
+    //     currentBuild.result = 'FAILURE'
+    // }
+
     stages {
         stage("Set up Variables") {
             steps {
                 script {
-                    sh 'make variables'
+                    this.GIT_COMMIT_HASH = sh(returnStdout: true, script: 'make git-commit-get-hash')
+                    sh "echo ${this.GIT_COMMIT_HASH}"
+                    this.TIMESTAMP = sh(returnStdout: true, script: 'make project-timestamp')
+                    sh "echo ${this.TIMESTAMP}"
+                    this.GIT_TAG = sh(returnStdout: true, script: 'make git-create-tag')
+                    sh "echo ${GIT_TAG}"
+                    sh 'make devops-print-variables'
                 }
             }
         }
@@ -15,38 +39,75 @@ pipeline {
                 }
             }
         }
-        stage("Run Tests") {
+        stage("Start up Test Database") {
             steps {
                 script {
-                    sh 'make test'
+                    sh 'export PROFILE=local && make test-db-start-jenkins'
+                    sh 'sleep 30'
+                    sh 'make migrate-jenkins'
+                }
+            }
+        }
+        stage("Run Tests (against code)") {
+            steps {
+                script {
+                    sh 'echo Unit Tests'
+                    sh 'export PROFILE=local && make test-unit-only-jenkins'
+                }
+                script {
+                    sh 'echo Regression Tests'
+                    sh 'export PROFILE=local && make test-regression-only-jenkins'
                 }
             }
         }
         stage("Tag Docker Images") {
             steps {
                 script {
-                    sh 'make docker-tag'
+                    sh "make docker-tag NAME=api TAG=${this.GIT_TAG}"
+                    sh "make docker-tag NAME=proxy TAG=${this.GIT_TAG}"
                 }
             }
         }
         stage("Push Images") {
             steps {
-                scripts {
-                    sh 'make docker-push'
+                script {
+                    sh "make docker-push NAME=api TAG=${this.GIT_TAG}"
+                    sh "make docker-push NAME=proxy TAG=${this.GIT_TAG}"
                 }
             }
         }
-        stage("Tag Git Commit") {
-            steps {
-                scripts {
-                    sh 'make git-tag-commit'
-                }
-            }
-        }
+        // stage("Tag Git Commit") {
+        //     steps {
+        //         script {
+        //             sh "make git-tag-master-commit TAG=${this.GIT_TAG}"
+        //             // Need user set up with git access
+        //         }
+        //     }
+        // }
     }
     post {
         always {
-            sh 'make pipeline-test-cleanup'
+            script {
+                sh 'make stop'
+                sh 'make api-clean'
+                sh 'make proxy-clean'
+                // Update clean make targets to remove networks, as builds fail after 10
+            }
         }
+        failure {
+            script {
+                sh "echo Build Failure"
+                // sh "make aws-assume-role-export-variables PROFILE=dev"
+                // sh "webhook_url_secret = $(make aws-secret-get NAME=)"
+                // sh "webhook_url_value = $(webhook_url_secret[value])"
+                // sh "curl -X POST -H 'Content-type: application/json' --data {text:hi} $(webhook_url_value)"
+            }
+        }
+        // cleanup {
+        //     script {
+        //         sh 'make jenkins-cleanup-workspace'
+        //         // TO DO: Create Make Targets for jenkins to cleanup the workspace after finishing
+        //     }
+        // }
     }
 }

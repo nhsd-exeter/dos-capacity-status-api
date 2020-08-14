@@ -310,6 +310,9 @@ _aws-elasticsearch-register-snapshot-repository: ### Register Elasticsearch snap
 	# 			$(TF_VAR_es_snapshot_role) \
 	# 	"
 
+aws-ecr-get-login-password-jenkins: ### Get ECR user login password
+		aws ecr get-login-password --region $(AWS_REGION)
+
 # ==============================================================================
 
 .SILENT: \
@@ -322,6 +325,7 @@ _aws-elasticsearch-register-snapshot-repository: ### Register Elasticsearch snap
 	aws-cognito-get-userpool-id \
 	aws-ecr-get-image-digest \
 	aws-ecr-get-login-password \
+	aws-ecr-get-login-password-jenkins \
 	aws-iam-policy-exists \
 	aws-iam-role-exists \
 	aws-rds-describe-instance \
