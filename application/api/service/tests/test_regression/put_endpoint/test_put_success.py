@@ -10,14 +10,14 @@ client = Client()
 
 
 @tag("regression")
-class TestPatchSuccess(unittest.TestCase):
+class TestPutSuccess(unittest.TestCase):
     "Tests for the successful update of capacity status information"
 
     def test_update_capacity_status_red(self):
 
         data = '{"status":"red"}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -34,7 +34,7 @@ class TestPatchSuccess(unittest.TestCase):
 
         data = '{"status":"amber"}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -51,7 +51,7 @@ class TestPatchSuccess(unittest.TestCase):
 
         data = '{"status":"amber", "resetStatusIn":50, "notes":"some more notes"}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -73,7 +73,7 @@ class TestPatchSuccess(unittest.TestCase):
 
         data = '{"status":"GreEn"}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -90,7 +90,7 @@ class TestPatchSuccess(unittest.TestCase):
 
         data = '{"status":"green", "resetStatusIn":50, "notes":"some more notes"}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -112,7 +112,7 @@ class TestPatchSuccess(unittest.TestCase):
 
         data = '{"status":"ReD", "resetStatusIn":0}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -130,7 +130,7 @@ class TestPatchSuccess(unittest.TestCase):
 
         data = '{"status":"red", "resetStatusIn":30}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -148,7 +148,7 @@ class TestPatchSuccess(unittest.TestCase):
 
         data = '{"status":"rEd", "resetStatusIn":1440}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -166,7 +166,7 @@ class TestPatchSuccess(unittest.TestCase):
 
         data = '{"status":"reD", "notes":1234}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -184,7 +184,7 @@ class TestPatchSuccess(unittest.TestCase):
 
         data = '{"status":"rEd", "resetStatusIn":50, "notes":"some more notes"}'
 
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,
@@ -203,7 +203,7 @@ class TestPatchSuccess(unittest.TestCase):
     def test_update_capacity_additional_notes_loads(self):
 
         data = '{"status":"reD","notes":"' + TestEnv.max_notes + '"}'
-        response = client.patch(
+        response = client.put(
             TestEnv.api_url,
             content_type="application/json",
             data=data,

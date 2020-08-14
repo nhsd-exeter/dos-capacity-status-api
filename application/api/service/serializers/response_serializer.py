@@ -39,7 +39,6 @@ class CapacityStatusResponseSerializer(serializers.Serializer):
     )
 
     def convertModelToResponse(data):
-
         logger.debug("Data in CapacityStatusResponseSerializer for response conversion: %s", data)
 
         response_data = data
@@ -59,6 +58,9 @@ class CapacityStatusResponseSerializer(serializers.Serializer):
         if data["notes"] is None:
             response_data.pop("notes")
         response_data.pop("service")
+        response_data.pop("resetdatetime")
+        response_data.pop("modifiedby")
+        response_data.pop("modifieddate")
 
         logger.debug("Converted data from CapacityStatusResponseSerializer: %s", response_data)
 
