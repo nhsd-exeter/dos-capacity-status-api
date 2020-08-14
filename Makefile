@@ -108,7 +108,7 @@ api-build:
 		$(SSL_CERTIFICATE_DIR)/certificate.* \
 		$(DOCKER_DIR)/api/assets/certificate
 	cd $(PROJECT_DIR)
-	make docker-image NAME=api VERSION=0.0.1
+	make docker-image NAME=api
 
 api-clean:
 	make docker-image-clean NAME=api

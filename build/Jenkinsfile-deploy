@@ -8,10 +8,33 @@ pipeline {
                 }
             }
         }
-        stage("Build Images") {
+        stage("Pull Images") {
             steps {
                 script {
-                    sh 'make build'
+                    sh 'make docker-pull'
+                }
+            }
+        }
+        stage("Provision Infrastructure") {
+            steps {
+                script {
+                    if env.PROFILE != 'dev':
+                      sh 'make backup-data'
+                    sh 'make deploy-infrastructure PROFILE=env.PROFILE'
+                }
+            }
+        }
+        stage("Deploy Application") {
+            steps {
+                script {
+                    sh 'make deploy PROFILE=env.PROFILE'
+                }
+            }
+        }
+        stage("Prepare Data") {
+            steps {
+                script {
+                    sh 'make prepare-data'
                 }
             }
         }
@@ -19,27 +42,6 @@ pipeline {
             steps {
                 script {
                     sh 'make test'
-                }
-            }
-        }
-        stage("Tag Docker Images") {
-            steps {
-                script {
-                    sh 'make docker-tag'
-                }
-            }
-        }
-        stage("Push Images") {
-            steps {
-                scripts {
-                    sh 'make docker-push'
-                }
-            }
-        }
-        stage("Tag Git Commit") {
-            steps {
-                scripts {
-                    sh 'make git-tag-commit'
                 }
             }
         }

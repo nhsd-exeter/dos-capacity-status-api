@@ -1,0 +1,24 @@
+pipeline {
+    agent any
+    stages {
+        stage("Print Variables") {
+            steps {
+                script {
+                    sh 'make pipeline-print-variables'
+                }
+            }
+        }
+        stage("Unit Test") {
+            steps {
+                script {
+                    sh 'make pipeline-test-suite'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            sh 'make pipeline-test-cleanup'
+        }
+    }
+}
