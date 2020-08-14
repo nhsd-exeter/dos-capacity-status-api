@@ -1,10 +1,25 @@
+#!/usr/bin/env groovy
+
 pipeline {
     agent any
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
+    }
+
+    environment {
+        GIT_COMMIT_HASH = ''
+        TIMESTAMP = ''
+    }
+
     stages {
         stage("Set up Variables") {
             steps {
                 script {
-                    sh 'make variables'
+                    this.GIT_COMMIT_HASH = sh(returnStdout: true, script: 'make git-commit-get-hash')
+                    this.TIMESTAMP = sh(returnStdout: true, script: 'make project-timestamp')
+                    // ADD AWS VARIABLES, DOCKER VARIABLES, (find the correct make target) ETC
                 }
             }
         }
@@ -12,41 +27,67 @@ pipeline {
             steps {
                 script {
                     sh 'make build'
+                    //Use current timestamp when building docker images rather than BUILD_COMMIT_DATE (git commit date/time)
+                }
+            }
+        }
+        stage("Provision Test Database") {
+            steps {
+                script {
+                    // Run make target to load, reload, or refresh rds test database
+                    // make terraform-apply-auto-approve
                 }
             }
         }
         stage("Run Tests") {
             steps {
                 script {
-                    sh 'make test'
+                    //run unit tests
+                    sh 'make unit-test-coverage'
+                }
+                script {
+                    //run regression tests
+                    sh 'make regression-test-coverage'
                 }
             }
         }
         stage("Tag Docker Images") {
             steps {
                 script {
-                    sh 'make docker-tag'
+                    sh 'make docker-tag NAME=api TAG=${env.TIMESTAMP}-${env.GIT_COMMIT_HASH}'
+                    sh 'make docker-tag NAME=proxy TAG=${env.TIMESTAMP}-${env.GIT_COMMIT_HASH}'
                 }
             }
         }
         stage("Push Images") {
             steps {
                 scripts {
-                    sh 'make docker-push'
+                    sh 'make docker-push NAME=api TAG=${env.TIMESTAMP}-${env.GIT_COMMIT_HASH}'
+                    sh 'make docker-push NAME=proxy TAG=${env.TIMESTAMP}-${env.GIT_COMMIT_HASH}'
                 }
             }
         }
         stage("Tag Git Commit") {
             steps {
                 scripts {
-                    sh 'make git-tag-commit'
+                    sh 'make git-tag-commit TAG=${env.TIMESTAMP}-${env.GIT_COMMIT_HASH}'
+                    // TO DO: Create Make Target for jenkins to tag the commit with the timestamp and git commit hash used in the
+                    // docker tag above to link the commit and docker images
                 }
             }
         }
     }
     post {
-        always {
-            sh 'make pipeline-test-cleanup'
+        failure {
+            script {
+                sh 'make slack-notification-on-failure'
+                // TO DO: Create Make target to send slack notification on failure of a build
+            }
+        }
+
+        cleanup {
+            sh 'make jenkins-cleanup-workspace'
+            // TO DO: Create Make Targets for jenkins to cleanup the workspace after finishing
         }
     }
 }

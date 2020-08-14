@@ -1,5 +1,12 @@
+#!/usr/bin/env groovy
+
 pipeline {
     agent any
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+    }
+
     stages {
         stage("Set up Variables") {
             steps {
