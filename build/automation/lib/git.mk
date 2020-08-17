@@ -68,6 +68,11 @@ git-tag-create-environment-deployment: ### Tag environment deployment as `[YYYYm
 		git push origin $$tag
 	fi
 
+git-tag-master-commit: ### Tag any PR to master as `[YYYYmmddHHMMSS]-[commit-hash]` - mandatory: COMMIT=[commit hash]; TIMESTAMP[timestamp]
+	tag=$(TIMESTAMP)-$(COMMIT)
+	git tag $$tag $(COMMIT)
+	git push origin $$tag
+
 git-tag-get-release-candidate: ### Get the latest release candidate tag for the whole repository or just the specified commit - optional: COMMIT=[commit]
 	if [ -z "$(COMMIT)" ]; then
 		git show-ref --tags -d | sed -e 's;.* refs/tags/;;' -e 's;\^{};;' | grep -- -rc$$ | sort -r | head -n 1

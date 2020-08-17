@@ -24,6 +24,9 @@ migrate:
 		DIR=application \
 		CMD="python manage.py migrate"
 
+test-db-start:
+	make docker-compose-start-single-service NAME=db-dos
+
 test: # Test project
 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
 		DIR=application \

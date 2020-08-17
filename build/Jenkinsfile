@@ -19,7 +19,7 @@ pipeline {
                 script {
                     this.GIT_COMMIT_HASH = sh(returnStdout: true, script: 'make git-commit-get-hash')
                     this.TIMESTAMP = sh(returnStdout: true, script: 'make project-timestamp')
-                    // ADD AWS VARIABLES, DOCKER VARIABLES, (find the correct make target) ETC
+                    sh 'make devops-print-variables'
                 }
             }
         }
@@ -27,67 +27,70 @@ pipeline {
             steps {
                 script {
                     sh 'make build'
-                    //Use current timestamp when building docker images rather than BUILD_COMMIT_DATE (git commit date/time)
                 }
             }
         }
-        stage("Provision Test Database") {
+        stage("Start up Test Database") {
             steps {
                 script {
-                    // Run make target to load, reload, or refresh rds test database
-                    // make terraform-apply-auto-approve
+                    sh 'export PROFILE=local && make test-db-start'
                 }
             }
         }
-        stage("Run Tests") {
+        stage("Run Tests (against code)") {
             steps {
                 script {
-                    //run unit tests
-                    sh 'make unit-test-coverage'
+                    sh 'echo Unit Tests'
+                    sh 'export PROFILE=local && make test-unit-only'
                 }
                 script {
-                    //run regression tests
-                    sh 'make regression-test-coverage'
+                    sh 'echo Regression Tests'
+                    sh 'export PROFILE=local && make test-regression-only'
                 }
             }
         }
         stage("Tag Docker Images") {
             steps {
                 script {
-                    sh 'make docker-tag NAME=api TAG=${env.TIMESTAMP}-${env.GIT_COMMIT_HASH}'
-                    sh 'make docker-tag NAME=proxy TAG=${env.TIMESTAMP}-${env.GIT_COMMIT_HASH}'
+                    sh 'make docker-tag NAME=api TAG=${this.TIMESTAMP}-${this.GIT_COMMIT_HASH}'
+                    sh 'make docker-tag NAME=proxy TAG=${this.TIMESTAMP}-${this.GIT_COMMIT_HASH}'
                 }
             }
         }
         stage("Push Images") {
             steps {
                 scripts {
-                    sh 'make docker-push NAME=api TAG=${env.TIMESTAMP}-${env.GIT_COMMIT_HASH}'
-                    sh 'make docker-push NAME=proxy TAG=${env.TIMESTAMP}-${env.GIT_COMMIT_HASH}'
+                    sh 'make docker-push NAME=api TAG=${this.TIMESTAMP}-${this.GIT_COMMIT_HASH}'
+                    sh 'make docker-push NAME=proxy TAG=${this.TIMESTAMP}-${this.GIT_COMMIT_HASH}'
                 }
             }
         }
         stage("Tag Git Commit") {
             steps {
                 scripts {
-                    sh 'make git-tag-commit TAG=${env.TIMESTAMP}-${env.GIT_COMMIT_HASH}'
-                    // TO DO: Create Make Target for jenkins to tag the commit with the timestamp and git commit hash used in the
-                    // docker tag above to link the commit and docker images
+                    sh 'make git-tag-master-commit TIMESTAMP=${this.TIMESTAMP} COMMIT=${this.GIT_COMMIT_HASH}'
                 }
             }
         }
     }
     post {
-        failure {
+        always {
             script {
-                sh 'make slack-notification'
-                // TO DO: Create Make target to send slack notification on failure of a build
+                sh 'make project-stop'
+                sh 'make project-clean'
             }
         }
-
-        cleanup {
-            sh 'make jenkins-cleanup-workspace'
-            // TO DO: Create Make Targets for jenkins to cleanup the workspace after finishing
+        failure {
+            script {
+                sh 'echo Build Failure'
+                //sh 'make slack-notification CONTENT= WEBHOOK_URL='
+            }
         }
+        // cleanup {
+        //     script {
+        //         sh 'make jenkins-cleanup-workspace'
+        //         // TO DO: Create Make Targets for jenkins to cleanup the workspace after finishing
+        //     }
+        // }
     }
 }

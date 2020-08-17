@@ -7,7 +7,36 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '5'))
     }
 
+    environment {
+        GIT_TAG = ''
+        PROFILE = 'DEV'
+        GIT_COMMIT = ''
+    }
+
     stages {
+        stage("Check Deployment") {
+            steps {
+                script {
+                    if env.BRANCH_NAME != 'master' {
+                        // STOP DEPLOYMENT
+                    }
+                    this.GIT_COMMIT = this.GIT_TAG.split('-')[1]
+                    this.GIT_TAG = 'GRAB GIT TAG FROM JENKINS JOB'
+                    if this.GIT_TAG.split('-')[-1] == 'PROD' {
+                        this.PROFILE = 'PROD'
+                    } else if this.GIT_TAG.split('-')[-1] == 'DEMO' {
+                        this.PROFILE = 'DEMO'
+                    } else {
+                        this.PROFILE = 'DEV'
+                    }
+                    if this.PROFILE == 'PROD' or this.PROFILE == 'DEMO' {
+                        // Evaluate tags to check for Release Candidate, if no RC tag, don't deploy
+                        sh 'make git-tag-is-release-candidate'
+                        // If not, stop deployment
+                    }
+                }
+            }
+        }
         stage("Set up Variables") {
             steps {
                 script {
@@ -18,24 +47,24 @@ pipeline {
         stage("Pull Images") {
             steps {
                 script {
-                    sh 'make docker-pull NAME=proxy TAG='
-                    sh 'make docker-pull NAME=api TAG='
+                    sh 'make docker-pull NAME=proxy TAG=${this.GIT_TAG}'
+                    sh 'make docker-pull NAME=api TAG=${this.GIT_TAG}'
                 }
             }
         }
         stage("Provision Infrastructure") {
             steps {
                 script {
-                    if env.PROFILE != 'dev':
+                    if this.PROFILE != 'DEV':
                       sh 'make backup-data'
-                    sh 'make terraform-apply-auto-approve STACKS=infrastructure/stacks PROFILE=env.PROFILE'
+                      sh 'make terraform-apply-auto-approve STACKS=infrastructure/stacks PROFILE=${this.PROFILE}'
                 }
             }
         }
         stage("Deploy Application") {
             steps {
                 script {
-                    sh 'make deploy PROFILE=env.PROFILE'
+                    sh 'make deploy PROFILE=${this.PROFILE}'
                 }
             }
         }
@@ -53,10 +82,25 @@ pipeline {
                 }
             }
         }
+        stage("Deployment Summary") {
+            steps {
+                scripts {
+                    sh 'make deployment-summary'
+                }
+            }
+        }
     }
     post {
-        always {
-            sh 'make pipeline-test-cleanup'
+        failure {
+            script {
+                sh 'make jenkins-upload-workspace'
+                sh 'make slack-notification CONTENT= WEBHOOK_URL='
+                // TO DO: Create Make target to send slack notification on failure of a build
+            }
+        }
+        cleanup {
+            sh 'make jenkins-cleanup-workspace'
+            // TO DO: Create Make Targets for jenkins to cleanup the workspace after finishing
         }
     }
 }
