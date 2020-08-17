@@ -11,6 +11,7 @@ pipeline {
     environment {
         GIT_COMMIT_HASH = ''
         TIMESTAMP = ''
+        GIT_TAG = ''
     }
 
     // if (env.BRANCH_NAME != 'master') {
@@ -23,6 +24,7 @@ pipeline {
                 script {
                     this.GIT_COMMIT_HASH = sh(returnStdout: true, script: 'make git-commit-get-hash')
                     this.TIMESTAMP = sh(returnStdout: true, script: 'make project-timestamp')
+                    this.GIT_TAG = "${this.TIMESTAMP}-${this.GIT_COMMIT_HASH}"
                     sh 'make devops-print-variables'
                 }
             }
@@ -56,16 +58,16 @@ pipeline {
         stage("Tag Docker Images") {
             steps {
                 script {
-                    sh "make docker-tag NAME=api TAG=${this.TIMESTAMP}-${this.GIT_COMMIT_HASH}"
-                    sh "make docker-tag NAME=proxy TAG=${this.TIMESTAMP}-${this.GIT_COMMIT_HASH}"
+                    sh "make docker-tag NAME=api TAG=${this.GIT_TAG}"
+                    sh "make docker-tag NAME=proxy TAG=${this.GIT_TAG}"
                 }
             }
         }
         stage("Push Images") {
             steps {
                 scripts {
-                    sh "make docker-push NAME=api TAG=${this.TIMESTAMP}-${this.GIT_COMMIT_HASH}"
-                    sh "make docker-push NAME=proxy TAG=${this.TIMESTAMP}-${this.GIT_COMMIT_HASH}"
+                    sh "make docker-push NAME=api TAG=${this.GIT_TAG}"
+                    sh "make docker-push NAME=proxy TAG=${this.GIT_TAG}"
                 }
             }
         }
