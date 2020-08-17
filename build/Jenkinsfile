@@ -61,16 +61,16 @@ pipeline {
         stage("Tag Docker Images") {
             steps {
                 script {
-                    sh "make docker-tag NAME=api TAG=\"${this.TIMESTAMP}+"-"+${this.GIT_COMMIT_HASH}\""
-                    sh "make docker-tag NAME=proxy TAG=\"${this.TIMESTAMP}+"-"+${this.GIT_COMMIT_HASH}\""
+                    sh "make docker-tag NAME=api TAG=\"${this.TIMESTAMP}-${this.GIT_COMMIT_HASH}\""
+                    sh "make docker-tag NAME=proxy TAG=\"${this.TIMESTAMP}-${this.GIT_COMMIT_HASH}\""
                 }
             }
         }
         stage("Push Images") {
             steps {
                 scripts {
-                    sh "make docker-push NAME=api TAG=\"${this.TIMESTAMP}+"-"+${this.GIT_COMMIT_HASH}\""
-                    sh "make docker-push NAME=proxy TAG=\"${this.TIMESTAMP}+"-"+${this.GIT_COMMIT_HASH}\""
+                    sh "make docker-push NAME=api TAG=\"${this.TIMESTAMP}-${this.GIT_COMMIT_HASH}\""
+                    sh "make docker-push NAME=proxy TAG=\"${this.TIMESTAMP}-${this.GIT_COMMIT_HASH}\""
                 }
             }
         }
