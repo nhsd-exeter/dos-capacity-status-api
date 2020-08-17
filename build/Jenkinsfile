@@ -26,8 +26,8 @@ pipeline {
                     sh "echo ${this.GIT_COMMIT_HASH}"
                     this.TIMESTAMP = sh(returnStdout: true, script: 'make project-timestamp')
                     sh "echo ${this.TIMESTAMP}"
-                    // this.GIT_TAG = sh(returnStdout:true, script: 'echo $TIMESTAMP-$GIT_COMMIT_HASH')
-                    // sh "echo ${this.GIT_TAG}"
+                    this.GIT_TAG = "${this.TIMESTAMP}" + "-" + "${this.GIT_COMMIT_HASH}"
+                    sh "echo ${this.GIT_TAG}"
                     sh 'make devops-print-variables'
                 }
             }
@@ -61,16 +61,16 @@ pipeline {
         stage("Tag Docker Images") {
             steps {
                 script {
-                    sh "make docker-tag NAME=api TAG=\"${this.TIMESTAMP}\" + \"-\" + \"${this.GIT_COMMIT_HASH}\""
-                    sh "make docker-tag NAME=proxy TAG=\"${this.TIMESTAMP}\" + \"-\" + \"${this.GIT_COMMIT_HASH}\""
+                    sh "make docker-tag NAME=api TAG=${this.GIT_TAG}"
+                    sh "make docker-tag NAME=proxy TAG=${this.GIT_TAG}"
                 }
             }
         }
         stage("Push Images") {
             steps {
                 scripts {
-                    sh "make docker-push NAME=api TAG=\"${this.TIMESTAMP}\" + \"-\" + \"${this.GIT_COMMIT_HASH}\""
-                    sh "make docker-push NAME=proxy TAG=\"${this.TIMESTAMP}\" + \"-\" + \"${this.GIT_COMMIT_HASH}\""
+                    sh "make docker-push NAME=api TAG=${this.GIT_TAG}"
+                    sh "make docker-push NAME=proxy TAG=${this.GIT_TAG}"
                 }
             }
         }
