@@ -11,14 +11,14 @@ pipeline {
         BRANCH_NAME = sh(returnStdout: true, script: 'echo $(BUILD_BRANCH)')
         GIT_TAG = ''
         PROFILE = 'DEV'
-        GIT_COMMIT = ''
+        GIT_COMMIT = sh(returnStdout: true, script: 'make git-commit-get-hash')
     }
 
     stages {
         stage("Check Deployment") {
             steps {
                 script {
-                    if this.BRANCH_NAME != 'master' {
+                    if (this.BRANCH_NAME != 'master') {
                       currentBuild.result = 'FAILURE'
                       return
                     }
