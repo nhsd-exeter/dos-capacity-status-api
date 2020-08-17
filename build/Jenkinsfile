@@ -26,9 +26,8 @@ pipeline {
                     sh "echo ${this.GIT_COMMIT_HASH}"
                     this.TIMESTAMP = sh(returnStdout: true, script: 'make project-timestamp')
                     sh "echo ${this.TIMESTAMP}"
-                    this.GIT_TAG = sh(returnStdout:true, script: '"${this.TIMESTAMP}-${this.GIT_COMMIT_HASH}"')
+                    this.GIT_TAG = sh(returnStdout:true, script: 'echo "${this.TIMESTAMP}-${this.GIT_COMMIT_HASH}"')
                     sh "echo ${this.GIT_TAG}"
-
                     sh 'make devops-print-variables'
                 }
             }
