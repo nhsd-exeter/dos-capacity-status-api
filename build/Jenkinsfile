@@ -9,8 +9,8 @@ pipeline {
     }
 
     // environment {
-    //     GIT_COMMIT_HASH = ''
-    //     TIMESTAMP = ''
+        GIT_COMMIT_HASH = ''
+        TIMESTAMP = ''
     //     GIT_TAG = ''
     //     GIT_TAG2 = ''
     // }
@@ -23,15 +23,14 @@ pipeline {
         stage("Set up Variables") {
             steps {
                 script {
-                    GIT_COMMIT_HASH = sh(returnStdout: true, script: 'make git-commit-get-hash')
-                    sh "echo ${GIT_COMMIT_HASH}"
-                    TIMESTAMP = sh(returnStdout: true, script: 'make project-timestamp')
-                    sh "echo ${TIMESTAMP}"
-                    GIT_TAG = sh(script: 'echo $TIMESTAMP; echo -; echo $GIT_COMMIT_HASH', returnStdout: true)
+                    this.GIT_COMMIT_HASH = sh(returnStdout: true, script: 'make git-commit-get-hash')
+                    sh "echo ${this.GIT_COMMIT_HASH}"
+                    this.TIMESTAMP = sh(returnStdout: true, script: 'make project-timestamp')
+                    sh "echo ${this.TIMESTAMP}"
+                    GIT_TAG = "$this.TIMESTAMP" + "$this.GIT_COMMIT_HASH"
                     sh "echo ${GIT_TAG}"
                     sh 'make devops-print-variables'
                 }
-                echo "Git Tag: ${GIT_TAG}"
             }
         }
         stage("Build Images") {
