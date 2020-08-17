@@ -18,7 +18,8 @@ pipeline {
         stage("Pull Images") {
             steps {
                 script {
-                    sh 'make docker-pull'
+                    sh 'make docker-pull NAME=proxy TAG='
+                    sh 'make docker-pull NAME=api TAG='
                 }
             }
         }
@@ -27,7 +28,7 @@ pipeline {
                 script {
                     if env.PROFILE != 'dev':
                       sh 'make backup-data'
-                    sh 'make deploy-infrastructure PROFILE=env.PROFILE'
+                    sh 'make terraform-apply-auto-approve STACKS=infrastructure/stacks PROFILE=env.PROFILE'
                 }
             }
         }

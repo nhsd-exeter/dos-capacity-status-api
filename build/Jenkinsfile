@@ -80,7 +80,7 @@ pipeline {
     post {
         failure {
             script {
-                sh 'make slack-notification-on-failure'
+                sh 'make slack-notification'
                 // TO DO: Create Make target to send slack notification on failure of a build
             }
         }
