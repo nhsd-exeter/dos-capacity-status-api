@@ -131,7 +131,7 @@ docker-login: ### Log into the Docker registry - optional: DOCKER_USERNAME,DOCKE
 	if [ -n "$(DOCKER_USERNAME)" ] && [ -n "$(DOCKER_PASSWORD)" ]; then
 		make _docker-get-login-password | docker login --username "$(DOCKER_USERNAME)" --password-stdin
 	else
-		make aws-ecr-get-login-password | docker login --username AWS --password-stdin $(AWS_ECR)
+		make aws-ecr-get-login-password $(AWS_REGION) | docker login --username AWS --password-stdin $(AWS_ECR)
 	fi
 
 docker-create-repository: ### Create Docker repository to store an image - mandatory: NAME
