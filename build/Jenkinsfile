@@ -27,7 +27,7 @@ pipeline {
                     sh "echo ${GIT_COMMIT_HASH}"
                     TIMESTAMP = sh(returnStdout: true, script: 'make project-timestamp')
                     sh "echo ${TIMESTAMP}"
-                    GIT_TAG = "timestamp" + "commit"
+                    GIT_TAG = (${TIMESTAMP} + ${GIT_COMMIT_HASH})
                     sh "echo ${GIT_TAG}"
                     // GIT_TAG_TWO = [TIMESTAMP.toString(), GIT_COMMIT_HASH.toString()].join('-')
                     // sh "echo $GIT_TAG_TWO"
@@ -72,7 +72,7 @@ pipeline {
         }
         stage("Push Images") {
             steps {
-                scripts {
+                script {
                     sh "make docker-push NAME=api TAG=${this.GIT_TAG}"
                     sh "make docker-push NAME=proxy TAG=${this.GIT_TAG}"
                 }
@@ -80,19 +80,19 @@ pipeline {
         }
         stage("Tag Git Commit") {
             steps {
-                scripts {
+                script {
                     sh "make git-tag-master-commit TIMESTAMP=${this.TIMESTAMP} COMMIT=${this.GIT_COMMIT_HASH}"
                 }
             }
         }
     }
     post {
-        // always {
-        //     script {
-        //         sh 'make project-stop'
-        //         sh 'make project-clean'
-        //     }
-        // }
+        always {
+            script {
+                sh 'make project-stop'
+                sh 'make project-clean'
+            }
+        }
         failure {
             script {
                 sh 'echo Build Failure'
