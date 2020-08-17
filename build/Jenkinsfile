@@ -27,7 +27,7 @@ pipeline {
                     sh "echo ${GIT_COMMIT_HASH}"
                     TIMESTAMP = sh(returnStdout: true, script: 'make project-timestamp')
                     sh "echo ${TIMESTAMP}"
-                    GIT_TAG= "${TIMESTAMP}" + "${GIT_COMMIT_HASH}"
+                    GIT_TAG = "timestamp" + "commit"
                     sh "echo ${GIT_TAG}"
                     // GIT_TAG_TWO = [TIMESTAMP.toString(), GIT_COMMIT_HASH.toString()].join('-')
                     // sh "echo $GIT_TAG_TWO"
