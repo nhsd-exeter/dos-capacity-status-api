@@ -81,4 +81,5 @@ project-create-pipeline: ### Create pipeline
 	project-create-image \
 	project-create-infrastructure \
 	project-create-pipeline \
-	project-create-profile
+	project-create-profile \
+	project-timestamp
