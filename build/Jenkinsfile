@@ -8,11 +8,11 @@ pipeline {
         disableConcurrentBuilds()
     }
 
-    environment {
-        GIT_COMMIT_HASH = ''
-        TIMESTAMP = ''
-        GIT_TAG = ''
-    }
+    // environment {
+    //     GIT_COMMIT_HASH = ''
+    //     TIMESTAMP = ''
+    //     GIT_TAG = ''
+    // }
 
     // if (env.BRANCH_NAME != 'master') {
     //     currentBuild.result = 'FAILURE'
@@ -22,13 +22,13 @@ pipeline {
         stage("Set up Variables") {
             steps {
                 script {
-                    this.GIT_COMMIT_HASH = sh(returnStdout: true, script: 'make git-commit-get-hash')
-                    sh "echo ${this.GIT_COMMIT_HASH}"
-                    this.TIMESTAMP = sh(returnStdout: true, script: 'make project-timestamp')
-                    sh "echo ${this.TIMESTAMP}"
-                    // this.GIT_TAG = ${this.TIMESTAMP}.toString() + "-" + ${this.GIT_COMMIT_HASH}.toString()
-                    // sh "echo ${this.GIT_TAG}"
-                    sh 'echo "${TIMESTAMP}-${GIT_COMMIT_HASH}"'
+                    GIT_COMMIT_HASH = sh(returnStdout: true, script: 'make git-commit-get-hash')
+                    sh "echo ${GIT_COMMIT_HASH}"
+                    TIMESTAMP = sh(returnStdout: true, script: 'make project-timestamp')
+                    sh "echo ${TIMESTAMP}"
+                    GIT_TAG = "${TIMESTAMP}-${GIT_COMMIT_HASH}"
+                    sh "echo ${GIT_TAG}"
+                    // sh "export TIMESTAMP=${TIMESTAMP} && export GIT_COMMIT_HASH=${GIT_COMMIT_HASH} && echo ${TIMESTAMP}-${GIT_COMMIT_HASH}"
                     sh 'make devops-print-variables'
                 }
             }
