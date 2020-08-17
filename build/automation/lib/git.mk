@@ -68,6 +68,11 @@ git-tag-create-environment-deployment: ### Tag environment deployment as `[YYYYm
 		git push origin $$tag
 	fi
 
+git-create-tag:
+	timestamp = $$(TZ=UTC date "+%Y%m%d%H%M%S")
+	commit = make git-commit-get-hash
+	echo "$(TIMESTAMP)-$(COMMIT)"
+
 git-tag-master-commit: ### Tag any PR to master as `[YYYYmmddHHMMSS]-[commit-hash]` - mandatory: COMMIT=[commit hash]; TIMESTAMP[timestamp]
 	tag=$(TIMESTAMP)-$(COMMIT)
 	git tag $$tag $(COMMIT)
