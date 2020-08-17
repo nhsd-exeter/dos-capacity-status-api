@@ -8,6 +8,7 @@ pipeline {
     }
 
     environment {
+        BRANCH_NAME = sh(returnStdout: true, script: 'echo $(BUILD_BRANCH)')
         GIT_TAG = ''
         PROFILE = 'DEV'
         GIT_COMMIT = ''
@@ -17,8 +18,9 @@ pipeline {
         stage("Check Deployment") {
             steps {
                 script {
-                    if env.BRANCH_NAME != 'master' {
-                        // STOP DEPLOYMENT
+                    if this.BRANCH_NAME != 'master' {
+                      currentBuild.result = 'FAILURE'
+                      return
                     }
                     this.GIT_COMMIT = this.GIT_TAG.split('-')[1]
                     this.GIT_TAG = 'GRAB GIT TAG FROM JENKINS JOB'
@@ -40,7 +42,7 @@ pipeline {
         stage("Set up Variables") {
             steps {
                 script {
-                    sh 'make variables'
+                    sh 'make devops-print-variables'
                 }
             }
         }
@@ -52,43 +54,43 @@ pipeline {
                 }
             }
         }
-        stage("Provision Infrastructure") {
-            steps {
-                script {
-                    if this.PROFILE != 'DEV':
-                      sh 'make backup-data'
-                      sh 'make terraform-apply-auto-approve STACKS=infrastructure/stacks PROFILE=${this.PROFILE}'
-                }
-            }
-        }
-        stage("Deploy Application") {
-            steps {
-                script {
-                    sh 'make deploy PROFILE=${this.PROFILE}'
-                }
-            }
-        }
-        stage("Prepare Data") {
-            steps {
-                script {
-                    sh 'make prepare-data'
-                }
-            }
-        }
-        stage("Run Tests") {
-            steps {
-                script {
-                    sh 'make test'
-                }
-            }
-        }
-        stage("Deployment Summary") {
-            steps {
-                scripts {
-                    sh 'make deployment-summary'
-                }
-            }
-        }
+        // stage("Provision Infrastructure") {
+        //     steps {
+        //         script {
+        //             if this.PROFILE != 'DEV':
+        //               sh 'make backup-data'
+        //               sh 'make terraform-apply-auto-approve STACKS=infrastructure/stacks PROFILE=${this.PROFILE}'
+        //         }
+        //     }
+        // }
+        // stage("Deploy Application") {
+        //     steps {
+        //         script {
+        //             sh 'make deploy PROFILE=${this.PROFILE}'
+        //         }
+        //     }
+        // }
+        // stage("Prepare Data") {
+        //     steps {
+        //         script {
+        //             sh 'make prepare-data'
+        //         }
+        //     }
+        // }
+        // stage("Run Tests") {
+        //     steps {
+        //         script {
+        //             sh 'make test'
+        //         }
+        //     }
+        // }
+        // stage("Deployment Summary") {
+        //     steps {
+        //         scripts {
+        //             sh 'make deployment-summary'
+        //         }
+        //     }
+        // }
     }
     post {
         failure {
