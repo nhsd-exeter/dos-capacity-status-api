@@ -13,6 +13,10 @@ pipeline {
         TIMESTAMP = ''
     }
 
+    // if (env.BRANCH_NAME != 'master') {
+    //     currentBuild.result = 'FAILURE'
+    // }
+
     stages {
         stage("Set up Variables") {
             steps {
@@ -30,25 +34,25 @@ pipeline {
                 }
             }
         }
-        stage("Start up Test Database") {
-            steps {
-                script {
-                    sh 'export PROFILE=local && make test-db-start'
-                }
-            }
-        }
-        stage("Run Tests (against code)") {
-            steps {
-                script {
-                    sh 'echo Unit Tests'
-                    sh 'export PROFILE=local && make test-unit-only'
-                }
-                script {
-                    sh 'echo Regression Tests'
-                    sh 'export PROFILE=local && make test-regression-only'
-                }
-            }
-        }
+        // stage("Start up Test Database") {
+        //     steps {
+        //         script {
+        //             sh 'export PROFILE=local && make test-db-start'
+        //         }
+        //     }
+        // }
+        // stage("Run Tests (against code)") {
+        //     steps {
+        //         script {
+        //             sh 'echo Unit Tests'
+        //             sh 'export PROFILE=local && make test-unit-only'
+        //         }
+        //         script {
+        //             sh 'echo Regression Tests'
+        //             sh 'export PROFILE=local && make test-regression-only'
+        //         }
+        //     }
+        // }
         stage("Tag Docker Images") {
             steps {
                 script {
@@ -74,12 +78,12 @@ pipeline {
         }
     }
     post {
-        always {
-            script {
-                sh 'make project-stop'
-                sh 'make project-clean'
-            }
-        }
+        // always {
+        //     script {
+        //         sh 'make project-stop'
+        //         sh 'make project-clean'
+        //     }
+        // }
         failure {
             script {
                 sh 'echo Build Failure'
