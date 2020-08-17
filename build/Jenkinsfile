@@ -34,7 +34,7 @@ pipeline {
                     // sh "export TIMESTAMP=${TIMESTAMP} && export GIT_COMMIT_HASH=${GIT_COMMIT_HASH} && echo ${TIMESTAMP}-${GIT_COMMIT_HASH}"
                     sh 'make devops-print-variables'
                 }
-                echo "buildRevision: ${buildRevision}"
+                echo "Git Tag: ${GIT_TAG}"
             }
         }
         stage("Build Images") {
@@ -88,12 +88,12 @@ pipeline {
         }
     }
     post {
-        always {
-            script {
-                // sh 'make project-stop'
-                sh 'make project-clean'
-            }
-        }
+        // always {
+        //     script {
+        //         // sh 'make project-stop'
+        //         sh 'make project-clean'
+        //     }
+        // }
         failure {
             script {
                 sh 'echo Build Failure'
