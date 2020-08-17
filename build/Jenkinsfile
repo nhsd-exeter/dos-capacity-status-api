@@ -69,8 +69,11 @@ pipeline {
         stage("Push Images") {
             steps {
                 script {
-                    sh "make docker-push NAME=api TAG=${this.GIT_TAG}"
-                    sh "make docker-push NAME=proxy TAG=${this.GIT_TAG}"
+                    sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID_MGMT}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+                    // sh "make docker-push NAME=api TAG=${this.GIT_TAG}"
+                    sh "docker push ${DOCKER_REGISTRY}/api:${this.GIT_TAG}"
+                    // sh "make docker-push NAME=proxy TAG=${this.GIT_TAG}"
+                    sh "docker push ${DOCKER_REGISTRY}/proxy:${this.GIT_TAG}"
                 }
             }
         }
