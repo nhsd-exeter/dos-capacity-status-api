@@ -8,12 +8,12 @@ pipeline {
         disableConcurrentBuilds()
     }
 
-    // environment {
+    environment {
         GIT_COMMIT_HASH = ''
         TIMESTAMP = ''
     //     GIT_TAG = ''
     //     GIT_TAG2 = ''
-    // }
+    }
 
     // if (env.BRANCH_NAME != 'master') {
     //     currentBuild.result = 'FAILURE'
