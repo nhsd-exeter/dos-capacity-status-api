@@ -24,6 +24,10 @@ jenkins-upload-workspace: ### Upload the project workspace to a storage - optio
 		make _jenkins-upload-workspace-exploded
 	fi
 
+jenkins-clean: ### Remove anything leftover from a jenkins build
+	network_id=$$(docker network ls | grep uec-dos-api/cs | tr -s ' ' | awk -v f=1 '$$f ~ /^[[:alnum:]]{12}$$/ { print $$f }')
+	docker network rm $$network_id
+
 _jenkins-create-workspace-storage:
 	if [ false == $$(make aws-s3-exists NAME=$(JENKINS_WORKSPACE_BUCKET_NAME)) ]; then
 		make aws-s3-create NAME=$(JENKINS_WORKSPACE_BUCKET_NAME)

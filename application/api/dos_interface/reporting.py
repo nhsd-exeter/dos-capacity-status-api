@@ -25,7 +25,11 @@ def _retrieve_service_data(service_uid):
     service_data["DOS_REGION"] = "dosregion=" + dos_region_info["name"]
 
     service_data["CAPACITY_STATUS"] = "capacity=" + service_info["color"]
-    service_data["NOTES"] = "notes=" + service_info["notes"]
+
+    notes = ""
+    if service_info["notes"] is not None:
+        notes = "notes=" + service_info["notes"]
+    service_data["NOTES"] = notes
 
     reset_date_time = ""
     if service_info["resetdatetime"] is not None:
