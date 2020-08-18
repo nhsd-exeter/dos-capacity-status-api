@@ -738,6 +738,9 @@ docker-login-jenkins: ### TEMPORARY Log into the Docker registry - optional: DOC
 		make aws-ecr-get-login-password-jenkins | docker login --username AWS --password-stdin $(AWS_ECR)
 	fi
 
+docker-pull-test-db: ### TEMPORARY WORKAROUND
+	docker pull $(DOCKER_LIBRARY_REGISTRY)/postgres:latest
+
 # ==============================================================================
 
 .SILENT: \

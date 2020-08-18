@@ -42,6 +42,7 @@ pipeline {
         stage("Start up Test Database") {
             steps {
                 script {
+                    sh 'make test-db-pull'
                     sh 'export PROFILE=local && make test-db-start'
                 }
             }
@@ -78,18 +79,18 @@ pipeline {
         //     steps {
         //         script {
         //             sh "make git-tag-master-commit TAG=${this.GIT_TAG}"
-        //             // Need user set p with git access
+        //             // Need user set up with git access
         //         }
         //     }
         // }
     }
     post {
-        // always {
-        //     script {
-        //         // sh 'make project-stop'
-        //         sh 'make clean'
-        //     }
-        // }
+        always {
+            script {
+                sh 'make stop'
+                sh 'make clean'
+            }
+        }
         failure {
             script {
                 sh 'echo Build Failure'
