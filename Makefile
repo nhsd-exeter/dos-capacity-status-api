@@ -58,6 +58,8 @@ test-regression-only: # Run only regression test suite
 test-unit-only: # Run only unit test suite
 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
 		DIR=application \
+		DB_DOS_HOST=db-dos-$(BUILD_ID) \
+		API_DB_HOST=db-dos-$(BUILD_ID) \
 		CMD="python manage.py test --exclude-tag=regression api"
 
 push: # Push project artefacts to the registry
