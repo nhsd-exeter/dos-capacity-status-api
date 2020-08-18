@@ -1,39 +1,39 @@
 from unittest import TestCase, mock
 from datetime import datetime
 from ..reporting import _get_request_execution_time, log_reporting_info, usage_reporting_logger
-from ..reporting import api_logger  # , _retrieve_service_data
+from ..reporting import api_logger, _retrieve_service_data
 from time import gmtime as real_gmtime, strftime
 
 
 class TestDosInterfaceReporting(TestCase):
     "Test for reporting to dos"
 
-    # def test_retrieve_service_data(self):
-    #     service_uid = "149198"
-    #     service_data = _retrieve_service_data(service_uid)
-    #     expected_keys = [
-    #         "CLIENT_NAME",
-    #         "ORG_NAME",
-    #         "ORG_TYPE",
-    #         "PARENT_ORG",
-    #         "DOS_REGION",
-    #         "CAPACITY_STATUS",
-    #         "NOTES",
-    #         "RESET_DATE_TIME",
-    #         "CHANGED_TIME",
-    #     ]
-    #     keys = list(service_data.keys())
-    #     assert keys == expected_keys
-    #     for key in keys:
-    #         assert type(service_data[key]) is str and service_data[key] != ""
-    #         if key != "CLIENT_NAME" and key != "CAPACITY_STATUS":
-    #             lower = key.lower()
-    #             no_underscore = lower.replace("_", "")
-    #             msg = "key " + key + " as lower with or without underscores is NOT present"
-    #             assert lower in service_data[key] or no_underscore in service_data[key], msg
+    def test_retrieve_service_data(self):
+        service_uid = "149198"
+        service_data = _retrieve_service_data(service_uid)
+        expected_keys = [
+            "CLIENT_NAME",
+            "ORG_NAME",
+            "ORG_TYPE",
+            "PARENT_ORG",
+            "DOS_REGION",
+            "CAPACITY_STATUS",
+            "NOTES",
+            "RESET_DATE_TIME",
+            "CHANGED_TIME",
+        ]
+        keys = list(service_data.keys())
+        assert keys == expected_keys
+        for key in keys:
+            assert (type(service_data[key]) is str and service_data[key] != "") or type(service_data[key]) is None
+            if key != "CLIENT_NAME" and key != "CAPACITY_STATUS":
+                lower = key.lower()
+                no_underscore = lower.replace("_", "")
+                msg = "key " + key + " as lower with or without underscores is NOT present"
+                assert lower in service_data[key] or no_underscore in service_data[key], msg
 
-    #     assert service_data["CLIENT_NAME"] in ["EditUser", "TestUser"]
-    #     assert "capacity" in service_data["CAPACITY_STATUS"]
+        assert service_data["CLIENT_NAME"] in ["EditUser", "TestUser"]
+        assert "capacity" in service_data["CAPACITY_STATUS"]
 
     def test_get_request_execution_time(self):
         class Request:
