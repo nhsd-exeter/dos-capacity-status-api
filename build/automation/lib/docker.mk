@@ -708,7 +708,7 @@ _docker-get-docker-compose-yml:
 	fi
 	echo $$yml
 
-_docker-get-docker-compose-yml-jenkins: ### TEMPORARY
+_docker-get-docker-compose-yml-jenkins: ### TEMPORARY - adds build id to everything within compose yml as well
 	yml=$(or $(YML), $(DOCKER_COMPOSE_YML))
 	# if [ "$(BUILD_ID)" != 0 ]; then
 	# 	make -s docker-run-tools ARGS="--env BUILD_ID=$(BUILD_ID)" CMD=" \

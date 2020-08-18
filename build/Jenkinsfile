@@ -92,7 +92,7 @@ pipeline {
         // }
         failure {
             script {
-                // sh "echo Build Failure"
+                sh "echo Build Failure"
                 // sh "make aws-assume-role-export-variables PROFILE=dev"
                 // sh "webhook_url_secret = $(make aws-secret-get NAME=)"
                 // sh "webhook_url_value = $(webhook_url_secret[value])"
