@@ -710,14 +710,6 @@ _docker-get-docker-compose-yml:
 
 _docker-get-docker-compose-yml-jenkins: ### TEMPORARY - adds build id to everything within compose yml as well
 	yml=$(or $(YML), $(DOCKER_COMPOSE_YML))
-	# if [ "$(BUILD_ID)" != 0 ]; then
-	# 	make -s docker-run-tools ARGS="--env BUILD_ID=$(BUILD_ID)" CMD=" \
-	# 		$(BIN_DIR_REL)/docker-compose-processor.py \
-	# 			$$(echo $$yml | sed 's;//;/;g' | sed "s;$(PROJECT_DIR);;g") \
-	# 			$(TMP_DIR_REL)/docker-compose-$(BUILD_ID).yml \
-	# 	"
-	# 	yml=$(TMP_DIR)/docker-compose-$(BUILD_ID).yml
-	# fi
 	echo $$yml
 
 _docker-is-lib-image:
