@@ -74,9 +74,10 @@ git-create-tag: ### Tag PR to master for auto pipeline
 	tag=$$timestamp-$$commit
 	echo "$$tag"
 
-git-tag-master-commit: ### Tag any PR to master as `[YYYYmmddHHMMSS]-[commit-hash]` - mandatory: COMMIT=[commit hash]; TIMESTAMP[timestamp]
-	tag=$(TIMESTAMP)-$(COMMIT)
-	git tag $$tag $(COMMIT)
+git-tag-master-commit: ### Tag any PR to master as `[YYYYmmddHHMMSS]-[commit-hash]` - mandatory: TAG=[timestamp-commithash]
+	tag=$(TAG)
+	commit=$$(make git-commit-get-hash)
+	git tag $$tag $$commit
 	git push origin $$tag
 
 git-tag-get-release-candidate: ### Get the latest release candidate tag for the whole repository or just the specified commit - optional: COMMIT=[commit]

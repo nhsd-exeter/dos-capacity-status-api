@@ -69,19 +69,19 @@ pipeline {
         stage("Push Images") {
             steps {
                 script {
-                    sh "make docker-login"
                     sh "make docker-push NAME=api TAG=${this.GIT_TAG}"
                     sh "make docker-push NAME=proxy TAG=${this.GIT_TAG}"
                 }
             }
         }
-        stage("Tag Git Commit") {
-            steps {
-                script {
-                    sh "make git-tag-master-commit TIMESTAMP=${this.TIMESTAMP} COMMIT=${this.GIT_COMMIT_HASH}"
-                }
-            }
-        }
+        // stage("Tag Git Commit") {
+        //     steps {
+        //         script {
+        //             sh "make git-tag-master-commit TAG=${this.GIT_TAG}"
+        //             // Need user set p with git access
+        //         }
+        //     }
+        // }
     }
     post {
         // always {
