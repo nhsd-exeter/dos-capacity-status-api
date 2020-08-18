@@ -36,6 +36,7 @@ pipeline {
             steps {
                 script {
                     sh 'make build'
+                    sh 'make docker-run-tools'
                 }
             }
         }
