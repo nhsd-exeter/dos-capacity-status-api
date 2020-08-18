@@ -43,9 +43,7 @@ pipeline {
             steps {
                 script {
                     sh 'export PROFILE=local && make test-db-start-jenkins'
-                    sh "export DB_DOS_HOST=db-dos-${BUILD_ID}"
-                    sh "export API_DOS_HOST=db-dos-${BUILD_ID}"
-                    // sh 'make migrate'
+                    sh 'make migrate-jenkins'
                 }
             }
         }
@@ -53,11 +51,11 @@ pipeline {
             steps {
                 script {
                     sh 'echo Unit Tests'
-                    sh 'export PROFILE=local && make test-unit-only'
+                    sh 'export PROFILE=local && make test-unit-only-jenkins'
                 }
                 script {
                     sh 'echo Regression Tests'
-                    sh 'export PROFILE=local && make test-regression-only'
+                    sh 'export PROFILE=local && make test-regression-only-jenkins'
                 }
             }
         }

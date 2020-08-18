@@ -24,6 +24,13 @@ migrate:
 		DIR=application \
 		CMD="python manage.py migrate"
 
+migrate-jenkins:
+	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+		DIR=application \
+		DB_DOS_HOST=db-dos-$(BUILD_ID) \
+		API_DB_HOST=db-dos-$(BUILD_ID) \
+		CMD="python manage.py migrate"
+
 test-db-start:
 	make docker-compose-start-single-service NAME=db-dos
 
@@ -55,7 +62,19 @@ test-regression-only: # Run only regression test suite
 		DIR=application \
 		CMD="python manage.py test --tag=regression api"
 
+test-regression-only-jenkins: # Run only regression test suite
+	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+		DIR=application \
+		DB_DOS_HOST=db-dos-$(BUILD_ID) \
+		API_DB_HOST=db-dos-$(BUILD_ID) \
+		CMD="python manage.py test --tag=regression api"
+
 test-unit-only: # Run only unit test suite
+	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+		DIR=application \
+		CMD="python manage.py test --exclude-tag=regression api"
+
+test-unit-only-jenkins: # Run only unit test suite
 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
 		DIR=application \
 		DB_DOS_HOST=db-dos-$(BUILD_ID) \
