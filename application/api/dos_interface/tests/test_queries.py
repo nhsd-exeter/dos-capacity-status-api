@@ -1,6 +1,7 @@
 from unittest import TestCase
 from django.core.exceptions import ObjectDoesNotExist
-from datetime import datetime
+
+# from datetime import datetime
 
 from ..queries import can_user_edit_service, get_dos_service_for_uid, get_service_info, Users
 from ..queries import get_dos_user_for_user_id, get_dos_user_for_username
@@ -125,43 +126,43 @@ class TestDosInterfaceQueries(TestCase):
         return_value = get_dos_service_for_uid(service_uid, throwDoesNotExist=False)
         self.assertIsNone(return_value)
 
-    def test_get_service_info__success(self):
-        "Test get_service_info, success"
-        service_uid = "149198"
-        service_info = get_service_info(service_uid)
-        self.assertEqual(len(service_info), 3)
-        expected_keys = [
-            "depth",
-            "id",
-            "uid",
-            "name",
-            "typeid",
-            "notes",
-            "modifiedby",
-            "modifieddate",
-            "resetdatetime",
-            "color",
-        ]
-        for index in range(len(service_info)):
-            service = service_info[index]
-            self.assertListEqual(list(service.keys()), expected_keys)
-            if index == 0:
-                assert type(service["depth"]) is int and service["depth"] == 0
-                assert service["uid"] == service_uid
-                assert "Capacity" in service["notes"]
-                assert type(service["modifiedby"]) is str and service["modifiedby"] is not None
-                assert type(service["modifieddate"]) is datetime
-                assert type(service["resetdatetime"]) is datetime
-            else:
-                assert type(service["depth"]) is int and service["depth"] == 1
-                assert service["uid"] is not service_uid and service["uid"] is not None
-                assert service["modifiedby"] is None
-                assert service["modifieddate"] is None
-                assert service["resetdatetime"] is None
-            assert type(service["id"]) is int
-            assert type(service["name"]) is str and service["name"] is not None
-            assert type(service["typeid"]) is int
-            assert service["color"] in ("RED", "AMBER", "GREEN")
+    # def test_get_service_info__success(self):
+    #     "Test get_service_info, success"
+    #     service_uid = "149198"
+    #     service_info = get_service_info(service_uid)
+    #     self.assertEqual(len(service_info), 3)
+    #     expected_keys = [
+    #         "depth",
+    #         "id",
+    #         "uid",
+    #         "name",
+    #         "typeid",
+    #         "notes",
+    #         "modifiedby",
+    #         "modifieddate",
+    #         "resetdatetime",
+    #         "color",
+    #     ]
+    #     for index in range(len(service_info)):
+    #         service = service_info[index]
+    #         self.assertListEqual(list(service.keys()), expected_keys)
+    #         if index == 0:
+    #             assert type(service["depth"]) is int and service["depth"] == 0
+    #             assert service["uid"] == service_uid
+    #             assert "Capacity" in service["notes"]
+    #             assert type(service["modifiedby"]) is str and service["modifiedby"] is not None
+    #             assert type(service["modifieddate"]) is datetime
+    #             assert type(service["resetdatetime"]) is datetime
+    #         else:
+    #             assert type(service["depth"]) is int and service["depth"] == 1
+    #             assert service["uid"] is not service_uid and service["uid"] is not None
+    #             assert service["modifiedby"] is None
+    #             assert service["modifieddate"] is None
+    #             assert service["resetdatetime"] is None
+    #         assert type(service["id"]) is int
+    #         assert type(service["name"]) is str and service["name"] is not None
+    #         assert type(service["typeid"]) is int
+    #         assert service["color"] in ("RED", "AMBER", "GREEN")
 
     def test_get_service_info__fail(self):
         "Test get_service_info, fail"

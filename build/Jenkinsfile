@@ -91,6 +91,7 @@ pipeline {
                 sh 'make stop'
                 sh 'make api-clean'
                 sh 'make proxy-clean'
+                // Update clean make targets to remove networks, as builds fail after 10
             }
         }
         failure {
