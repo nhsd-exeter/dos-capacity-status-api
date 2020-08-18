@@ -642,9 +642,14 @@ docker-compose-start: ### Start Docker Compose - optional: YML=[docker-compose.y
 docker-compose-start-single-service: ### Start Docker Compose - mandatory: NAME=[service name]; optional: YML=[docker-compose.yml, defaults to $(DOCKER_COMPOSE_YML)]
 	make docker-config
 	yml=$$(make _docker-get-docker-compose-yml YML=$(YML))
-	make _docker-get-docker-compose-yml YML=$(YML)
 	docker-compose --file $$yml \
 		up --no-build --detach $(NAME)
+
+docker-compose-start-single-service-jenkins: ### TEMPORARY Start Docker Compose - mandatory: NAME=[service name]; optional: YML=[docker-compose.yml, defaults to $(DOCKER_COMPOSE_YML)]
+	make docker-config
+	yml=$$(make _docker-get-docker-compose-yml YML=$(YML))
+	docker-compose --file $$yml \
+		up --no-build --detach $(NAME)-$(BUILD_ID)
 
 docker-compose-stop: ### Stop Docker Compose - optional: YML=[docker-compose.yml, defaults to $(DOCKER_COMPOSE_YML)],ALL=true
 	make docker-config

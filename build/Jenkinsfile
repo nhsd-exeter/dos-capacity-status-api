@@ -42,7 +42,7 @@ pipeline {
         stage("Start up Test Database") {
             steps {
                 script {
-                    sh 'export PROFILE=local && make test-db-start'
+                    sh 'export PROFILE=local && make test-db-start-jenkins'
                 }
             }
         }
