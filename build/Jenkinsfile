@@ -36,29 +36,28 @@ pipeline {
             steps {
                 script {
                     sh 'make build'
-                    sh 'make docker-run-tools'
                 }
             }
         }
-        // stage("Start up Test Database") {
-        //     steps {
-        //         script {
-        //             sh 'export PROFILE=local && make test-db-start'
-        //         }
-        //     }
-        // }
-        // stage("Run Tests (against code)") {
-        //     steps {
-        //         script {
-        //             sh 'echo Unit Tests'
-        //             sh 'export PROFILE=local && make test-unit-only'
-        //         }
-        //         script {
-        //             sh 'echo Regression Tests'
-        //             sh 'export PROFILE=local && make test-regression-only'
-        //         }
-        //     }
-        // }
+        stage("Start up Test Database") {
+            steps {
+                script {
+                    sh 'export PROFILE=local && make test-db-start'
+                }
+            }
+        }
+        stage("Run Tests (against code)") {
+            steps {
+                script {
+                    sh 'echo Unit Tests'
+                    sh 'export PROFILE=local && make test-unit-only'
+                }
+                script {
+                    sh 'echo Regression Tests'
+                    sh 'export PROFILE=local && make test-regression-only'
+                }
+            }
+        }
         stage("Tag Docker Images") {
             steps {
                 script {
@@ -88,7 +87,7 @@ pipeline {
         // always {
         //     script {
         //         // sh 'make project-stop'
-        //         sh 'make project-clean'
+        //         sh 'make clean'
         //     }
         // }
         failure {
