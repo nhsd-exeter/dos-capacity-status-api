@@ -641,7 +641,7 @@ docker-compose-start: ### Start Docker Compose - optional: YML=[docker-compose.y
 
 docker-compose-start-single-service: ### Start Docker Compose - mandatory: NAME=[service name]; optional: YML=[docker-compose.yml, defaults to $(DOCKER_COMPOSE_YML)]
 	make docker-config
-	yml=$$(make _docker-get-docker-compose-yml YML=$(YML))
+	yml=$$(make _docker-get-docker-compose-yml)
 	docker-compose --file $$yml \
 		up --no-build --detach $(NAME)
 
@@ -740,7 +740,6 @@ docker-login-jenkins: ### TEMPORARY Log into the Docker registry - optional: DOC
 
 docker-pull-test-db: ### TEMPORARY WORKAROUND
 	docker pull $(DOCKER_LIBRARY_REGISTRY)/postgres:latest
-	docker tag $(DOCKER_LIBRARY_REGISTRY)/postgres db-dos
 
 # ==============================================================================
 
