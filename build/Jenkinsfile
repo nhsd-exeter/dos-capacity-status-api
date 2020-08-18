@@ -12,6 +12,8 @@ pipeline {
         GIT_COMMIT_HASH = ''
         TIMESTAMP = ''
         GIT_TAG = ''
+        ROLE = ''
+        WEBHOOK_URL = ''
     }
 
     // if (env.BRANCH_NAME != 'master') {
@@ -32,6 +34,13 @@ pipeline {
                 }
             }
         }
+        stage("Start up Test Database") {
+            steps {
+                script {
+                    sh 'export PROFILE=local && make test-db-start-jenkins'
+                }
+            }
+        }
         stage("Build Images") {
             steps {
                 script {
@@ -39,17 +48,12 @@ pipeline {
                 }
             }
         }
-        stage("Start up Test Database") {
-            steps {
-                script {
-                    sh 'export PROFILE=local && make test-db-start-jenkins'
-                    sh 'sleep 30'
-                    sh 'make migrate-jenkins'
-                }
-            }
-        }
         stage("Run Tests (against code)") {
             steps {
+                script {
+                    sh 'echo Run Migration'
+                    sh 'make migrate-jenkins'
+                }
                 script {
                     sh 'echo Unit Tests'
                     sh 'export PROFILE=local && make test-unit-only-jenkins'
@@ -80,7 +84,7 @@ pipeline {
         //     steps {
         //         script {
         //             sh "make git-tag-master-commit TAG=${this.GIT_TAG}"
-        //             // Need user set up with git access
+        //             // Need user set up with git access, can wait until Dan is back, manual step for now
         //         }
         //     }
         // }
@@ -91,20 +95,16 @@ pipeline {
                 sh 'make stop'
                 sh 'make api-clean'
                 sh 'make proxy-clean'
-                sh "make aws-assume-role-export-variables PROFILE=dev"
-                sh "secret_store_results=$(aws secretsmanager get-secret-value --secret-id uec-dos-api-cs/deployment --region 'eu-west-2' --query 'SecretString' --output text)"
-                sh "export WEBHOOK_URL=$(echo ${secret_store_results} | jq --raw-output '.webhook_url')"
-                sh "curl -X POST -H 'Content-type: application/json' --data {text:hello} $(WEBHOOK_URL)"
-                // Update clean make targets to remove networks, as builds fail after 10
+                sh 'make jenkins-clean' // TODO: Target made, check if required
             }
         }
         failure {
             script {
-                sh "echo Build Failure"
-                // sh "make aws-assume-role-export-variables PROFILE=dev"
-                // sh "webhook_url_secret = $(make aws-secret-get NAME=)"
-                // sh "webhook_url_value = $(webhook_url_secret[value])"
-                // sh "curl -X POST -H 'Content-type: application/json' --data {text:hi} $(webhook_url_value)"
+                sh """echo Build Failure
+                  export "RESULT=${currentBuild.currentResult}"
+                  export "PIPELINE_NAME=Commit Pipeline"
+                  make slack-send-notification PROFILE=dev GIT_TAG=${this.GIT_TAG}
+                  """
             }
         }
         // cleanup {
@@ -115,3 +115,4 @@ pipeline {
         // }
     }
 }
+
