@@ -44,6 +44,7 @@ pipeline {
                 script {
                     sh 'export PROFILE=local && make test-db-start-jenkins'
                     sh "export DB_DOS_HOST=db-dos-${BUILD_ID}"
+                    sh "export API_DOS_HOST=db-dos-${BUILD_ID}"
                     sh 'make migrate'
                 }
             }
