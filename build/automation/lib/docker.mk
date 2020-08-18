@@ -647,7 +647,7 @@ docker-compose-start-single-service: ### Start Docker Compose - mandatory: NAME=
 
 docker-compose-start-single-service-jenkins: ### TEMPORARY Start Docker Compose - mandatory: NAME=[service name]; optional: YML=[docker-compose.yml, defaults to $(DOCKER_COMPOSE_YML)]
 	make docker-config
-	yml=$(DOCKER_COMPOSE_YML))
+	yml=$(DOCKER_COMPOSE_YML)
 	docker-compose --file $$yml \
 		up --no-build --detach $(NAME)
 
