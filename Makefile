@@ -27,9 +27,6 @@ migrate:
 test-db-start:
 	make docker-compose-start-single-service NAME=db-dos
 
-test-db-pull:
-	make docker-pull-test-db
-
 test: # Test project
 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
 		DIR=application \

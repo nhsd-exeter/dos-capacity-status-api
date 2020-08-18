@@ -42,7 +42,6 @@ pipeline {
         stage("Start up Test Database") {
             steps {
                 script {
-                    sh 'make test-db-pull'
                     sh 'export PROFILE=local && make test-db-start'
                 }
             }
