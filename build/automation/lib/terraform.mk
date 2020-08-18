@@ -42,6 +42,13 @@ terraform-apply: ### Set up infrastructure - mandatory: STACK|STACKS|INFRASTRUCT
 		STACKS="$(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS)))" \
 		CMD="apply $(OPTS)"
 
+terraform-assume-role-apply: ### Set up infrastructure and assume aws role based of PROFILE - mandatory: STACK|STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],INIT=false,OPTS=[Terraform options]
+	aws=($$(make aws-assume-role-export-variables PROFILE=$(PROFILE) | cut -d '=' -f 2))
+	export AWS_ACCESS_KEY_ID=$${aws[0]}
+	export AWS_SECRET_ACCESS_KEY=$${aws[1]}
+	export AWS_SESSION_TOKEN=$${aws[2]}
+	make terraform-apply
+
 terraform-destroy-auto-approve: ### Tear down infrastructure - mandatory: STACK|STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],INIT=false,OPTS=[Terraform options]
 	make terraform-destroy \
 		STACKS="$(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS)))" \

@@ -95,19 +95,13 @@ pipeline {
                 sh 'make stop'
                 sh 'make api-clean'
                 sh 'make proxy-clean'
-                sh "make aws-assume-role-export-variables PROFILE=dev"
-                sh "secret_store_results=\$(aws secretsmanager get-secret-value --secret-id uec-dos-api-cs/deployment --region 'eu-west-2' --query 'SecretString' --output text)"
-                sh "export WEBHOOK_URL=\$(echo ${secret_store_results} | jq --raw-output '.webhook_url')"
-                sh "curl -X POST -H 'Content-type: application/json' --data {text:hello} ${WEBHOOK_URL}"
-                // Update clean make targets to remove networks, as builds fail after 10
+                sh "make slack-send-notification"
+                // sh 'make jenkins-clean' // TODO: Target made, check if required
             }
         }
         cleanup {
             script {
-                sh 'make stop'
-                sh 'make api-clean'
-                sh 'make proxy-clean'
-                sh 'make jenkins-clean' // TODO: Target made, check if required
+                sh "echo Build Failure"
             }
         }
     }

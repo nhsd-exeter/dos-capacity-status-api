@@ -80,6 +80,16 @@ git-tag-master-commit: ### Tag any PR to master as `[YYYYmmddHHMMSS]-[commit-has
 	git tag $$tag $$commit
 	git push origin $$tag
 
+git-tag-get-latest: ### Returns the latest git timestamp prefixed tag on the current branch
+	git tag --sort version:refname | grep -o '^[0-9]*'| tail -1
+
+git-tag-is-present-on-branch: ### Returns true if the given branch contains the given tag else it returns false - mandatory: BRANCH=[branch name] TAG=[tag name]
+	if [ $$(git branch --contains tags/$(TAG) | grep -ow $(BRANCH)) ]; then
+		echo true
+	else
+		echo false
+	fi
+
 git-tag-get-release-candidate: ### Get the latest release candidate tag for the whole repository or just the specified commit - optional: COMMIT=[commit]
 	if [ -z "$(COMMIT)" ]; then
 		git show-ref --tags -d | sed -e 's;.* refs/tags/;;' -e 's;\^{};;' | grep -- -rc$$ | sort -r | head -n 1
@@ -89,7 +99,7 @@ git-tag-get-release-candidate: ### Get the latest release candidate tag for the 
 
 git-tag-get-environment-deployment: ### Get the latest environment deployment tag for the whole repository or just the specified commit - mandatory: PROFILE=[profile name]; optional: COMMIT=[commit]
 	[ $(PROFILE) = local ] && (echo "ERROR: Please, specify the PROFILE"; exit 1)
-	if [ -z "$(COMMIT)" ]; then
+	if [ -z "$(COMMIT)" ]; thengit
 		git show-ref --tags -d | grep ^$(COMMIT) | sed -e 's;.* refs/tags/;;' -e 's;\^{};;' | grep -- -$(PROFILE)$$ | sort -r | head -n 1
 	else
 		git show-ref --tags -d | grep ^$$(git rev-parse --short $(COMMIT)) | sed -e 's;.* refs/tags/;;' -e 's;\^{};;' | grep -- -$(PROFILE)$$ | sort -r | head -n 1
@@ -119,4 +129,6 @@ git-tag-clear: ### Remove tags from the specified commit - optional: COMMIT=[co
 	git-tag-is-environment-deployment \
 	git-tag-is-release-candidate \
 	git-tag-list \
+	git-tag-get-latest \
+	git-tag-is-present-on-branch \
 	git-create-tag
