@@ -28,7 +28,7 @@ test-db-start:
 	make docker-compose-start-single-service NAME=db-dos
 
 test-db-start-jenkins: ### TEMPORARY
-	make docker-compose-start-single-service-jenkins NAME=db-dos
+	make docker-compose-start-single-service NAME=db-dos-$(BUILD_ID)
 
 test: # Test project
 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
