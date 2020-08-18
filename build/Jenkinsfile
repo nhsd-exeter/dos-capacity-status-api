@@ -85,12 +85,12 @@ pipeline {
         // }
     }
     post {
-        always {
-            script {
-                sh 'make stop'
-                sh 'make clean'
-            }
-        }
+        // always {
+        //     script {
+        //         sh 'make stop'
+        //         sh 'make clean'
+        //     }
+        // }
         failure {
             script {
                 sh 'echo Build Failure'

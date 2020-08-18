@@ -740,6 +740,7 @@ docker-login-jenkins: ### TEMPORARY Log into the Docker registry - optional: DOC
 
 docker-pull-test-db: ### TEMPORARY WORKAROUND
 	docker pull $(DOCKER_LIBRARY_REGISTRY)/postgres:latest
+	docker tag $(DOCKER_LIBRARY_REGISTRY)/postgres db-dos
 
 # ==============================================================================
 
