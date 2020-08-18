@@ -647,9 +647,9 @@ docker-compose-start-single-service: ### Start Docker Compose - mandatory: NAME=
 
 docker-compose-start-single-service-jenkins: ### TEMPORARY Start Docker Compose - mandatory: NAME=[service name]; optional: YML=[docker-compose.yml, defaults to $(DOCKER_COMPOSE_YML)]
 	make docker-config
-	yml=$$(make _docker-get-docker-compose-yml YML=$(YML))
+	yml=$$(make _docker-get-docker-compose-yml-jenkins YML=$(YML))
 	docker-compose --file $$yml \
-		up --no-build --detach $(NAME)-$(BUILD_ID)
+		up --no-build --detach $(NAME)
 
 docker-compose-stop: ### Stop Docker Compose - optional: YML=[docker-compose.yml, defaults to $(DOCKER_COMPOSE_YML)],ALL=true
 	make docker-config
@@ -706,6 +706,18 @@ _docker-get-docker-compose-yml:
 		"
 		yml=$(TMP_DIR)/docker-compose-$(BUILD_ID).yml
 	fi
+	echo $$yml
+
+_docker-get-docker-compose-yml-jenkins: ### TEMPORARY
+	yml=$(or $(YML), $(DOCKER_COMPOSE_YML))
+	# if [ "$(BUILD_ID)" != 0 ]; then
+	# 	make -s docker-run-tools ARGS="--env BUILD_ID=$(BUILD_ID)" CMD=" \
+	# 		$(BIN_DIR_REL)/docker-compose-processor.py \
+	# 			$$(echo $$yml | sed 's;//;/;g' | sed "s;$(PROJECT_DIR);;g") \
+	# 			$(TMP_DIR_REL)/docker-compose-$(BUILD_ID).yml \
+	# 	"
+	# 	yml=$(TMP_DIR)/docker-compose-$(BUILD_ID).yml
+	# fi
 	echo $$yml
 
 _docker-is-lib-image:
