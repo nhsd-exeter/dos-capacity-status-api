@@ -43,6 +43,7 @@ pipeline {
             steps {
                 script {
                     sh 'export PROFILE=local && make test-db-start-jenkins'
+                    sh 'sleep 30'
                     sh 'make migrate-jenkins'
                 }
             }
