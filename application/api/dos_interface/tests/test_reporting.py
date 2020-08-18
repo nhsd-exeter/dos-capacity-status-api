@@ -25,15 +25,9 @@ class TestDosInterfaceReporting(TestCase):
         keys = list(service_data.keys())
         assert keys == expected_keys
         for key in keys:
-            assert_error_msg = (
-                "The "
-                + key
-                + " key of the service has a value that isn't a non-empty string or null "
-                + service_data[key]
-            )
             assert (type(service_data[key]) is str and service_data[key] != "") or type(
                 service_data[key]
-            ) is None, assert_error_msg
+            ) is None, "key value not string or none" + str(key)
             if key != "CLIENT_NAME" and key != "CAPACITY_STATUS":
                 lower = key.lower()
                 no_underscore = lower.replace("_", "")
