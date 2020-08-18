@@ -43,6 +43,7 @@ pipeline {
             steps {
                 script {
                     sh 'export PROFILE=local && make test-db-start-jenkins'
+                    sh 'make dev-migrate'
                 }
             }
         }
@@ -84,12 +85,13 @@ pipeline {
         // }
     }
     post {
-        // always {
-        //     script {
-        //         sh 'make stop'
-        //         sh 'make clean'
-        //     }
-        // }
+        always {
+            script {
+                sh 'make stop'
+                sh 'make api-clean'
+                sh 'make proxy-clean'
+            }
+        }
         failure {
             script {
                 sh "echo Build Failure"
