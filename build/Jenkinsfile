@@ -92,11 +92,14 @@ pipeline {
     post {
         failure {
             script {
-                sh """echo Build Failure
-                  export "RESULT=${currentBuild.currentResult}"
-                  export "PIPELINE_NAME=Commit Pipeline"
-                  make slack-send-notification PROFILE=dev GIT_TAG=${this.GIT_TAG}
-                  """
+                sh 'make stop'
+                sh 'make api-clean'
+                sh 'make proxy-clean'
+                sh "make aws-assume-role-export-variables PROFILE=dev"
+                sh "secret_store_results=\$(aws secretsmanager get-secret-value --secret-id uec-dos-api-cs/deployment --region 'eu-west-2' --query 'SecretString' --output text)"
+                sh "export WEBHOOK_URL=\$(echo ${secret_store_results} | jq --raw-output '.webhook_url')"
+                sh "curl -X POST -H 'Content-type: application/json' --data {text:hello} $(WEBHOOK_URL)"
+                // Update clean make targets to remove networks, as builds fail after 10
             }
         }
         cleanup {
