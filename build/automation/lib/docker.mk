@@ -645,12 +645,6 @@ docker-compose-start-single-service: ### Start Docker Compose - mandatory: NAME=
 	docker-compose --file $$yml \
 		up --no-build --detach $(NAME)
 
-docker-compose-start-single-service-jenkins: ### TEMPORARY Start Docker Compose - mandatory: NAME=[service name]; optional: YML=[docker-compose.yml, defaults to $(DOCKER_COMPOSE_YML)]
-	make docker-config
-	yml=$(DOCKER_COMPOSE_YML)
-	docker-compose --file $$yml \
-		up --no-build --detach $(NAME)
-
 docker-compose-stop: ### Stop Docker Compose - optional: YML=[docker-compose.yml, defaults to $(DOCKER_COMPOSE_YML)],ALL=true
 	make docker-config
 	yml=$$(make _docker-get-docker-compose-yml YML=$(YML))
@@ -707,10 +701,6 @@ _docker-get-docker-compose-yml:
 		yml=$(TMP_DIR)/docker-compose-$(BUILD_ID).yml
 	fi
 	echo $$yml
-
-# _docker-get-docker-compose-yml-jenkins: ### TEMPORARY - adds build id to everything within compose yml as well
-# 	yml=$(or $(YML), $(DOCKER_COMPOSE_YML))
-# 	echo $$yml
 
 _docker-is-lib-image:
 	([ -n "$(NAME)" ] && [ -d $(DOCKER_LIB_IMAGE_DIR)/$(NAME) ]) && echo true || echo false
