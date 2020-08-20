@@ -16,9 +16,9 @@ pipeline {
         WEBHOOK_URL = ''
     }
 
-    if (env.BRANCH_NAME != 'master') {
-        error("Commit Pipeline must be run from master branch")
-    }
+    // if (env.BRANCH_NAME != 'master') {
+    //     error("Commit Pipeline must be run from master branch")
+    // } // Extra check to put in first stage if needed
 
     stages {
         stage("Set up Variables") {
