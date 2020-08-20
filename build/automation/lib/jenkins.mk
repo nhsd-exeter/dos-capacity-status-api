@@ -25,11 +25,8 @@ jenkins-upload-workspace: ### Upload the project workspace to a storage - optio
 	fi
 
 jenkins-clean: ### Remove anything leftover from a jenkins build
-	network_id=($$(docker network ls | grep uec-dos-api/cs | tr -s ' ' | cut -d ' ' -f 1))
-	for id in $$network_id;
-	do
-		docker network rm $$id
-	done
+	network_id=$$(docker network ls | grep uec-dos-api/cs | tr -s ' ' | awk -v f=1 '$$f ~ /^[[:alnum:]]{12}$$/ { print $$f }')
+	docker network rm $$network_id
 
 _jenkins-create-workspace-storage:
 	if [ false == $$(make aws-s3-exists NAME=$(JENKINS_WORKSPACE_BUCKET_NAME)) ]; then
