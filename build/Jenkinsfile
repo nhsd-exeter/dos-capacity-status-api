@@ -16,9 +16,9 @@ pipeline {
         WEBHOOK_URL = ''
     }
 
-    // if (env.BRANCH_NAME != 'master') {
-    //     currentBuild.result = 'FAILURE'
-    // }
+    if (env.BRANCH_NAME != 'master') {
+        error("Commit Pipeline must be run from master branch")
+    }
 
     stages {
         stage("Set up Variables") {
@@ -90,14 +90,6 @@ pipeline {
         // }
     }
     post {
-        always {
-            script {
-                sh 'make stop'
-                sh 'make api-clean'
-                sh 'make proxy-clean'
-                sh 'make jenkins-clean' // TODO: Target made, check if required
-            }
-        }
         failure {
             script {
                 sh """echo Build Failure
@@ -107,12 +99,14 @@ pipeline {
                   """
             }
         }
-        // cleanup {
-        //     script {
-        //         sh 'make jenkins-cleanup-workspace'
-        //         // TO DO: Create Make Targets for jenkins to cleanup the workspace after finishing
-        //     }
-        // }
+        cleanup {
+            script {
+                sh 'make stop'
+                sh 'make api-clean'
+                sh 'make proxy-clean'
+                sh 'make jenkins-clean' // TODO: Target made, check if required
+            }
+        }
     }
 }
 
