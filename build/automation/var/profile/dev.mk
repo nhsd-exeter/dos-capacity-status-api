@@ -7,7 +7,7 @@ API_HOST = uec-dos-api-cs
 #API_ADMIN_ALLOWED_HOSTS = [secret]
 
 #API_DB_HOST = [secret]
-API_DB_NAME = capacity_status
+API_DB_NAME = postgres
 API_DB_PORT = 5432
 API_DB_USERNAME = postgres
 #API_DB_PASSWORD = [secret]

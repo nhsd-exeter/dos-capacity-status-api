@@ -19,3 +19,8 @@ SERVICE_RESET_STATUS_IN_MAX_MINS = 7200
 
 PYTHON_VERSION = 3.8.2
 DOCKER_PYTHON_VERSION = $(PYTHON_VERSION)-slim
+
+# ==============================================================================
+
+INSTANA_AGENT_PORT = 42699
+AUTOWRAPT_BOOTSTRAP = instana

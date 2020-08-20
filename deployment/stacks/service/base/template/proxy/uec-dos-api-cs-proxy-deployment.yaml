@@ -1,39 +1,64 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: K8S_APP_NAMESPACE_TO_REPLACE
+  creationTimestamp: null
+  labels:
+    app: uec-dos-api-cs-proxy
   name: uec-dos-api-cs-proxy
+  namespace: K8S_APP_NAMESPACE_TO_REPLACE
 spec:
+  progressDeadlineSeconds: 2147483647
   replicas: 1
+  revisionHistoryLimit: 2147483647
+  selector:
+    matchLabels:
+      app: uec-dos-api-cs-proxy
   strategy:
-    type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1 # how many pods we can add at a time
-      maxUnavailable: 0 # maxUnavailable define how many pods can be unavailable during the rolling update
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
   template:
     metadata:
+      creationTimestamp: null
       labels:
         app: uec-dos-api-cs-proxy
     spec:
       containers:
-        - name: uec-dos-api-cs-proxy
-          image: DOCKER_REGISTRY_TO_REPLACE/proxy:PROXY_IMAGE_TAG_TO_REPLACE
+        - env:
+            - name: INSTANA_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
           envFrom:
             - configMapRef:
                 name: uec-dos-api-cs-proxy-configmap
-          readinessProbe:
-            tcpSocket:
-              port: 443
-            initialDelaySeconds: 10
-            periodSeconds: 30
+          image: DOCKER_REGISTRY_TO_REPLACE/proxy:PROXY_IMAGE_TAG_TO_REPLACE
+          imagePullPolicy: Always
+          name: uec-dos-api-cs-proxy
           ports:
             - containerPort: 443
               protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            successThreshold: 1
+            tcpSocket:
+              port: 443
+            timeoutSeconds: 1
           resources:
-            requests:
-              memory: "0Mi"
-              cpu: "0m"
             limits:
-              memory: "2048Mi"
-              cpu: "1000m"
-          imagePullPolicy: Always
+              cpu: "1"
+              memory: 2Gi
+            requests:
+              cpu: "0"
+              memory: "0"
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+status: {}
