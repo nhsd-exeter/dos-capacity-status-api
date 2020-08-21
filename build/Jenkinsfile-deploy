@@ -121,7 +121,7 @@ pipeline {
                 if (this.PROFILE != 'DEV') {
                   sh """
                     export "RESULT=${currentBuild.currentResult}"
-                    export "PIPELINE_NAME=Commit Pipeline"
+                    export "PIPELINE_NAME=Deploy Pipeline"
                     make slack-send-notification PROFILE=dev GIT_TAG=${this.GIT_TAG}
                   """
                 }

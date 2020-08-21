@@ -94,7 +94,7 @@ pipeline {
             script {
                 sh """echo Build Failure
                   export "RESULT=${currentBuild.currentResult}"
-                  export "PIPELINE_NAME=Deploy Pipeline"
+                  export "PIPELINE_NAME=Commit Pipeline"
                   make slack-send-notification PROFILE=dev GIT_TAG=${this.GIT_TAG}
                   """
             }
@@ -104,7 +104,6 @@ pipeline {
                 sh 'make stop'
                 sh 'make clean'
                 sh 'make jenkins-clean'
-                // Check if extra cleanup required
             }
         }
     }
