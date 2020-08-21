@@ -115,30 +115,31 @@ pipeline {
         //     }
         // }
     }
-    // post {
-    //     always {
-    //         script {
-    //             sh 'echo Clean Up Here'
-    //             // sh 'make stop'
-    //             // sh 'make api-clean'
-    //             // sh 'make proxy-clean'
-    //         }
-    //     }
-    //     success {
-    //         script {
-    //             if (this.PROFILE != 'DEV') {
-    //                 sh 'make slack-send-notification'
-    //             }
-
-    //         }
-    //     }
-    //     failure {
-    //         script {
-    //             if (this.PROFILE != 'DEV') {
-    //                 sh 'make jenkins-upload-workspace'
-    //                 sh 'make slack-send-notification'
-    //             }
-    //         }
-    //     }
-    // }
+    post {
+        always {
+            script {
+                if (this.PROFILE != 'DEV') {
+                  sh """
+                    export "RESULT=${currentBuild.currentResult}"
+                    export "PIPELINE_NAME=Commit Pipeline"
+                    make slack-send-notification PROFILE=dev GIT_TAG=${this.GIT_TAG}
+                  """
+                }
+            }
+        }
+        failure {
+          script {
+            sh "make jenkins-upload-workspace"
+          }
+        }
+        cleanup {
+            script {
+                script {
+                sh 'make clean'
+                sh 'make jenkins-clean'
+                // Check if extra cleanup required
+            }
+            }
+        }
+    }
 }

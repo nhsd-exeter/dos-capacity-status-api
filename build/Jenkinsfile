@@ -92,16 +92,19 @@ pipeline {
     post {
         failure {
             script {
-                sh 'make stop'
-                sh 'make api-clean'
-                sh 'make proxy-clean'
-                sh "make slack-send-notification"
-                // sh 'make jenkins-clean' // TODO: Target made, check if required
+                sh """echo Build Failure
+                  export "RESULT=${currentBuild.currentResult}"
+                  export "PIPELINE_NAME=Deploy Pipeline"
+                  make slack-send-notification PROFILE=dev GIT_TAG=${this.GIT_TAG}
+                  """
             }
         }
         cleanup {
             script {
-                sh "echo Build Failure"
+                sh 'make stop'
+                sh 'make clean'
+                sh 'make jenkins-clean'
+                // Check if extra cleanup required
             }
         }
     }
