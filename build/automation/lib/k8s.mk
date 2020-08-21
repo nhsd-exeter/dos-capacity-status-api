@@ -44,7 +44,7 @@ k8s-deploy: ### Deploy application to the Kubernetes cluster - mandatory: STACK=
 k8s-deploy-jenkins: ### Deploy application to the Kubernetes cluster - mandatory: STACK=[name],PROFILE=[name]
 	# set up
 	eval "$$(make aws-assume-role-export-variables)"
-	eval "$$(make secret-fetch-and-export-variables NAME=uec-dos-api-capacity-status-$(PROFILE))"
+	eval "$$(make secret-fetch-and-export-variables-jenkins NAME=uec-dos-api-capacity-status-$(PROFILE))"
 	make k8s-kubeconfig-get
 	eval "$$(make k8s-kubeconfig-export-variables)"
 	# deploy

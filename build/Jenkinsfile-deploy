@@ -69,7 +69,7 @@ pipeline {
                     // need to asume aws role related to profile e.g. non-prod for DEV, prod for DEMO and PROD
                     // sh "make terraform-apply-auto-approve STACKS=infrastructure/stacks PROFILE=${this.PROFILE}"
                     TERRAFORM_OPTS='"--var-file=../tfvars/nonprod.tfvars"'
-                    sh "make terraform-apply STACKS=service PROFILE=${PROFILE} OPTS=${TERRAFORM_OPTS}"
+                    sh "make terraform-destroy-auto-approve STACKS=service PROFILE=${PROFILE} OPTS=${TERRAFORM_OPTS}"
                 }
                 // Extra maybe add some way ofgit tagging the infrasturcture with the git_tag and the commit
             }

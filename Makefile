@@ -106,10 +106,6 @@ deploy: # Deploy project - mandatory: PROFILE=[name]
 
 deploy-jenkins: # Deploy project - mandatory: PROFILE=[name]
 	[ local == $(PROFILE) ] && exit 1
-	# eval "$$(make aws-assume-role-export-variables)"
-	# make k8s-kubeconfig-get
-	# eval "$$(make k8s-kubeconfig-export)"
-	# eval "$$(make project-populate-secret-variables)"
 	make k8s-deploy-jenkins STACK=service
 	# TODO: What's the URL?
 	echo "The URL is $(UI_URL)"
