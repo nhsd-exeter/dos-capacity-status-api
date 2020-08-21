@@ -1,6 +1,6 @@
 secret-fetch-and-export-variables: ### Get secret and print variable exports - mandatory: NAME=[secret name]; return: [variables export]
 	# set up
-	eval "$$(make aws-assume-role-export-variables)"
+	# eval "$$(make aws-assume-role-export-variables)"
 	# fetch
 	secret=$$(make aws-secret-get NAME=$(NAME))
 	make _secret-export-variables-from-json JSON="$$secret"
