@@ -73,26 +73,14 @@ pipeline {
                 // Extra maybe add some way of tagging the infrasturcture with the git_tag and the commit
             }
         }
-        stage("Pull Images & Tag Images For Deployment") {
+        stage("Deploy Application") {
             steps {
+                //TODO Need additional step to set the docker images used for the deploy to the one matching the git tag being pulled
                 script {
-                    COMMIT_IMAGE_TAG = this.GIT_TAG.takeBefore("-${PROFILE}")
-                    sh "make docker-pull NAME=proxy TAG=${COMMIT_IMAGE_TAG}-${GIT_COMMIT}"
-                    sh "make docker-pull NAME=api TAG=${COMMIT_IMAGE_TAG}-${GIT_COMMIT}"
-                }
-                script {
-                    sh "make docker-tag NAME=api TAG=${GIT_TAG}"
-                    sh "make docker-tag NAME=proxy TAG=${GIT_TAG}"
+                    sh 'make deploy PROFILE=${this.PROFILE}'
                 }
             }
         }
-        // stage("Deploy Application") {
-        //     steps {
-        //         script {
-        //             // sh 'make deploy PROFILE=${this.PROFILE}'
-        //         }
-        //     }
-        // }
         // stage("Prepare Data") {
         //     steps {
         //         script {
