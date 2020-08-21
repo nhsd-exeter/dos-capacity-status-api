@@ -78,7 +78,7 @@ pipeline {
             steps {
                 //TODO Need additional step to set the docker images used for the deploy to the one matching the git tag being pulled
                 script {
-                    sh 'make deploy PROFILE=${this.PROFILE}'
+                    sh "make deploy PROFILE=${PROFILE}"
                 }
             }
         }
