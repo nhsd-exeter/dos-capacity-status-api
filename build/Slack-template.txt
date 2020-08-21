@@ -4,7 +4,7 @@
       "type": "header",
       "text": {
         "type": "plain_text",
-        "text": "Jenkins Commit_Pipeline Results",
+        "text": "Jenkins PIPELINE_NAME Results",
         "emoji": true
       }
     },
@@ -12,7 +12,7 @@
       "type": "section",
       "text": {
         "type": "mrkdwn",
-        "text": "Result: SUCCESS \n Tag: GIT_TAG \n Commit Hash: BUILD_COMMIT_HASH_TO_REPLACE \n Profile: PROFILE_TO_REPLACE \n For more information click here BUILD_URL_TO_REPLACE"
+        "text": "Result: RESULT \n Tag: GIT_TAG \n Commit Hash: BUILD_COMMIT_HASH_TO_REPLACE \n Profile: PROFILE_TO_REPLACE \n For more information click here BUILD_URL_TO_REPLACE"
       }
     }
   ]

@@ -105,9 +105,9 @@ pipeline {
         // }
     }
     post {
-        always {
+        success {
             script {
-                if (this.PROFILE != 'DEV') {
+                if (this.PROFILE != 'dev') {
                   sh """
                     export "RESULT=${currentBuild.currentResult}"
                     export "PIPELINE_NAME=Deploy Pipeline"
@@ -118,6 +118,11 @@ pipeline {
         }
         failure {
           script {
+            sh """
+              export "RESULT=${currentBuild.currentResult}"
+              export "PIPELINE_NAME=Deploy Pipeline"
+              make slack-send-notification PROFILE=dev GIT_TAG=${this.GIT_TAG}
+              """
             sh "make jenkins-upload-workspace"
           }
         }

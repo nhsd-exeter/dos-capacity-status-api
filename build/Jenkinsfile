@@ -102,8 +102,9 @@ pipeline {
         cleanup {
             script {
                 sh 'make stop'
-                sh 'make clean'
-                sh 'make jenkins-clean'
+                sh 'make api-clean'
+                sh 'make proxy-clean'
+                sh 'make jenkins-clean' // TODO: Target made, check if required
             }
         }
     }
