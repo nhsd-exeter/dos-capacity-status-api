@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: STACK_TEMPLATE_TO_REPLACE-deployment
@@ -19,16 +19,16 @@ spec:
           readinessProbe:
             tcpSocket:
               port: 8443
-            initialDelaySeconds: 3
-            periodSeconds: 7
+            initialDelaySeconds: 10
+            periodSeconds: 30
           ports:
             - containerPort: 8443
               protocol: TCP
           resources:
             requests:
-              cpu: "0.1"
-              memory: "128M"
+              memory: "0Mi"
+              cpu: "0m"
             limits:
-              cpu: "1"
-              memory: "2048M"
+              memory: "2048Mi"
+              cpu: "1000m"
           imagePullPolicy: Always

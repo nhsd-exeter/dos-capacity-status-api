@@ -1,22 +1,27 @@
-FROM postgres:latest as base
+FROM postgres:latest
 
-# ==============================================================================
-
-FROM base as builder
 ENV \
-    GOSU_VERSION="1.12"
+    DEBIAN_FRONTEND="noninteractive" \
+    GOSU_VERSION="1.12" \
+    LANG="C.UTF-8" \
+    LC_ALL="C.UTF-8" \
+    SYSTEM_USER_GID="999" \
+    SYSTEM_USER_UID="999" \
+    SYSTEM_USER="postgres" \
+    TZ="Europe/London"
 
 RUN set -eux && \
     \
-    # Get base packages
-    apk add --no-cache \
+    # Install base packages
+    apt-get update --yes && \
+    apt-get install --yes --no-install-recommends \
         ca-certificates \
-        dpkg \
+        curl \
         gnupg \
         wget \
     && \
     \
-    # Get gosu
+    # Install gosu
     dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')" && \
     wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch" && \
     wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc" && \
@@ -25,34 +30,18 @@ RUN set -eux && \
     gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu && \
     gpgconf --kill all && \
     rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc && \
-    chmod +x /usr/local/bin/gosu
-
-# ==============================================================================
-
-FROM base
-ENV \
-    LANG="C.UTF-8" \
-    LC_ALL="C.UTF-8" \
-    SYSTEM_USER_GID="999" \
-    SYSTEM_USER_UID="999" \
-    SYSTEM_USER="postgres" \
-    TZ="Europe/London"
-
-COPY --from=builder /usr/local/bin/gosu /usr/local/bin/gosu
-COPY assets/ /
-RUN set -eux && \
-    \
-    # Install base packages
-    apk add --no-cache \
-        bash \
-        curl \
-    && \
+    chmod +x /usr/local/bin/gosu && \
+    gosu nobody true && \
     \
     # Configure system user
-    ( deluser $SYSTEM_USER ||: ) && ( delgroup $SYSTEM_USER ||: ) && ( delgroup $(getent group $SYSTEM_USER_GID | sed -e "s/:x:$SYSTEM_USER_GID//g") ||: ) && \
-    addgroup -S -g $SYSTEM_USER_GID $SYSTEM_USER && \
-    adduser -H -D -s /bin/false -g "" -h /tmp -G $SYSTEM_USER -u $SYSTEM_USER_UID $SYSTEM_USER && \
-    gosu nobody true
+    ( userdel --remove --force $SYSTEM_USER ||: ) && \
+    groupadd --system --gid $SYSTEM_USER_GID $SYSTEM_USER && \
+    useradd --system --create-home --home-dir /var/lib/postgresql --shell=/bin/false --uid $SYSTEM_USER_UID --gid $SYSTEM_USER_GID $SYSTEM_USER && \
+    \
+    # Clean up
+    rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/* /var/cache/apt/*
+
+COPY assets/ /
 
 WORKDIR /data
 ENTRYPOINT [ "/sbin/entrypoint.sh" ]

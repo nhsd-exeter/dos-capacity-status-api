@@ -1,4 +1,5 @@
 FROM bitnami/elasticsearch:latest
+
 ENV \
     DEBIAN_FRONTEND="noninteractive" \
     GOSU_VERSION="1.12" \
@@ -40,6 +41,7 @@ RUN set -eux && \
     \
     # Clean up
     rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/* /var/cache/apt/*
+
 COPY assets/ /
 
 WORKDIR /data

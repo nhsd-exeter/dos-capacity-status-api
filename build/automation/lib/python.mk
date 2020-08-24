@@ -1,12 +1,9 @@
-PYTHON_VERSION_MAJOR = 3
-PYTHON_VERSION_MINOR = 8
-PYTHON_VERSION_PATCH = 3
-PYTHON_VERSION = $(PYTHON_VERSION_MAJOR).$(PYTHON_VERSION_MINOR).$(PYTHON_VERSION_PATCH)
+PYTHON_VERSION = 3.8.2
 PYTHON_BASE_PACKAGES = \
 	awscli-local==0.6 \
-	awscli==1.18.91 \
+	awscli==1.18.74 \
 	black \
-	boto3==1.14.14 \
+	boto3==1.13.24 \
 	bpython \
 	configparser \
 	coverage \
@@ -15,7 +12,7 @@ PYTHON_BASE_PACKAGES = \
 	pygments \
 	pylint \
 	pyyaml \
-	requests==2.24.0
+	requests==2.23.0
 
 python-virtualenv: ### Setup Python virtual environment - optional: PYTHON_VERSION
 	brew update
@@ -25,7 +22,7 @@ python-virtualenv: ### Setup Python virtual environment - optional: PYTHON_VERSI
 	pyenv local $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME)
 	pip install --upgrade pip
 	pip install $(PYTHON_BASE_PACKAGES)
-	sed -i 's;    "python.pythonPath":.*;    "python.pythonPath": "$(HOME)/.pyenv/versions/$(PYTHON_VERSION)",;g' $(PROJECT_DIR)/$(PROJECT_NAME).code-workspace
+	ln -sfv ~/.pyenv/versions/$(PYTHON_VERSION) ~/.pyenv/versions/default
 
 python-virtualenv-clean: ### Clean up Python virtual environment - optional: PYTHON_VERSION
 	rm -rf \
@@ -56,15 +53,3 @@ python-code-coverage: ### Test Python code with 'coverage' - mandatory: CMD=[tes
 		coverage report -m && \
 		coverage erase \
 	"
-
-python-clean: ### Clean up Python project files - mandatory: DIR=[Python project directory]
-	[ -z "$(DIR)" ] && (echo "ERROR: Please, specify the DIR"; exit 1)
-	find $(DIR) \( \
-		-name "__pycache__" -o \
-		-name ".mypy_cache" -o \
-		-name "*.pyc" -o \
-		-name "*.pyd" -o \
-		-name "*.pyo" -o \
-		-name "coverage.xml" -o \
-		-name "db.sqlite3" -o \
-	\) -print | xargs rm -rfv

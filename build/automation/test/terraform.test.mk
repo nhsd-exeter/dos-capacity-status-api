@@ -3,7 +3,7 @@ TF_VAR_localstack_host = $(LOCALSTACK_HOST)
 test-terraform:
 	make test-terraform-setup
 	tests=( \
-		test-terraform-export-variables \
+		test-terraform-export-variables-aws \
 		test-terraform-export-variables-from-secret \
 		test-terraform-export-variables-from-shell-vars \
 		test-terraform-export-variables-from-shell-pattern \
@@ -13,8 +13,6 @@ test-terraform:
 		test-terraform-plan-before-apply \
 		test-terraform-apply \
 		test-terraform-plan-after-apply \
-		test-terraform-output \
-		test-terraform-show \
 		test-terraform-destroy \
 		test-terraform-unlock \
 	)
@@ -27,7 +25,7 @@ test-terraform:
 test-terraform-setup:
 	make localstack-start
 	# Prerequisites
-	make docker-pull NAME=tools VERSION=$(DOCKER_LIBRARY_TOOLS_VERSION)
+	make docker-build NAME=tools FROM_CACHE=true
 
 test-terraform-teardown:
 	make localstack-stop
@@ -37,13 +35,13 @@ test-terraform-teardown:
 
 # ==============================================================================
 
-test-terraform-export-variables:
+test-terraform-export-variables-aws:
 	# arrange
 	export AWS_ACCESS_KEY_ID_test=value
 	export AWS_SECRET_ACCESS_KEY_test=value
 	export AWS_SESSION_TOKEN_test=value
 	# act
-	export=$$(make terraform-export-variables)
+	export=$$(make terraform-export-variables-aws)
 	# assert
 	count=$$(echo "$$export" | grep -E "TF_VAR_aws_[a-z_]*=value" | wc -l)
 	mk_test "3 = $$count"
@@ -136,12 +134,6 @@ test-terraform-plan-after-apply:
 	str="No changes\. Infrastructure is up-to-date\."
 	count=$$(echo "$$output" | grep "$$str" | wc -l)
 	mk_test "1 = $$count"
-
-test-terraform-output:
-	mk_test_skip
-
-test-terraform-show:
-	mk_test_skip
 
 test-terraform-destroy:
 	# act

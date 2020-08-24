@@ -4,17 +4,6 @@ test-git:
 		test-git-config \
 		test-git-secrets-add-allowed \
 		test-git-secrets-scan-history \
-		test-git-commit-has-changed-directory \
-		test-git-commit-get-hash \
-		test-git-commit-get-timestamp \
-		test-git-tag-is-release-candidate \
-		test-git-tag-is-environment-deployment \
-		test-git-tag-create-release-candidate \
-		test-git-tag-create-environment-deployment \
-		test-git-tag-get-release-candidate \
-		test-git-tag-get-environment-deployment \
-		test-git-tag-list \
-		test-git-tag-clear \
 	)
 	for test in $${tests[*]}; do
 		mk_test_initialise $$test
@@ -61,40 +50,4 @@ test-git-secrets-scan-history:
 	# act
 	make git-secrets-scan-history
 	# assert
-	mk_test "0 -eq $$?"
-
-test-git-commit-has-changed-directory:
-	# act
-	output=$$(make git-commit-has-changed-directory DIR=build/automation/tmp)
-	# assert
-	mk_test "false == $$output"
-
-test-git-commit-get-hash:
-	mk_test_skip
-
-test-git-commit-get-timestamp:
-	mk_test_skip
-
-test-git-tag-is-release-candidate:
-	mk_test_skip
-
-test-git-tag-is-environment-deployment:
-	mk_test_skip
-
-test-git-tag-create-release-candidate:
-	mk_test_skip
-
-test-git-tag-create-environment-deployment:
-	mk_test_skip
-
-test-git-tag-get-release-candidate:
-	mk_test_skip
-
-test-git-tag-get-environment-deployment:
-	mk_test_skip
-
-test-git-tag-list:
-	mk_test_skip
-
-test-git-tag-clear:
-	mk_test_skip
+	mk_test 0 -eq $$?

@@ -6,7 +6,6 @@ test-python:
 		test-python-code-format \
 		test-python-code-check \
 		test-python-code-coverage \
-		test-python-clean \
 	)
 	for test in $${tests[*]}; do
 		mk_test_initialise $$test
@@ -47,7 +46,4 @@ test-python-code-check:
 		mk_test "true" || mk_test "false"
 
 test-python-code-coverage:
-	mk_test_skip
-
-test-python-clean:
 	mk_test_skip

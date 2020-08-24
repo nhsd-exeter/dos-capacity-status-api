@@ -27,7 +27,6 @@ test-aws:
 		test-aws-s3-exists \
 		test-aws-s3-create \
 		test-aws-s3-upload-download \
-		test-aws-rds-describe-instance \
 		test-aws-rds-create-snapshot \
 		test-aws-rds-get-snapshot-status \
 		test-aws-rds-wait-for-snapshot \
@@ -35,7 +34,6 @@ test-aws:
 		test-aws-cognito-get-client-id \
 		test-aws-cognito-get-client-secret \
 		test-aws-ecr-get-login-password \
-		test-aws-ecr-get-image-digest \
 		test-aws-ses-verify-email-identity \
 	)
 	for test in $${tests[*]}; do
@@ -47,7 +45,7 @@ test-aws:
 test-aws-setup:
 	make localstack-start
 	# Prerequisites
-	make docker-pull NAME=tools VERSION=$(DOCKER_LIBRARY_TOOLS_VERSION)
+	make docker-build NAME=tools FROM_CACHE=true
 
 test-aws-teardown:
 	make localstack-stop
@@ -241,9 +239,6 @@ test-aws-s3-upload-download:
 	hash2=$$(md5sum $(TEST_AWS_BUCKET_FILE_PATH).download | awk '{ print $$1 }')
 	mk_test "$$hash1 = $$hash2"
 
-test-aws-rds-describe-instance:
-	mk_test_skip
-
 test-aws-rds-create-snapshot:
 	mk_test_skip
 
@@ -263,9 +258,6 @@ test-aws-cognito-get-client-secret:
 	mk_test_skip
 
 test-aws-ecr-get-login-password:
-	mk_test_skip
-
-test-aws-ecr-get-image-digest:
 	mk_test_skip
 
 test-aws-ses-verify-email-identity:

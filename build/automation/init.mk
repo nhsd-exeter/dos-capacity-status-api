@@ -15,10 +15,7 @@ help-project-supporting: ## Show development supporting targets
 devops-print-variables: ### Print all the variables
 	$(foreach v, $(sort $(.VARIABLES)),
 		$(if $(filter-out default automatic, $(origin $v)),
-			$(if $(and $(patsubst %_PASSWORD,,$v), $(patsubst %_SECRET,,$v)),
-				$(info $v=$($v) ($(value $v)) [$(flavor $v),$(origin $v)]),
-				$(info $v=****** (******) [$(flavor $v),$(origin $v)])
-			)
+			$(info $v=$($v) ($(value $v)))
 		)
 	)
 
@@ -35,8 +32,6 @@ devops-test-suite: ### Run the DevOps unit test suite - optional: DEBUG=true
 		test-k8s \
 		test-jenkins \
 		test-python \
-		test-java \
-		test-postgres \
 		test-techradar \
 		test-project \
 	"
@@ -76,7 +71,7 @@ devops-copy: ### Copy the DevOps automation toolchain scripts to given destinati
 	cp -fv $(PROJECT_DIR)/build/automation/lib/project/template/Makefile $(DIR)
 	cp -fv $(PROJECT_DIR)/LICENSE.md $(DIR)/build/automation/LICENSE.md
 
-devops-update devops-synchronise: ### Update/upgrade the DevOps automation toolchain scripts used by this project - optional: LATEST=true,ALL=true
+devops-synchronise: ### Synchronise the DevOps automation toolchain scripts used by this project - optional: LATEST=true,ALL=true
 	function download() {
 		cd $(PROJECT_DIR)
 		rm -rf \
@@ -103,6 +98,8 @@ devops-update devops-synchronise: ### Update/upgrade the DevOps automation toolc
 			build/* \
 			$(PARENT_PROJECT_DIR)/build
 		[ -f $(PARENT_PROJECT_DIR)/build/automation/etc/certificate/*.pem ] && rm -fv $(PARENT_PROJECT_DIR)/build/automation/etc/certificate/.gitignore
+		[ ! -f $(PARENT_PROJECT_DIR)/build/docker/docker-compose.yml ] && cp -v build/automation/lib/project/template/build/docker/docker-compose.yml $(PARENT_PROJECT_DIR)/build/docker/docker-compose.yml ||:
+		[ ! -f $(PARENT_PROJECT_DIR)/build/Jenkinsfile ] && cp -v build/automation/lib/project/template/build/Jenkinsfile $(PARENT_PROJECT_DIR)/build/Jenkinsfile ||:
 		cp -fv LICENSE.md $(PARENT_PROJECT_DIR)/build/automation/LICENSE.md
 		# Copy additionals
 		if [[ "$(ALL)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then
@@ -116,35 +113,25 @@ devops-update devops-synchronise: ### Update/upgrade the DevOps automation toolc
 	}
 	function version() {
 		cd $(PROJECT_DIR)
-		tag=$$([ -n "$$(git tag --points-at HEAD)" ] && echo $$(git tag --points-at HEAD) || echo v$$(git show -s --format=%cd --date=format:%Y%m%d%H%M%S))
+		tag=$$([ -n "$$(git tag --points-at HEAD)" ] && echo $$(git tag --points-at HEAD) || echo vcommit)
 		hash=$$(git rev-parse --short HEAD)
 		echo "$${tag:1}-$${hash}" > $(PARENT_PROJECT_DIR)/build/automation/VERSION
 	}
 	function cleanup() {
 		cd $(PARENT_PROJECT_DIR)
-		# Remove not needed project files
-		rm -f \
-			$(PARENT_PROJECT_DIR)/build/docker/.gitkeep
-		# Remove empty project directories
-		rmdir \
-			$(PARENT_PROJECT_DIR)/build/docker \
-			||:
-		# Remove old project files and directories
+		# Clean up old project files
 		rm -rf \
 			~/bin/docker-compose-processor \
 			~/bin/texas-mfa \
 			~/bin/texas-mfa-clear.sh \
 			~/bin/toggle-natural-scrolling.sh \
 			$(PARENT_PROJECT_DIR)/build/automation/bin/markdown.pl \
-			$(PARENT_PROJECT_DIR)/build/automation/etc/githooks/scripts/*.default \
 			$(PARENT_PROJECT_DIR)/build/automation/etc/platform-texas* \
 			$(PARENT_PROJECT_DIR)/build/automation/lib/dev.mk \
 			$(PARENT_PROJECT_DIR)/build/automation/lib/docker/nginx \
 			$(PARENT_PROJECT_DIR)/build/automation/lib/docker/postgres \
 			$(PARENT_PROJECT_DIR)/build/automation/lib/docker/tools \
 			$(PARENT_PROJECT_DIR)/build/automation/lib/fix \
-			$(PARENT_PROJECT_DIR)/build/automation/lib/k8s/template/deployment/stacks/stack/base/template/network-policy \
-			$(PARENT_PROJECT_DIR)/build/automation/lib/k8s/template/deployment/stacks/stack/base/template/STACK_TEMPLATE_TO_REPLACE/network-policy.yaml \
 			$(PARENT_PROJECT_DIR)/build/automation/var/helpers.mk.default \
 			$(PARENT_PROJECT_DIR)/build/automation/var/override.mk.default \
 			$(PARENT_PROJECT_DIR)/build/docker/Dockerfile.metadata
@@ -163,8 +150,7 @@ devops-update devops-synchronise: ### Update/upgrade the DevOps automation toolc
 		fi
 	}
 	if [ -z "$(__DEVOPS_SYNCHRONISE)" ]; then
-		branch=$$(git rev-parse --abbrev-ref HEAD)
-		[ $$branch != "task/Update_automation_scripts" ] && git checkout -b task/Update_automation_scripts
+		git checkout -b task/Update_automation_scripts
 		download
 		cd $(TMP_DIR)/$(DEVOPS_PROJECT_NAME)
 		make devops-synchronise \
@@ -265,28 +251,20 @@ VAR_DIR := $(abspath $(DEVOPS_PROJECT_DIR)/var)
 VAR_DIR_REL := $(shell echo $(VAR_DIR) | sed "s;$(PROJECT_DIR);;g")
 
 APPLICATION_DIR := $(abspath $(or $(APPLICATION_DIR), $(PROJECT_DIR)/application))
-APPLICATION_DIR_REL := $(shell echo $(APPLICATION_DIR) | sed "s;$(PROJECT_DIR);;g")
 APPLICATION_TEST_DIR := $(abspath $(or $(APPLICATION_TEST_DIR), $(PROJECT_DIR)/test))
-APPLICATION_TEST_DIR_REL := $(shell echo $(APPLICATION_TEST_DIR) | sed "s;$(PROJECT_DIR);;g")
 CONFIG_DIR := $(abspath $(or $(CONFIG_DIR), $(PROJECT_DIR)/config))
-CONFIG_DIR_REL := $(shell echo $(CONFIG_DIR) | sed "s;$(PROJECT_DIR);;g")
 DATA_DIR := $(abspath $(or $(DATA_DIR), $(PROJECT_DIR)/data))
-DATA_DIR_REL := $(shell echo $(DATA_DIR) | sed "s;$(PROJECT_DIR);;g")
 DEPLOYMENT_DIR := $(abspath $(or $(DEPLOYMENT_DIR), $(PROJECT_DIR)/deployment))
-DEPLOYMENT_DIR_REL := $(shell echo $(DEPLOYMENT_DIR) | sed "s;$(PROJECT_DIR);;g")
-GITHOOKS_DIR := $(abspath $(ETC_DIR)/githooks)
-GITHOOKS_DIR_REL := $(shell echo $(GITHOOKS_DIR) | sed "s;$(PROJECT_DIR);;g")
+GITHOOKS_DIR_REL := $(shell echo $(abspath $(ETC_DIR)/githooks) | sed "s;$(PROJECT_DIR);;g")
 INFRASTRUCTURE_DIR := $(abspath $(or $(INFRASTRUCTURE_DIR), $(PROJECT_DIR)/infrastructure))
-INFRASTRUCTURE_DIR_REL := $(shell echo $(INFRASTRUCTURE_DIR) | sed "s;$(PROJECT_DIR);;g")
 JQ_DIR_REL := $(shell echo $(abspath $(LIB_DIR)/jq) | sed "s;$(PROJECT_DIR);;g")
 
 PROFILE := $(or $(PROFILE), local)
 BUILD_ID := $(or $(or $(BUILD_ID), $(CIRCLE_BUILD_NUM)), 0)
 BUILD_DATE := $(or $(BUILD_DATE), $(shell date -u +"%Y-%m-%dT%H:%M:%S%z"))
+BUILD_HASH := $(or $(shell git rev-parse --short HEAD 2> /dev/null ||:), unknown)
 BUILD_REPO := $(or $(shell git config --get remote.origin.url 2> /dev/null ||:), unknown)
 BUILD_BRANCH := $(or $(shell git rev-parse --abbrev-ref HEAD 2> /dev/null ||:), unknown)
-BUILD_COMMIT_HASH := $(or $(shell git rev-parse --short HEAD 2> /dev/null ||:), unknown)
-BUILD_COMMIT_DATE := $(or $(shell TZ=UTC git show -s --format=%cd --date=format-local:%Y-%m-%dT%H:%M:%S%z HEAD 2> /dev/null ||:), unknown)
 USER_ID := $(shell id -u)
 GROUP_ID := $(shell id -g)
 TTY_ENABLE := false
@@ -364,14 +342,11 @@ ifndef PROGRAMME
 $(error PROGRAMME is not set in build/automation/var/project.mk)
 endif
 
-ifndef SERVICE_TAG
-$(error SERVICE_TAG is not set in build/automation/var/project.mk)
+ifndef TEXAS_SERVICE_TAG
+$(error TEXAS_SERVICE_TAG is not set in build/automation/var/project.mk)
 endif
-ifndef PROJECT_TAG
-$(error PROJECT_TAG is not set in build/automation/var/project.mk)
-endif
-ifndef ROLE_PREFIX
-$(error ROLE_PREFIX is not set in build/automation/var/project.mk)
+ifndef TEXAS_ROLE_PREFIX
+$(error TEXAS_ROLE_PREFIX is not set in build/automation/var/project.mk)
 endif
 
 ifndef AWS_ACCOUNT_ID_LIVE_PARENT
@@ -395,27 +370,27 @@ ifeq (true, $(shell [ "Darwin" == "$$(uname)" ] && echo true))
 # macOS: Xcode Command Line Tools
 ifneq (0, $(shell xcode-select -p > /dev/null 2>&1; echo $$?))
 $(info )
-$(info $(shell tput setaf 4; echo "Installation of the Xcode Command Line Tools has just been triggered automatically..."; tput sgr0))
+$(info Installation of the Xcode Command Line Tools has just been triggered automatically...)
 $(info )
 $(error $(shell tput setaf 1; echo "ERROR: Please, before proceeding install the Xcode Command Line Tools"; tput sgr0))
 endif
 # macOS: Homebrew
 ifneq (0, $(shell which brew > /dev/null 2>&1; echo $$?))
 $(info )
-$(info Run $(shell tput setaf 4; echo '/usr/bin/ruby -e "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"'; tput sgr0))
+$(info /usr/bin/ruby -e "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)")
 $(info )
 $(error $(shell tput setaf 1; echo "ERROR: Please, before proceeding install the brew package manager. Copy and paste in your terminal the above command, then execute it"; tput sgr0))
 endif
 # macOS: GNU Make
 ifeq (true, $(shell [ ! -f /usr/local/opt/make/libexec/gnubin/make ] && echo true))
 $(info )
-$(info Run $(shell tput setaf 4; echo "brew install make"; tput sgr0))
+$(info brew install make)
 $(info )
 $(error $(shell tput setaf 1; echo "ERROR: Please, before proceeding install the GNU make tool. Copy and paste in your terminal the above command, then execute it"; tput sgr0))
 endif
 ifeq (, $(findstring oneshell, $(.FEATURES)))
 $(info )
-$(info Run $(shell tput setaf 4; echo "export PATH=$(PATH)"; tput sgr0))
+$(info export PATH=$(PATH))
 $(info )
 $(error $(shell tput setaf 1; echo "ERROR: Please, before proceeding make sure GNU make is included in your \$$PATH. Copy and paste in your terminal the above command, then execute it"; tput sgr0))
 endif

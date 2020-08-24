@@ -9,6 +9,7 @@ macos-setup devops-setup: ## Provision your MacBook (and become a DevOps ninja) 
 		macos-install-essential \
 		macos-install-additional \
 		macos-install-corporate \
+		macos-check \
 		macos-config \
 		macos-fix
 	make macos-enable-gatekeeper
@@ -18,11 +19,11 @@ macos-prepare:: ## Prepare for installation and configuration of the development
 	networksetup -setdnsservers Wi-Fi 8.8.8.8
 	sudo chown -R $$(id -u) $$(brew --prefix)/*
 
-macos-update:: ## Update/upgrade all currently installed development dependencies
+macos-update:: ## Update all currently installed development dependencies
 	which mas > /dev/null 2>&1 || brew install mas
 	mas upgrade $(mas list | grep -i xcode | awk '{ print $1 }')
 	brew update
-	brew upgrade ||:
+	brew upgrade
 	brew tap buo/cask-upgrade
 	brew cu --all --yes
 
@@ -31,6 +32,7 @@ macos-install-essential:: ## Install essential development dependencies - option
 	if [[ "$$REINSTALL" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then
 		install="reinstall --force"
 	fi
+	brew update
 	brew tap adoptopenjdk/openjdk ||:
 	brew tap blendle/blendle ||:
 	brew tap buo/cask-upgrade ||:
@@ -72,7 +74,7 @@ macos-install-essential:: ## Install essential development dependencies - option
 	brew $$install pyenv ||:
 	brew $$install pyenv-virtualenv ||:
 	brew $$install pyenv-which-ext ||:
-	brew $$install python@$(PYTHON_VERSION_MAJOR).$(PYTHON_VERSION_MINOR) ||:
+	brew $$install python ||:
 	brew $$install shellcheck ||:
 	brew $$install terraform ||:
 	brew $$install tmux ||:
@@ -82,7 +84,7 @@ macos-install-essential:: ## Install essential development dependencies - option
 	brew $$install zsh-autosuggestions ||:
 	brew $$install zsh-completions ||:
 	brew $$install zsh-syntax-highlighting ||:
-	brew cask $$install adoptopenjdk$(JAVA_VERSION) ||:
+	brew cask $$install adoptopenjdk13 ||:
 	brew cask $$install docker ||:
 	brew cask $$install font-hack-nerd-font ||:
 	brew cask $$install iterm2 ||:
@@ -95,11 +97,14 @@ macos-install-additional:: ## Install additional development dependencies - opti
 	if [[ "$$REINSTALL" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then
 		install="reinstall --force"
 	fi
-	brew tap weaveworks/tap ||:
+	brew update
+	#brew tap weaveworks/tap ||:
 	brew $$install github/gh/gh ||:
-	brew $$install weaveworks/tap/eksctl ||:
+	#brew $$install weaveworks/tap/eksctl ||:
 	brew cask $$install appcleaner ||:
 	brew cask $$install atom ||:
+	brew cask $$install bettertouchtool ||:
+	brew cask $$install cheatsheet ||:
 	brew cask $$install dbeaver-community ||:
 	brew cask $$install dcommander ||:
 	brew cask $$install drawio
@@ -108,11 +113,13 @@ macos-install-additional:: ## Install additional development dependencies - opti
 	brew cask $$install gitkraken ||:
 	brew cask $$install google-chrome ||:
 	brew cask $$install hammerspoon ||:
+	brew cask $$install intellij-idea-ce ||:
 	brew cask $$install istat-menus ||:
 	brew cask $$install karabiner-elements ||:
 	brew cask $$install keepingyouawake ||:
-	#brew cask $$install microsoft-remote-desktop-beta ||:
+	brew cask $$install microsoft-remote-desktop-beta ||:
 	brew cask $$install postman ||:
+	brew cask $$install pycharm ||:
 	brew cask $$install sourcetree ||:
 	brew cask $$install spectacle ||:
 	brew cask $$install tripmode ||:
@@ -120,18 +127,15 @@ macos-install-additional:: ## Install additional development dependencies - opti
 	brew cask $$install vanilla ||:
 	brew cask $$install vlc ||:
 	brew cask $$install wifi-explorer ||:
-	# # Pinned package: vagrant
-	# brew cask reinstall --force \
-	# 	https://raw.githubusercontent.com/Homebrew/homebrew-cask/ae2a540ffee555491ccbb2cefa4296c76355ef9f/Casks/vagrant.rb ||:
-	brew cask $$install vagrant ||:
-	# # Pinned package: virtualbox
-	# brew cask reinstall --force \
-	# 	https://raw.githubusercontent.com/Homebrew/homebrew-cask/33de1ad39862b4d31528e62f931480c1ba8a90f8/Casks/virtualbox.rb ||:
-	brew cask $$install virtualbox ||:
-	# # Pinned package: virtualbox-extension-pack
-	# brew cask reinstall --force \
-	# 	https://raw.githubusercontent.com/Homebrew/homebrew-cask/5a0a2b2322e35ec867f6633ca985ee485255f0b1/Casks/virtualbox-extension-pack.rb ||:
-	brew cask $$install virtualbox-extension-pack ||:
+	# Pinned package: vagrant
+	brew cask reinstall --force \
+		https://raw.githubusercontent.com/Homebrew/homebrew-cask/ae2a540ffee555491ccbb2cefa4296c76355ef9f/Casks/vagrant.rb ||:
+	# Pinned package: virtualbox
+	brew cask reinstall --force \
+		https://raw.githubusercontent.com/Homebrew/homebrew-cask/33de1ad39862b4d31528e62f931480c1ba8a90f8/Casks/virtualbox.rb ||:
+	# Pinned package: virtualbox-extension-pack
+	brew cask reinstall --force \
+		https://raw.githubusercontent.com/Homebrew/homebrew-cask/5a0a2b2322e35ec867f6633ca985ee485255f0b1/Casks/virtualbox-extension-pack.rb ||:
 
 macos-install-corporate:: ## Install corporate dependencies - optional: REINSTALL=true
 	install="install"
@@ -184,7 +188,7 @@ macos-check:: ## Check if the development dependencies are installed
 	brew list pyenv ||:
 	brew list pyenv-virtualenv ||:
 	brew list pyenv-which-ext ||:
-	brew list python@$(PYTHON_VERSION_MAJOR).$(PYTHON_VERSION_MINOR) ||:
+	brew list python ||:
 	brew list shellcheck ||:
 	brew list terraform ||:
 	brew list tmux ||:
@@ -194,39 +198,28 @@ macos-check:: ## Check if the development dependencies are installed
 	brew list zsh-autosuggestions ||:
 	brew list zsh-completions ||:
 	brew list zsh-syntax-highlighting ||:
-	brew cask list adoptopenjdk$(JAVA_VERSION) ||:
+	brew cask list adoptopenjdk13 ||:
 	brew cask list docker ||:
 	brew cask list font-hack-nerd-font ||:
 	brew cask list iterm2 ||:
 	brew cask list visual-studio-code ||:
 	# Additional dependencies
 	brew list github/gh/gh ||:
-	brew list weaveworks/tap/eksctl ||:
-	brew cask list appcleaner ||:
+	#brew list weaveworks/tap/eksctl ||:
 	brew cask list atom ||:
+	brew cask list cheatsheet ||:
 	brew cask list dbeaver-community ||:
-	brew cask list dcommander ||:
-	brew cask list drawio
-	brew cask list firefox-developer-edition ||:
-	brew cask list gimp ||:
+	brew cask list drawio ||:
 	brew cask list gitkraken ||:
 	brew cask list google-chrome ||:
-	brew cask list hammerspoon ||:
-	brew cask list istat-menus ||:
-	brew cask list karabiner-elements ||:
+	brew cask list intellij-idea-ce ||:
 	brew cask list keepingyouawake ||:
-	#brew cask list microsoft-remote-desktop-beta ||:
+	brew cask list microsoft-remote-desktop-beta ||:
 	brew cask list postman ||:
+	brew cask list pycharm ||:
 	brew cask list sourcetree ||:
 	brew cask list spectacle ||:
-	brew cask list tripmode ||:
 	brew cask list tunnelblick ||:
-	brew cask list vanilla ||:
-	brew cask list vlc ||:
-	brew cask list wifi-explorer ||:
-	brew cask list vagrant ||:
-	brew cask list virtualbox ||:
-	brew cask list virtualbox-extension-pack ||:
 
 macos-config:: ## Configure development dependencies
 	make \
@@ -288,7 +281,6 @@ _macos-config-oh-my-zsh:
 	echo "    docker" >> ~/.zshrc
 	echo "    docker-compose" >> ~/.zshrc
 	echo "    virtualenv" >> ~/.zshrc
-	echo "    jenv" >> ~/.zshrc
 	echo "    terraform" >> ~/.zshrc
 	echo "    kubectl" >> ~/.zshrc
 	echo "    aws" >> ~/.zshrc
@@ -310,7 +302,7 @@ _macos-config-oh-my-zsh:
 	echo "POWERLEVEL9K_MODE=nerdfont-complete" >> ~/.zshrc
 	echo "POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs)" >> ~/.zshrc
 	echo "POWERLEVEL9K_SHORTEN_DIR_LENGTH=3" >> ~/.zshrc
-	echo "POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status virtualenv jenv custom_texas root_indicator background_jobs time)" >> ~/.zshrc
+	echo "POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status custom_texas virtualenv root_indicator background_jobs time)" >> ~/.zshrc
 	echo "POWERLEVEL9K_PROMPT_ON_NEWLINE=true" >> ~/.zshrc
 	echo "POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true" >> ~/.zshrc
 	echo "ZSH_THEME=powerlevel10k/powerlevel10k" >> ~/.zshrc
@@ -320,19 +312,19 @@ _macos-config-oh-my-zsh:
 _macos-config-command-line:
 	sudo chown -R $$(id -u) $$(brew --prefix)/*
 	# configure Python
-	brew link --overwrite --force python@$(PYTHON_VERSION_MAJOR).$(PYTHON_VERSION_MINOR)
+	brew link python
 	rm -f $$(brew --prefix)/bin/python
 	ln $$(brew --prefix)/bin/python3 $$(brew --prefix)/bin/python
-	curl -s https://bootstrap.pypa.io/get-pip.py | $$(brew --prefix)/bin/python3
+	curl -s https://bootstrap.pypa.io/get-pip.py | sudo $$(brew --prefix)/bin/python3
 	$$(brew --prefix)/bin/pip3 install $(PYTHON_BASE_PACKAGES)
 	# configure Go
 	curl -sSL https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer | bash ||:
 	# configure Java
 	eval "$$(jenv init -)"
 	jenv enable-plugin export
-	jenv add $$(/usr/libexec/java_home -v$(JAVA_VERSION))
+	jenv add $$(/usr/libexec/java_home)
 	jenv versions # ls -1 /Library/Java/JavaVirtualMachines
-	jenv global $(JAVA_VERSION).0
+	jenv global $$(jenv versions | sed 's/*//' | sed 's/^[ \t]*//;s/[ \t]*$$//' | grep '^[0-9]' | awk '{ print $$1 }' | sort -n | head -n 1)
 	# configure Git
 	make git-config
 	# configure shell
@@ -368,7 +360,7 @@ _macos-config-command-line:
 		echo "# env: Go"
 		echo ". $$HOME/.gvm/scripts/gvm"
 		echo "# env: Java"
-		echo "export JAVA_HOME=$$(/usr/libexec/java_home -v$(JAVA_VERSION))"
+		echo "export PATH=\$$HOME/.jenv/bin:\$$PATH"
 		echo "eval \"\$$(jenv init -)\""
 		echo "# env: Node"
 		echo "export NVM_DIR=\$$HOME/.nvm"
@@ -419,9 +411,9 @@ _macos-config-visual-studio-code:
 	code --force --install-extension felixfbecker.php-debug
 	code --force --install-extension felixfbecker.php-intellisense
 	code --force --install-extension gabrielbb.vscode-lombok
-	code --force --install-extension hashicorp.terraform
 	code --force --install-extension humao.rest-client
 	code --force --install-extension johnpapa.vscode-peacock
+	code --force --install-extension mauve.terraform
 	code --force --install-extension mhutchie.git-graph
 	code --force --install-extension ms-azuretools.vscode-docker
 	code --force --install-extension ms-python.anaconda-extension-pack
@@ -461,43 +453,41 @@ _macos-config-visual-studio-code:
 	code --force --install-extension zhuangtongfa.material-theme
 	# List them all
 	code --list-extensions --show-versions
-	# Copy user key bindings
-	cp -fv $(PROJECT_DIR)/build/automation/lib/macos/vscode-keybindings.json ~/Library/Application\ Support/Code/User/keybindings.json
 
 _macos-config-firefox:
-	# function firefox_install_extension {
-	# 	url=$$1
-	# 	file=$$2
-	# 	(
-	# 		cd ~/tmp
-	# 		curl -L $$url --output $$file
-	# 		mv $$file $$file.zip
-	# 		mkdir -p $$file
-	# 		mv $$file.zip $$file
-	# 		cd $$file
-	# 		unzip $$file.zip
-	# 		id=$$(jq -r '.applications.gecko.id' manifest.json)
-	# 		profile=$$(ls -1 ~/Library/Application\ Support/Firefox/Profiles/ | grep dev-edition-default)
-	# 		cp $$file.zip ~/Library/Application\ Support/Firefox/Profiles/$$profile/extensions/$$id.xpi
-	# 		cd ~/tmp
-	# 		rm -rf $$file
-	# 	)
-	# }
-	# firefox_install_extension \
-	# 	https://addons.mozilla.org/firefox/downloads/file/3478747/react_developer_tools-4.4.0-fx.xpi \
-	# 	react_developer_tools.xpi ||:
-	# firefox_install_extension \
-	# 	https://addons.mozilla.org/firefox/downloads/file/1509811/redux_devtools-2.17.1-fx.xpi \
-	# 	redux_devtools.xpi ||:
+	function firefox_install_extension {
+		url=$$1
+		file=$$2
+		(
+			cd ~/tmp
+			curl -L $$url --output $$file
+			mv $$file $$file.zip
+			mkdir -p $$file
+			mv $$file.zip $$file
+			cd $$file
+			unzip $$file.zip
+			id=$$(jq -r '.applications.gecko.id' manifest.json)
+			profile=$$(ls -1 ~/Library/Application\ Support/Firefox/Profiles/ | grep dev-edition-default)
+			cp $$file.zip ~/Library/Application\ Support/Firefox/Profiles/$$profile/extensions/$$id.xpi
+			cd ~/tmp
+			rm -rf $$file
+		)
+	}
+	firefox_install_extension \
+		https://addons.mozilla.org/firefox/downloads/file/3478747/react_developer_tools-4.4.0-fx.xpi \
+		react_developer_tools.xpi ||:
+	firefox_install_extension \
+		https://addons.mozilla.org/firefox/downloads/file/1509811/redux_devtools-2.17.1-fx.xpi \
+		redux_devtools.xpi ||:
 
 _macos-fix-vagrant-virtualbox:
-	# plugin=/opt/vagrant/embedded/gems/2.2.6/gems/vagrant-2.2.6/plugins/providers/virtualbox/plugin.rb
-	# meta=/opt/vagrant/embedded/gems/2.2.6/gems/vagrant-2.2.6/plugins/providers/virtualbox/driver/meta.rb
-	# if [ -f $$plugin ] && [ -f $$meta ]; then
-	# 	sudo sed -i 's;autoload :Version_4_0, File.expand_path("../driver/version_4_0", __FILE__);autoload :Version_6_1, File.expand_path("../driver/version_6_1", __FILE__);g' $$plugin
-	# 	sudo sed -i 's;"4.0" => Version_4_0,;"6.1" => Version_6_1,;g' $$meta
-	# 	sudo cp $(LIB_DIR)/macos/version_6_1.rb /opt/vagrant/embedded/gems/2.2.6/gems/vagrant-2.2.6/plugins/providers/virtualbox/driver
-	# fi
+	plugin=/opt/vagrant/embedded/gems/2.2.6/gems/vagrant-2.2.6/plugins/providers/virtualbox/plugin.rb
+	meta=/opt/vagrant/embedded/gems/2.2.6/gems/vagrant-2.2.6/plugins/providers/virtualbox/driver/meta.rb
+	if [ -f $$plugin ] && [ -f $$meta ]; then
+		sudo sed -i 's;autoload :Version_4_0, File.expand_path("../driver/version_4_0", __FILE__);autoload :Version_6_1, File.expand_path("../driver/version_6_1", __FILE__);g' $$plugin
+		sudo sed -i 's;"4.0" => Version_4_0,;"6.1" => Version_6_1,;g' $$meta
+		sudo cp $(LIB_DIR)/macos/version_6_1.rb /opt/vagrant/embedded/gems/2.2.6/gems/vagrant-2.2.6/plugins/providers/virtualbox/driver
+	fi
 
 # ==============================================================================
 

@@ -6,14 +6,10 @@ user:
     home: /tmp
     shell: /bin/false
 
-package:
-  bash:
-    installed: true
-  curl:
-    installed: true
-
-command:
-  gosu --version:
-    exit-status: 0
-  python --version:
-    exit-status: 0
+file:
+  /bin/bash:
+    exists: true
+    mode: "0755"
+  /usr/local/bin/gosu:
+    exists: true
+    mode: "0755"

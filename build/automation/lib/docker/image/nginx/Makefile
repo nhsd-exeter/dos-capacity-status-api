@@ -8,7 +8,7 @@ build:
 	make docker-build NAME=nginx
 
 test:
-	make docker-test NAME=nginx
+	make docker-test NAME=nginx CMD=bash
 
 push:
 	make docker-push NAME=nginx
@@ -26,8 +26,8 @@ test-example:
 
 run-example:
 	make docker-image-start NAME=nginx EXAMPLE=true \
+		DIR="example" \
 		ARGS=" \
-			--workdir /application \
 			--publish 8080:8080 \
 			--publish 8443:8443 \
 			--attach \

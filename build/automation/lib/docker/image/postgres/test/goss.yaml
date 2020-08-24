@@ -3,20 +3,23 @@ user:
     exists: true
     uid: 999
     gid: 999
-    home: /tmp
+    home: /var/lib/postgresql
     shell: /bin/false
 
 package:
-  bash:
+  ca-certificates:
     installed: true
   curl:
     installed: true
+  gnupg:
+    installed: true
+  wget:
+    installed: true
 
-command:
-  gosu --version:
-    exit-status: 0
-  'psql postgres://test:test@localhost:5432/test -c "select version();"':
-    exit-status: 0
+file:
+  /usr/local/bin/gosu:
+    exists: true
+    mode: "0755"
 
 process:
   postgres:
@@ -27,3 +30,7 @@ port:
     listening: true
     ip:
       - 0.0.0.0
+
+command:
+  'psql postgres://test:test@localhost:5432/test -c "select version();"':
+    exit-status: 0

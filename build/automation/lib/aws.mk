@@ -19,7 +19,7 @@ aws-assume-role-export-variables: ### Get assume role export for the Jenkins use
 		echo "export AWS_SESSION_TOKEN=$${array[2]}"
 	fi
 
-aws-account-check-id: ### Checked if user has MFA'd into the account - mandatory: ID; return: true|false
+aws-account-check-id: ### Checked if user has MFA'd into the account - mandatory: ID; returns: true|false
 	if [ $(ID) == "$$(make aws-account-get-id)" ] && [ "$$TEXAS_SESSION_EXPIRY_TIME" -gt $$(date -u +"%Y%m%d%H%M%S") ]; then
 		echo true
 	else
@@ -74,7 +74,7 @@ aws-secret-get-and-format: ### Get secret - mandatory: NAME=[secret name]; optio
 	make aws-secret-get NAME=$(NAME) \
 		| make -s docker-run-tools CMD="jq -r"
 
-aws-secret-exists: ### Check if secret exists - mandatory: NAME=[secret name]; optional: AWS_REGION=[AWS region]; return: true|false
+aws-secret-exists: ### Check if secret exists - mandatory: NAME=[secret name]; optional: AWS_REGION=[AWS region]; returns: true|false
 	count=$$(make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 		$(AWSCLI) secretsmanager list-secrets \
 			--region $(AWS_REGION) \
@@ -94,7 +94,7 @@ aws-iam-policy-create: ### Create IAM policy - mandatory: NAME=[policy name],DES
 	"
 	rm $(TMP_DIR_REL)/$(@).json
 
-aws-iam-policy-exists: ### Check if IAM policy exists - mandatory: NAME=[policy name]; return: true|false
+aws-iam-policy-exists: ### Check if IAM policy exists - mandatory: NAME=[policy name]; returns: true|false
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 		$(AWSCLI) iam get-policy \
 			--policy-arn arn:aws:iam::$(AWS_ACCOUNT_ID):policy/$(NAME) \
@@ -103,7 +103,7 @@ aws-iam-policy-exists: ### Check if IAM policy exists - mandatory: NAME=[policy 
 aws-iam-role-create: ### Create IAM role - mandatory: NAME=[role name],DESCRIPTION=[role description],FILE=[path to json file]
 	cp $(FILE) $(TMP_DIR_REL)/$(@).json
 	make file-replace-variables FILE=$(TMP_DIR_REL)/$(@).json
-	tags='[{"Key":"Programme","Value":"$(PROGRAMME)"},{"Key":"Service","Value":"$(SERVICE_TAG)"},{"Key":"Environment","Value":"$(PROFILE)"}]'
+	tags='[{"Key":"Programme","Value":"$(PROGRAMME)"},{"Key":"Service","Value":"$(TEXAS_SERVICE_TAG)"},{"Key":"Environment","Value":"$(PROFILE)"}]'
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 		$(AWSCLI) iam create-role \
 			--role-name $(NAME) \
@@ -113,7 +113,7 @@ aws-iam-role-create: ### Create IAM role - mandatory: NAME=[role name],DESCRIPTI
 	"
 	rm $(TMP_DIR_REL)/$(@).json
 
-aws-iam-role-exists: ### Check if IAM role exists - mandatory: NAME=[role name]; return: true|false
+aws-iam-role-exists: ### Check if IAM role exists - mandatory: NAME=[role name]; returns: true|false
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 		$(AWSCLI) iam get-role \
 			--role-name $(NAME) \
@@ -150,7 +150,7 @@ aws-s3-create: ### Create secure bucket - mandatory: NAME=[bucket name]
 			--bucket $(NAME) \
 			--versioning-configuration "Status=Enabled" \
 	"
-	tags='TagSet=[{Key=Programme,Value=$(PROGRAMME)},{Key=Service,Value=$(SERVICE_TAG)},{Key=Environment,Value=$(PROFILE)}]'
+	tags='TagSet=[{Key=Programme,Value=$(PROGRAMME)},{Key=Service,Value=$(TEXAS_SERVICE_TAG)},{Key=Environment,Value=$(PROFILE)}]'
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 		$(AWSCLI) s3api put-bucket-tagging \
 			--bucket $(NAME) \
@@ -179,13 +179,6 @@ aws-s3-exists: ### Check if bucket exists - mandatory: NAME=[bucket name]
 			s3://$(NAME) \
 		2>&1 | grep -q NoSuchBucket \
 	" > /dev/null 2>&1 && echo false || echo true
-
-aws-rds-describe-instance: ### Describe RDS instance - mandatory: DB_INSTANCE
-	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
-		$(AWSCLI) rds describe-db-instances \
-			--region $(AWS_REGION) \
-			--db-instance-identifier=$(DB_INSTANCE) \
-	" | make -s docker-run-tools CMD="jq -r '.DBInstances[0]'"
 
 aws-rds-create-snapshot: ### Create RDS instance snapshot - mandatory: DB_INSTANCE,SNAPSHOT_NAME
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
@@ -245,18 +238,10 @@ aws-cognito-get-client-secret: ### Get Cognito client secret - mandatory: NAME=[
 			--output text \
 	"
 
-aws-ecr-get-login-password: ### Get ECR user login password
+aws-ecr-get-login-password: ### Get the ECR user login password
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 		$(AWSCLI) ecr get-login-password --region $(AWS_REGION) \
 	"
-aws-ecr-get-image-digest: ### Get ECR image digest by matching tag pattern - mandatory: REPO=[repository name],TAG=[string to match]
-	cp $(JQ_DIR_REL)/$(@).jq $(TMP_DIR_REL)/$(@).json
-	make -s file-replace-variables FILE=$(TMP_DIR_REL)/$(@).json > /dev/null 2>&1
-	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
-		aws ecr list-images \
-			--repository-name $(shell echo $(REPO) | sed "s;$(AWS_ECR)/;;g") \
-	" | make -s docker-run-tools CMD="jq -rf $(TMP_DIR_REL)/$(@).json"
-	rm $(TMP_DIR_REL)/$(@).json
 
 aws-ses-verify-email-identity: ### Verify SES email address - mandatory: NAME
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
@@ -312,11 +297,9 @@ _aws-elasticsearch-register-snapshot-repository: ### Register Elasticsearch snap
 	aws-cognito-get-client-id \
 	aws-cognito-get-client-secret \
 	aws-cognito-get-userpool-id \
-	aws-ecr-get-image-digest \
 	aws-ecr-get-login-password \
 	aws-iam-policy-exists \
 	aws-iam-role-exists \
-	aws-rds-describe-instance \
 	aws-rds-get-snapshot-status \
 	aws-s3-exists \
 	aws-secret-create \
