@@ -14,7 +14,6 @@ slack-send-notification: # TODO: Change data to template with overlay of message
 
 slack-read-template: # Reads text from file and replaces variables in template
 	make -s file-replace-variables FILE=build/Slack-template.txt
-	sed -i 's/RESULT/'"$(RESULT)"'/;s/PIPELINE_NAME/'"$(PIPELINE_NAME)"'/;s/GIT_TAG/'"$(NEW_GIT_TAG)"'/' build/Slack-template.txt
 	file=$$(cat build/Slack-template.txt)
 	echo $$file
 

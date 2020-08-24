@@ -24,6 +24,7 @@ pipeline {
         stage("Set up Variables") {
             steps {
                 script {
+                    sh 'docker pull nhsd/tools:20200701'
                     this.GIT_COMMIT_HASH = sh(returnStdout: true, script: 'make git-commit-get-hash')
                     sh "echo ${this.GIT_COMMIT_HASH}"
                     this.TIMESTAMP = sh(returnStdout: true, script: 'make project-timestamp')
