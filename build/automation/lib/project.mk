@@ -22,27 +22,22 @@ project-deploy: ### Deploy application service stack to the Kubernetes cluster -
 
 # ==============================================================================
 
-project-tag-as-release-candidate: ### Tag release candidate - mandatory: NAME|NAMES=[comma-separated image names]; optional: COMMIT=[git commit hash, defaults to master]
-	commit=$(or $(COMMIT), $$(make git-commit-get-hash COMMIT=master))
-	make git-tag-create-release-candidate COMMIT=$$commit
-	tag=$$(make git-tag-get-release-candidate COMMIT=$$commit)
-	for image in $$(echo $(or $(NAMES), $(NAME)) | tr "," "\n"); do
-		make docker-tag-from-git-commit \
-			TAG=$$tag \
-			NAME=$$image \
-			COMMIT=$$commit
+project-tag-as-release-candidate: ### Tag release candidate - mandatory: IMAGE|IMAGES=[comma-separated image names]; optional: COMMIT=[git commit hash, defaults to master]
+	make git-tag-create-release-candidate
+	tag=$$(make git-tag-get-release-candidate)
+	for image in $$(echo $(or $(IMAGES), $(IMAGE)) | tr "," "\n"); do
+		make docker-tag-as-release-candidate \
+			IMAGE=$$image \
+			TAG=$$tag
 	done
 
-project-tag-as-environment-deployment: ### Tag environment deployment - mandatory: NAME|NAMES=[comma-separated image names],PROFILE=[profile name]; optional: COMMIT=[git release candidate tag name, defaults to master]
-	[ $(PROFILE) = local ] && (echo "ERROR: Please, specify the PROFILE"; exit 1)
-	commit=$(or $(COMMIT), $$(make git-commit-get-hash COMMIT=master))
-	make git-tag-create-environment-deployment COMMIT=$$commit
-	tag=$$(make git-tag-get-environment-deployment COMMIT=$$commit PROFILE=$(PROFILE))
-	for image in $$(echo $(or $(NAMES), $(NAME)) | tr "," "\n"); do
-		make docker-tag-from-git-commit \
-			TAG=$$tag \
-			NAME=$$image \
-			COMMIT=$$commit
+project-tag-as-environment-deployment: ### Tag environment deployment - mandatory: IMAGE|IMAGES=[comma-separated image names],PROFILE=[profile name]; optional: COMMIT=[git release candidate tag name, defaults to master]
+	make git-tag-create-environment-deployment
+	tag=$$(make git-tag-get-environment-deployment)
+	for image in $$(echo $(or $(IMAGES), $(IMAGE)) | tr "," "\n"); do
+		make docker-tag-as-environment-deployment \
+			IMAGE=$$image \
+			TAG=$$tag
 	done
 
 # ==============================================================================

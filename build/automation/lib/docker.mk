@@ -14,8 +14,8 @@ DOCKER_ELASTICSEARCH_VERSION = 7.7.0
 DOCKER_GRADLE_VERSION = 6.5.0-jdk$(JAVA_VERSION)
 DOCKER_LOCALSTACK_VERSION = $(LOCALSTACK_VERSION)
 DOCKER_MAVEN_VERSION = 3.6.3-openjdk-$(JAVA_VERSION)-slim
-DOCKER_NGINX_VERSION = 1.19.0-alpine
-DOCKER_NODE_VERSION = 14.4.0-alpine
+DOCKER_NGINX_VERSION = 1.19.2-alpine
+DOCKER_NODE_VERSION = 14.8.0-alpine
 DOCKER_OPENJDK_VERSION = $(JAVA_VERSION)-alpine
 DOCKER_POSTGRES_VERSION = $(POSTGRES_VERSION)-alpine
 DOCKER_POSTMAN_NEWMAN_VERSION = $(POSTMAN_NEWMAN_VERSION)-alpine
@@ -135,18 +135,7 @@ docker-login: ### Log into the Docker registry - optional: DOCKER_USERNAME,DOCKE
 	fi
 
 docker-create-repository: ### Create Docker repository to store an image - mandatory: NAME
-	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
-		$(AWSCLI) ecr create-repository \
-			--repository-name $(PROJECT_GROUP_SHORT)/$(PROJECT_NAME_SHORT)/$(NAME) \
-			--tags Key=Service,Value=$(SERVICE_TAG) \
-	"
-	cp $(LIB_DIR_REL)/aws/ecr-policy.json $(TMP_DIR_REL)/$(@).json
-	make file-replace-variables FILE=$(TMP_DIR_REL)/$(@).json
-	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
-		$(AWSCLI) ecr set-repository-policy \
-			--repository-name $(PROJECT_GROUP_SHORT)/$(PROJECT_NAME_SHORT)/$(NAME) \
-			--policy-text file://$(TMP_DIR_REL)/$(@).json \
-	"
+	make aws-ecr-create-repository NAME=$(NAME)
 
 docker-push: ### Push Docker image - mandatory: NAME; optional: VERSION|TAG
 	make docker-login
@@ -707,19 +696,25 @@ _docker-is-lib-image:
 
 # ==============================================================================
 
-docker-image-get-digest: ### Get image digest by matching tag pattern - mandatory: NAME=[image name],VERSION|TAG=[string to match]
+docker-image-get-digest: ### Get image digest by matching tag pattern - mandatory: NAME=[image name],VERSION|TAG
 	[ $$(make _docker-is-lib-image) == false ] && make docker-login > /dev/null 2>&1
 	make aws-ecr-get-image-digest \
-		REPO=$$(make _docker-get-reg NAME=$(NAME))/$(NAME) \
+		REPO=$$(make _docker-get-reg)/$(NAME) \
 		TAG=$(or $(VERSION), $(TAG))
 
-docker-tag-from-git-commit: ### Tag release candidate - mandatory: TAG,NAME=[image name]; optional: COMMIT=[git commit hash, defaults to HEAD]
+docker-tag-as-release-candidate: ### Tag release candidate - mandatory: TAG,IMAGE=[image name]; optional: COMMIT=[git commit hash, defaults to HEAD]
 	commit=$(or $(COMMIT), master)
 	hash=$$(make git-commit-get-hash COMMIT=$$commit)
-	digest=$$(make docker-image-get-digest NAME=$(NAME) VERSION=$$hash | tail -n 1)
-	make docker-pull NAME=$(NAME) DIGEST=$$digest
-	make docker-tag DIGEST=$$digest TAG=$(TAG)
-	make docker-push NAME=$(NAME) TAG=$(TAG)
+	digest=$$(make docker-image-get-digest NAME=$(IMAGE) COMMIT=$$hash)
+	make docker-pull NAME=$(IMAGE) DIGEST=$$digest
+	make docker-tag DIGEST=$$digest TAG=
+
+docker-tag-as-environment-deployment: ### Tag environment deployment - mandatory: TAG,IMAGE=[image name],PROFILE=[profile name]; optional: COMMIT=[git release candidate tag name, defaults to HEAD]
+	[ $(PROFILE) = local ] && (echo "ERROR: Please, specify the PROFILE"; exit 1)
+	commit=$(or $(COMMIT), master)
+	hash=$$(make git-commit-get-hash COMMIT=$$commit)
+	digest=$$(make docker-image-get-digest NAME=$(IMAGE) COMMIT=$$hash)
+	make docker-pull NAME=$(IMAGE) DIGEST=$$digest
 
 # ==============================================================================
 
