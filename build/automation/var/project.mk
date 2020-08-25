@@ -8,6 +8,9 @@ ROLE_PREFIX = UECDoSAPI
 SERVICE_TAG = $(PROJECT_GROUP_SHORT)
 PROJECT_TAG = $(PROJECT_NAME)
 
+TEXAS_ROLE_PREFIX = UECDoSAPI
+TEXAS_SERVICE_TAG = $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)
+
 # ==============================================================================
 # Business rules
 
