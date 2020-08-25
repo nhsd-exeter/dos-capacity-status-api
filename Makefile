@@ -32,7 +32,7 @@ migrate:
 # 		CMD="python manage.py migrate"
 
 test-db-start:
-	make docker-compose-start-single-service NAME=$(DB_DOS_HOST)
+	make docker-compose-start-single-service NAME=db-dos
 
 # test-db-start-jenkins: ### TEMPORARY
 # 	make docker-compose-start-single-service NAME=db-dos-$(BUILD_ID)
