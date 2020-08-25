@@ -128,7 +128,6 @@ api-build:
 	cd $(APPLICATION_DIR)
 	tar -czf $(PROJECT_DIR)/build/docker/api/assets/api-app.tar.gz \
 		api \
-		static \
 		manage.py \
 		requirements.txt
 	cp -f \
