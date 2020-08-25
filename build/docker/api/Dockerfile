@@ -9,7 +9,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 ADD assets/api-app.tar.gz /application
-RUN mkdir /application/static
+RUN mkdir application/static
 COPY assets/certificate /certificate
 
 WORKDIR /application
