@@ -47,7 +47,7 @@ services:
     networks:
       default:
         aliases:
-          - data.$PROJECT_NAME_SHORT.local
+          - db.$PROJECT_NAME_SHORT.local
 
   proxy:
     depends_on:
