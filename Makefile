@@ -124,10 +124,11 @@ clean: # Clean up project
 api-build:
 	make docker-run-python \
 		DIR=application \
-		CMD="" SH=true
+		CMD="pip install --upgrade pip && python manage.py collectstatic --noinput" SH=true
 	cd $(APPLICATION_DIR)
 	tar -czf $(PROJECT_DIR)/build/docker/api/assets/api-app.tar.gz \
 		api \
+		static \
 		manage.py \
 		requirements.txt
 	cp -f \
@@ -147,6 +148,9 @@ proxy-build:
 	cp -f \
 		$(SSL_CERTIFICATE_DIR)/certificate.* \
 		$(DOCKER_DIR)/proxy/assets/certificate
+	cp -rf \
+		$(PROJECT_DIR)/application/static \
+		$(DOCKER_DIR)/proxy/assets/application
 	make docker-image NAME=proxy
 
 proxy-clean:
