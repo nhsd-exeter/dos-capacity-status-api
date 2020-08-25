@@ -24,18 +24,18 @@ migrate:
 		DIR=application \
 		CMD="python manage.py migrate"
 
-# migrate-jenkins:
-# 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
-# 		DIR=application \
-# 		DB_DOS_HOST=db-dos-$(BUILD_ID) \
-# 		API_DB_HOST=db-dos-$(BUILD_ID) \
-# 		CMD="python manage.py migrate"
+migrate-jenkins:
+	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+		DIR=application \
+		DB_DOS_HOST=db-dos-$(BUILD_ID) \
+		API_DB_HOST=db-dos-$(BUILD_ID) \
+		CMD="python manage.py migrate"
 
 test-db-start:
 	make docker-compose-start-single-service NAME=db-dos
 
-# test-db-start-jenkins: ### TEMPORARY
-# 	make docker-compose-start-single-service NAME=db-dos-$(BUILD_ID)
+test-db-start-jenkins: ### TEMPORARY
+	make docker-compose-start-single-service NAME=db-dos-$(BUILD_ID)
 
 test: # Test project
 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
