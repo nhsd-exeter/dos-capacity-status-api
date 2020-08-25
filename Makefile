@@ -147,9 +147,6 @@ proxy-build:
 	cp -f \
 		$(SSL_CERTIFICATE_DIR)/certificate.* \
 		$(DOCKER_DIR)/proxy/assets/certificate
-	cp -rf \
-		$(PROJECT_DIR)application/static \
-		$(DOCKER_DIR)/proxy/assets/application
 	make docker-image NAME=proxy
 
 proxy-clean:
