@@ -12,8 +12,6 @@ pipeline {
         GIT_COMMIT_HASH = ''
         TIMESTAMP = ''
         GIT_TAG = ''
-        ROLE = ''
-        WEBHOOK_URL = ''
     }
 
     // if (env.BRANCH_NAME != 'master') {
@@ -104,7 +102,7 @@ pipeline {
                 sh 'make stop'
                 sh 'make api-clean'
                 sh 'make proxy-clean'
-                sh 'make jenkins-clean' // TODO: Target made, check if required
+                sh 'make jenkins-clean'
             }
         }
     }
