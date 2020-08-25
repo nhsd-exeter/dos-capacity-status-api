@@ -20,9 +20,7 @@ RUN set -ex && \
     \
     pip install --upgrade pip && \
     pip install -r requirements.txt && \
-    pip install gunicorn==20.0.4 && \
-    \
-    apk --purge del .build-deps
+    pip install gunicorn==20.0.4
 
 CMD python manage.py migrate && \
     python manage.py collectstatic --noinput && \
