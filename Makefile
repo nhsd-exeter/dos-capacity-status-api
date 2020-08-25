@@ -148,7 +148,7 @@ proxy-build:
 		$(SSL_CERTIFICATE_DIR)/certificate.* \
 		$(DOCKER_DIR)/proxy/assets/certificate
 	cp -rf \
-		$(PROJECT_DIR)/application/static \
+		$(PROJECT_DIR)application/static \
 		$(DOCKER_DIR)/proxy/assets/application
 	make docker-image NAME=proxy
 
