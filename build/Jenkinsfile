@@ -49,7 +49,7 @@ pipeline {
                 }
             }
         }
-        stage("Run Tests (against code)") {
+        stage("Run Tests") {
             steps {
                 script {
                     sh 'echo Run Migration'
