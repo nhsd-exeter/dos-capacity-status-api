@@ -10,6 +10,7 @@ slack-send-notification: # TODO: Change data to template with overlay of message
 	export AWS_SESSION_TOKEN=$${aws[2]}
 	webhook_url=$$(make aws-secret-get NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)/deployment | jq --raw-output '.webhook_url')
 	CONTENT=$$(make slack-read-template NEW_GIT_TAG=$(GIT_TAG))
+	echo $$CONTENT
 	curl -X POST -H 'Content-type: application/json' --data "$$CONTENT" $$webhook_url
 
 slack-read-template: # Reads text from file and replaces variables in template
