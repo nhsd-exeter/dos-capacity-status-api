@@ -24,12 +24,12 @@ migrate:
 		DIR=application \
 		CMD="python manage.py migrate"
 
-migrate-jenkins:
-	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
-		DIR=application \
-		DB_DOS_HOST=db-dos-$(BUILD_ID) \
-		API_DB_HOST=db-dos-$(BUILD_ID) \
-		CMD="python manage.py migrate"
+# migrate-jenkins:
+# 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+# 		DIR=application \
+# 		DB_DOS_HOST=db-dos-$(BUILD_ID) \
+# 		API_DB_HOST=db-dos-$(BUILD_ID) \
+# 		CMD="python manage.py migrate"
 
 test-db-start:
 	make docker-compose-start-single-service NAME=db-dos
@@ -124,7 +124,7 @@ clean: # Clean up project
 api-build:
 	make docker-run-python \
 		DIR=application \
-		CMD="pip install --upgrade pip && python manage.py collectstatic --noinput" SH=true
+		CMD="pip install --upgrade pip && pip install -r requirements.txt && python manage.py collectstatic --noinput" SH=true
 	cd $(APPLICATION_DIR)
 	tar -czf $(PROJECT_DIR)/build/docker/api/assets/api-app.tar.gz \
 		api \

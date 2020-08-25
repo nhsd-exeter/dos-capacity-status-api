@@ -44,6 +44,10 @@ services:
     ports:
       - "5432:5432"
     command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    networks:
+      default:
+        aliases:
+          - data.$PROJECT_NAME_SHORT.local
 
   proxy:
     depends_on:

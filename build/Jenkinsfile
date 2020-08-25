@@ -37,7 +37,7 @@ pipeline {
         stage("Start up Test Database") {
             steps {
                 script {
-                    sh 'export PROFILE=local && make test-db-start-jenkins'
+                    sh 'make test-db-start'
                 }
             }
         }
@@ -52,7 +52,7 @@ pipeline {
             steps {
                 script {
                     sh 'echo Run Migration'
-                    sh 'make migrate-jenkins'
+                    sh 'make migrate'
                 }
                 script {
                     sh 'echo Unit Tests'
