@@ -124,7 +124,7 @@ clean: # Clean up project
 api-build:
 	make docker-run-python \
 		DIR=application \
-		CMD="pip install --upgrade pip && pip install -r requirements.txt && python manage.py collectstatic --noinput" SH=true
+		CMD="" SH=true
 	cd $(APPLICATION_DIR)
 	tar -czf $(PROJECT_DIR)/build/docker/api/assets/api-app.tar.gz \
 		api \
