@@ -20,9 +20,6 @@ project-log: ### Print log from Docker Compose
 project-deploy: ### Deploy application service stack to the Kubernetes cluster - mandatory: PROFILE=[profile name]
 	make k8s-deploy STACK=$(or $(NAME), service)
 
-project-timestamp:
-	TZ=UTC date "+%Y%m%d%H%M%S"
-
 # ==============================================================================
 
 project-tag-as-release-candidate: ### Tag release candidate - mandatory: IMAGE|IMAGES=[comma-separated image names]; optional: COMMIT=[git commit hash, defaults to master]
@@ -76,5 +73,4 @@ project-create-pipeline: ### Create pipeline
 	project-create-image \
 	project-create-infrastructure \
 	project-create-pipeline \
-	project-create-profile \
-	project-timestamp
+	project-create-profile
