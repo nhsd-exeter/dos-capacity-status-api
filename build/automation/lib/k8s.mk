@@ -48,7 +48,7 @@ k8s-deploy-jenkins: ### Deploy application to the Kubernetes cluster - mandatory
 	export AWS_SECRET_ACCESS_KEY=$${aws[1]}
 	export AWS_SESSION_TOKEN=$${aws[2]}
 	eval "$$(make secret-fetch-and-export-variables-jenkins NAME=uec-dos-api-capacity-status-$(PROFILE))"
-	make k8s-kubeconfig-get
+	make k8s-kubeconfig-get-jenkins
 	eval "$$(make k8s-kubeconfig-export-variables)"
 	# deploy
 	make k8s-replace-variables STACK=$(STACK) PROFILE=$(PROFILE)
@@ -191,6 +191,19 @@ k8s-kubeconfig-get: ### Get configuration file - mandatory: PROFILE=[name]
 	make aws-s3-download \
 		URI=$(K8S_KUBECONFIG_FILE) \
 		FILE=/tmp/etc/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig
+	if [ $(PROFILE) == "local" ]; then
+		mkdir -p $(HOME)/.kube/configs
+		cp -f \
+			$(HOME)/etc/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig \
+			$(HOME)/.kube/configs/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig
+	fi
+
+
+k8s-kubeconfig-get-jenkins: ### Get configuration file - mandatory: PROFILE=[name]
+	mkdir -p $(HOME)/etc
+	make aws-s3-download \
+		URI=$(K8S_KUBECONFIG_FILE) \
+		FILE=$(TMP_DIR)/etc/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig
 	if [ $(PROFILE) == "local" ]; then
 		mkdir -p $(HOME)/.kube/configs
 		cp -f \
