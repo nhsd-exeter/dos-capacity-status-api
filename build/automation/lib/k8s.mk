@@ -49,7 +49,7 @@ k8s-deploy-jenkins: ### Deploy application to the Kubernetes cluster - mandatory
 	export AWS_SESSION_TOKEN=$${aws[2]}
 	eval "$$(make secret-fetch-and-export-variables-jenkins NAME=uec-dos-api-capacity-status-$(PROFILE))"
 	make k8s-kubeconfig-get-jenkins
-	eval "$$(make k8s-kubeconfig-export-variables)"
+	eval "$$(make k8s-kubeconfig-export-variables-jenkins)"
 	# deploy
 	make k8s-replace-variables STACK=$(STACK) PROFILE=$(PROFILE)
 	kubectl apply -k $$(make -s _k8s-get-deployment-directory)
@@ -213,6 +213,10 @@ k8s-kubeconfig-get-jenkins: ### Get configuration file - mandatory: PROFILE=[na
 
 k8s-kubeconfig-export-variables k8s-kubeconfig-export: ### Export configuration file - mandatory: PROFILE=[name]
 	echo "export KUBECONFIG=$(HOME)/etc/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig"
+
+
+k8s-kubeconfig-export-variables-jenkins k8s-kubeconfig-export-jenkins: ### Export configuration file - mandatory: PROFILE=[name]
+	echo "export KUBECONFIG=$(TMP_DIR)/etc/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig"
 
 k8s-clean: ### Clean Kubernetes files - mandatory: STACK=[name]
 	find $(K8S_DIR) -type f -name '*.yaml' -print | grep -v "/template/" | xargs rm -fv
