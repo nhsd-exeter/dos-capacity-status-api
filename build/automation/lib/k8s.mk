@@ -41,6 +41,18 @@ k8s-deploy: ### Deploy application to the Kubernetes cluster - mandatory: STACK=
 	make k8s-clean # TODO: Create a flag to switch it off
 	make k8s-sts
 
+k8s-deploy-jenkins: ### Deploy application to the Kubernetes cluster - mandatory: STACK=[name],PROFILE=[name]
+	# set up
+	eval "$$(make aws-assume-role-export-variables)"
+	eval "$$(make secret-fetch-and-export-variables-jenkins NAME=uec-dos-api-capacity-status-$(PROFILE))"
+	make k8s-kubeconfig-get
+	eval "$$(make k8s-kubeconfig-export-variables)"
+	# deploy
+	make k8s-replace-variables STACK=$(STACK) PROFILE=$(PROFILE)
+	kubectl apply -k $$(make -s _k8s-get-deployment-directory)
+	make k8s-clean # TODO: Create a flag to switch it off
+	make k8s-sts
+
 k8s-undeploy: ### Remove Kubernetes resources
 	# set up
 	eval "$$(make aws-assume-role-export-variables)"
