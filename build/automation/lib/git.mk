@@ -69,10 +69,9 @@ git-tag-create-environment-deployment: ### Tag environment deployment as `[YYYYm
 	fi
 
 git-create-tag: ### Tag PR to master for auto pipeline
-	timestamp=$$(TZ=UTC date "+%Y%m%d%H%M%S")
+	timestamp=$$(date --date=$(BUILD_DATE) -u +"%Y%m%d%H%M%S")
 	commit=$$(make git-commit-get-hash)
-	tag=$$timestamp-$$commit
-	echo "$$tag"
+	echo $$timestamp-$$commit
 
 git-tag-master-commit: ### Tag any PR to master as `[YYYYmmddHHMMSS]-[commit-hash]` - mandatory: TAG=[timestamp-commithash]
 	tag=$(TAG)

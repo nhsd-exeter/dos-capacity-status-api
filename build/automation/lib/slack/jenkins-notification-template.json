@@ -4,7 +4,7 @@
       "type": "header",
       "text": {
         "type": "plain_text",
-        "text": "Jenkins PIPELINE_NAME_TO_REPLACE Results",
+        "text": "PIPELINE_NAME_TO_REPLACE Results",
         "emoji": true
       }
     },

@@ -1,8 +1,8 @@
-slack-notification: # For local sending message to slack
+slack-notification: ### For local sending message to slack
 	CONTENT=$$(make slack-read-template)
 	curl -X POST -H 'Content-type: application/json' --data "$$CONTENT" $(WEBHOOK_URL)
 
-slack-send-notification: # TODO: Change data to template with overlay of message BUILD NUMBER: $(BUILD_ID): STATUS FAIL etc- MANDATORY PROFILE=[name], GIT_TAG=this.GIT_TAG
+slack-send-notification: ### TODO: Change data to template with overlay of message BUILD NUMBER: $(BUILD_ID): STATUS FAIL etc- MANDATORY PROFILE=[name], GIT_TAG=this.GIT_TAG
 	aws=($$(make aws-assume-role-export-variables PROFILE=$(PROFILE) | cut -d '=' -f 2))
 	export AWS_ACCESS_KEY_ID=$${aws[0]}
 	export AWS_SECRET_ACCESS_KEY=$${aws[1]}
@@ -11,11 +11,10 @@ slack-send-notification: # TODO: Change data to template with overlay of message
 	CONTENT=$$(make slack-read-template NEW_GIT_TAG=$(GIT_TAG))
 	curl -X POST -H 'Content-type: application/json' --data "$$CONTENT" $$webhook_url
 
-slack-read-template: # Reads text from file and replaces variables in template
-	make -s file-replace-variables FILE=build/Slack-template.txt
-	file=$$(cat build/Slack-template.txt)
+slack-read-template: ### Reads text from file and replaces variables in template
+	make -s file-copy-and-replace SRC=$(LIB_DIR)/slack/jenkins-notification-template.json DEST=$(TMP_DIR)/$(@).json > /dev/null 2>&1 && trap "{ rm -f $(TMP_DIR)/$(@).json; }" EXIT
+	file=$$(cat $(TMP_DIR)/$(@).json)
 	echo $$file
 
 .SILENT: \
-	slack-formatter \
 	slack-read-template \

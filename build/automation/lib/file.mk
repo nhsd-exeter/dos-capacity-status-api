@@ -17,7 +17,7 @@ file-replace-content: ### Replace multiline content from given file - mandatory:
 
 file-replace-variables: ### Replace all placholders in given file - mandatory: FILE; optional: SUFFIX=[variable suffix, defaults to _TO_REPLACE],EXCLUDE_FILE_NAME=true
 	suffix=$(or $(SUFFIX), _TO_REPLACE)
-	# echo "Replace placholders in '$$(echo $(FILE) | sed "s;$(PROJECT_DIR);;g")'"
+	echo "Replace placholders in '$$(echo $(FILE) | sed "s;$(PROJECT_DIR);;g")'"
 	# Replace placholders in file content
 	for str in $$(cat $(FILE) | grep -Eo "\$$\{[A-Za-z0-9_]*$${suffix}\}|\$$[A-Za-z0-9_]*$${suffix}|[A-Za-z0-9_]*$${suffix}" | sed 's/\$$//g' | sed 's/{//g' | sed 's/}//g' | sort | uniq); do
 		key=$$(echo $$str | sed "s/$${suffix}//g")
