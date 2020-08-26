@@ -30,7 +30,7 @@ pipeline {
     stage('Start up Test Database') {
       steps {
         script {
-          sh 'make test-db-start-jenkins'
+          sh 'make test-db-start'
         }
       }
     }
@@ -49,11 +49,11 @@ pipeline {
         }
         script {
           sh 'echo Unit Tests'
-          sh 'make test-unit-only-jenkins'
+          sh 'make test-unit-only'
         }
         script {
           sh 'echo Regression Tests'
-          sh 'make test-regression-only-jenkins'
+          sh 'make test-regression-only'
         }
       }
     }
