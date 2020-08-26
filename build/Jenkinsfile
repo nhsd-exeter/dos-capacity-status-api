@@ -56,11 +56,11 @@ pipeline {
                 }
                 script {
                     sh 'echo Unit Tests'
-                    sh 'export PROFILE=local && make test-unit-only-jenkins'
+                    sh 'make test-unit-only-jenkins'
                 }
                 script {
                     sh 'echo Regression Tests'
-                    sh 'export PROFILE=local && make test-regression-only-jenkins'
+                    sh 'make test-regression-only-jenkins'
                 }
             }
         }
