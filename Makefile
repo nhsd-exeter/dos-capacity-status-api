@@ -108,6 +108,12 @@ deploy: # Deploy project - mandatory: PROFILE=[name]
 	# TODO: What's the URL?
 	echo "The URL is $(UI_URL)"
 
+deploy-jenkins: # Deploy project - mandatory: PROFILE=[name]
+	[ local == $(PROFILE) ] && exit 1
+	make k8s-deploy-jenkins STACK=service
+	# TODO: What's the URL?
+	echo "The URL is $(UI_URL)"
+
 deploy-job: # Deploy project - mandatory: PROFILE=[name]
 	[ local == $(PROFILE) ] && exit 1
 	eval "$$(make aws-assume-role-export-variables)"

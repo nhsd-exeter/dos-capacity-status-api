@@ -1,106 +1,141 @@
+#!/usr/bin/env groovy
+
 pipeline {
-  agent any
-
-  options {
-    buildDiscarder(logRotator(numToKeepStr: '5'))
-  }
-  environment {
-    BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
-    BRANCH_NAME = sh(returnStdout: true, script: 'echo $(BUILD_BRANCH)')
-    GIT_TAG = ''
-    PROFILE = 'DEV'
-    GIT_COMMIT = sh(returnStdout: true, script: 'make git-commit-get-hash')
+  agent {
+    label 'jenkins-slave'
   }
 
-  stages {
-    stage("Check Deployment") {
-      steps {
-        script {
-          if (this.BRANCH_NAME != 'master') {
-            currentBuild.result = 'FAILURE'
-            return
-          }
-          this.GIT_COMMIT = this.GIT_TAG.split('-')[1]
-          this.GIT_TAG = 'GRAB GIT TAG FROM JENKINS JOB'
-          if this.GIT_TAG.split('-')[-1] == 'PROD' {
-            this.PROFILE = 'PROD'
-          } else if this.GIT_TAG.split('-')[-1] == 'DEMO' {
-            this.PROFILE = 'DEMO'
-          } else {
-            this.PROFILE = 'DEV'
-          }
-          if this.PROFILE == 'PROD' or this.PROFILE == 'DEMO' {
-            // Evaluate tags to check for Release Candidate, if no RC tag, don't deploy
-            sh 'make git-tag-is-release-candidate'
-            // If not, stop deployment
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+    }
+
+    environment {
+        PROFILE = 'dev'
+        BRANCH_NAME = "${GIT_BRANCH}"
+        GIT_COMMIT = ''
+        GIT_TAG = ''
+    }
+
+    stages {
+        stage("Set up Variables") {
+            steps {
+                script {
+                    sh 'make devops-print-variables'
+                    this.BRANCH_NAME = env.BRANCH_NAME
+                    sh "echo BRANCH_NAME=${BRANCH_NAME}"
+                    GIT_COMMIT = sh(returnStdout: true, script: 'make git-commit-get-hash')
+                    sh "echo GIT_COMMIT=${GIT_COMMIT}"
+                    GIT_TAG = sh(returnStdout: true, script: "make git-tag-get-latest").trim()
+                    sh "echo GIT_TAG=${GIT_TAG}"
+                }
+            }
+        }
+        stage("Check Deployment") {
+            steps {
+                script {
+                    IS_MASTER_BRANCH = sh(returnStdout: true, script: "make git-tag-is-present-on-branch TAG=${GIT_TAG} BRANCH=task/build_phase_two_deploy_pipeline") //TODO change BRANCH to master when finalising pipeline
+                    if (IS_MASTER_BRANCH == "false") {
+                      currentBuild.result = 'FAILURE'
+                      return
+                    }
+                    if (this.GIT_TAG.split('-')[-1] == 'prod') {
+                      this.PROFILE = 'prod'
+                    } else if (this.GIT_TAG.split('-')[-1] == 'demo') {
+                        this.PROFILE = 'demo'
+                    } else {
+                        this.PROFILE = 'dev'
+                    }
+                    if (this.PROFILE == 'prod' || this.PROFILE == 'demo') {
+                        // Evaluate tags to check for Release Candidate, if no RC tag, don't deploy
+                        sh 'make git-tag-is-release-candidate COMMIT=${this.GIT_COMMIT}'
+                        currentBuild.result = 'FAILURE'
+                        return
+                    }
+                }
+            }
+        }
+        stage("Provision Infrastructure") {
+            steps {
+                // script {
+                //     sh "echo Checking to see if RDS Snapshot is needed"
+                //     if this.PROFILE != 'DEV': // for snapshot
+                //     sh "echo Creating RDS Snapshot"
+                //     assume role to be able to snapshot
+                //     sh "make aws-rds-create-snapshot DB_INSTANCE=Need to get from SecretManager SNAPSHOT_NAME=${GIT_TAG}" //snapshot the database and name/tag it timestamp-profile (git tag)
+                //     sh "make aws-rds-wait-for-snapshot SNAPSHOT_NAME=${GIT_TAG}"
+                // }
+                script {
+                    sh "docker pull nhsd/tools:20200701"
+                    sh "echo Provisioning infrasturcture for ${PROFILE} environment"
+                    sh "make docker-config" // need to clean up the network this statment creates
+                    // need to asume aws role related to profile e.g. non-prod for DEV, prod for DEMO and PROD
+                    // sh "make terraform-apply-auto-approve STACKS=infrastructure/stacks PROFILE=${this.PROFILE}"
+                    TERRAFORM_OPTS='"--var-file=../tfvars/nonprod.tfvars"'
+                    sh "make terraform-destroy-auto-approve STACKS=service PROFILE=${PROFILE} OPTS=${TERRAFORM_OPTS}"
+                }
+                // Extra maybe add some way ofgit tagging the infrasturcture with the git_tag and the commit
+            }
+        }
+        stage("Deploy Application") {
+            steps {
+                //TODO Need additional step to set the docker images used for the deploy to the one matching the git tag being pulled
+                script {
+                    sh "make deploy-jenkins PROFILE=${PROFILE}"
+                }
+            }
+        }
+        // stage("Prepare Data") {
+        //     steps {
+        //         script {
+        //             sh 'make prepare-data'
+        //         }
+        //     }
+        // }
+        // stage("Run Tests") {
+        //     steps {
+        //         script {
+        //             sh 'make test'
+        //         }
+        //     }
+        // }
+        // stage("Deployment Summary") {
+        //     steps {
+        //         scripts {
+        //             sh 'make deployment-summary'
+        //         }
+        //     }
+        // }
+    }
+    post {
+        success {
+            script {
+                if (this.PROFILE != 'dev') {
+                  sh """
+                    export "RESULT=${currentBuild.currentResult}"
+                    export "PIPELINE_NAME=Deploy Pipeline"
+                    make slack-send-notification PROFILE=dev GIT_TAG=${this.GIT_TAG}
+                  """
+                }
+            }
+        }
+        failure {
+          script {
+            sh """
+              export "RESULT=${currentBuild.currentResult}"
+              export "PIPELINE_NAME=Deploy Pipeline"
+              make slack-send-notification PROFILE=dev GIT_TAG=${this.GIT_TAG}
+              """
+            sh "make jenkins-upload-workspace"
           }
         }
-      }
-    }
-    stage("Set up Variables") {
-      steps {
-        script {
-          sh 'make devops-print-variables'
+        cleanup {
+            script {
+                script {
+                sh 'make clean'
+                // sh 'make jenkins-clean'
+                // Check if extra cleanup required
+            }
+            }
         }
-      }
     }
-    stage("Pull Images") {
-      steps {
-        script {
-          sh 'make docker-pull NAME=proxy TAG=${this.GIT_TAG}'
-          sh 'make docker-pull NAME=api TAG=${this.GIT_TAG}'
-        }
-      }
-    }
-    // stage("Provision Infrastructure") {
-    //     steps {
-    //         script {
-    //             if this.PROFILE != 'DEV':
-    //               sh 'make backup-data'
-    //               sh 'make terraform-apply-auto-approve STACKS=infrastructure/stacks PROFILE=${this.PROFILE}'
-    //         }
-    //     }
-    // }
-    // stage("Deploy Application") {
-    //     steps {
-    //         script {
-    //             sh 'make deploy PROFILE=${this.PROFILE}'
-    //         }
-    //     }
-    // }
-    // stage("Prepare Data") {
-    //     steps {
-    //         script {
-    //             sh 'make prepare-data'
-    //         }
-    //     }
-    // }
-    // stage("Run Tests") {
-    //     steps {
-    //         script {
-    //             sh 'make test'
-    //         }
-    //     }
-    // }
-    // stage("Deployment Summary") {
-    //     steps {
-    //         scripts {
-    //             sh 'make deployment-summary'
-    //         }
-    //     }
-    // }
-  }
-  post {
-    failure {
-      script {
-        sh 'make jenkins-upload-workspace'
-        sh 'make slack-notification CONTENT= WEBHOOK_URL='
-        // TO DO: Create Make target to send slack notification on failure of a build
-      }
-    }
-    cleanup {
-      sh 'make jenkins-cleanup-workspace'
-      // TO DO: Create Make Targets for jenkins to cleanup the workspace after finishing
-    }
-  }
 }
