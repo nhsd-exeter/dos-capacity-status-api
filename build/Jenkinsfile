@@ -104,7 +104,6 @@ pipeline {
                 sh 'make stop'
                 sh 'make api-clean'
                 sh 'make proxy-clean'
-                sh 'make jenkins-clean'
             }
         }
     }
