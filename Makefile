@@ -32,23 +32,12 @@ migrate:
 			CMD="python manage.py migrate"
 	fi
 
-
-# migrate-jenkins:
-# 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
-# 		DIR=application \
-# 		DB_DOS_HOST=db-dos-$(BUILD_ID) \
-# 		API_DB_HOST=db-dos-$(BUILD_ID) \
-# 		CMD="python manage.py migrate"
-
 test-db-start:
 	if [ "$(BUILD_ID)" != 0 ]; then
 		make docker-compose-start-single-service NAME=db-dos-$(BUILD_ID)
 	else
 		make docker-compose-start-single-service NAME=db-dos
 	fi
-
-# test-db-start-jenkins: ### TEMPORARY
-# 	make docker-compose-start-single-service NAME=db-dos-$(BUILD_ID)
 
 test: # Test project
 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
@@ -83,13 +72,6 @@ test-regression-only: # Run only regression test suite
 			CMD="python manage.py test --tag=regression api"
 	fi
 
-# test-regression-only-jenkins: # Run only regression test suite
-# 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
-# 		DIR=application \
-# 		DB_DOS_HOST=db-dos-$(BUILD_ID) \
-# 		API_DB_HOST=db-dos-$(BUILD_ID) \
-# 		CMD="python manage.py test --tag=regression api"
-
 test-unit-only: # Run only unit test suite
 	if [ "$(BUILD_ID)" != 0 ]; then
 		make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
@@ -102,13 +84,6 @@ test-unit-only: # Run only unit test suite
 			DIR=application \
 			CMD="python manage.py test --exclude-tag=regression api"
 	fi
-
-# test-unit-only-jenkins: # Run only unit test suite
-# 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
-# 		DIR=application \
-# 		DB_DOS_HOST=db-dos-$(BUILD_ID) \
-# 		API_DB_HOST=db-dos-$(BUILD_ID) \
-# 		CMD="python manage.py test --exclude-tag=regression api"
 
 push: # Push project artefacts to the registry
 	make docker-login
