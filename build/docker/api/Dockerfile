@@ -1,21 +1,7 @@
-FROM python:3.8.2-slim
+FROM python:latest
 
 ENV DEBIAN_FRONTEND="noninteractive"
 
-RUN set -ex && \
-    \
-    # Install base packages
-    echo "APT::Install-Recommends 0;\nAPT::Install-Suggests 0;" > /etc/apt/apt.conf.d/99config && \
-    apt-get --yes update && \
-    apt-get --yes upgrade && \
-    apt-get --yes install \
-        gcc \
-        libpq-dev \
-        python3-dev \
-    && \
-    \
-    # Clean up
-    rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/* /var/cache/apt/*
 
 EXPOSE 8443
 
@@ -23,11 +9,14 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 ADD assets/api-app.tar.gz /application
+RUN mkdir /application/static
 COPY assets/certificate /certificate
 
 WORKDIR /application
 
 RUN set -ex && \
+    apk add --no-cache postgresql-libs && \
+    apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev && \
     \
     pip install --upgrade pip && \
     pip install -r requirements.txt && \

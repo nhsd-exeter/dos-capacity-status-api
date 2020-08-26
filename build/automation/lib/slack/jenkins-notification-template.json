@@ -1,0 +1,19 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "PIPELINE_NAME_TO_REPLACE Results",
+        "emoji": true
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "Result: RESULT_TO_REPLACE \n Tag: GIT_TAG_TO_REPLACE \n Commit Hash: BUILD_COMMIT_HASH_TO_REPLACE \n Profile: PROFILE_TO_REPLACE \n For more information click here BUILD_URL_TO_REPLACE"
+      }
+    }
+  ]
+}

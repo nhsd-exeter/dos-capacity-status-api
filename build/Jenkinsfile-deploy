@@ -1,0 +1,106 @@
+pipeline {
+  agent any
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '5'))
+  }
+  environment {
+    BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
+    BRANCH_NAME = sh(returnStdout: true, script: 'echo $(BUILD_BRANCH)')
+    GIT_TAG = ''
+    PROFILE = 'DEV'
+    GIT_COMMIT = sh(returnStdout: true, script: 'make git-commit-get-hash')
+  }
+
+  stages {
+    stage("Check Deployment") {
+      steps {
+        script {
+          if (this.BRANCH_NAME != 'master') {
+            currentBuild.result = 'FAILURE'
+            return
+          }
+          this.GIT_COMMIT = this.GIT_TAG.split('-')[1]
+          this.GIT_TAG = 'GRAB GIT TAG FROM JENKINS JOB'
+          if this.GIT_TAG.split('-')[-1] == 'PROD' {
+            this.PROFILE = 'PROD'
+          } else if this.GIT_TAG.split('-')[-1] == 'DEMO' {
+            this.PROFILE = 'DEMO'
+          } else {
+            this.PROFILE = 'DEV'
+          }
+          if this.PROFILE == 'PROD' or this.PROFILE == 'DEMO' {
+            // Evaluate tags to check for Release Candidate, if no RC tag, don't deploy
+            sh 'make git-tag-is-release-candidate'
+            // If not, stop deployment
+          }
+        }
+      }
+    }
+    stage("Set up Variables") {
+      steps {
+        script {
+          sh 'make devops-print-variables'
+        }
+      }
+    }
+    stage("Pull Images") {
+      steps {
+        script {
+          sh 'make docker-pull NAME=proxy TAG=${this.GIT_TAG}'
+          sh 'make docker-pull NAME=api TAG=${this.GIT_TAG}'
+        }
+      }
+    }
+    // stage("Provision Infrastructure") {
+    //     steps {
+    //         script {
+    //             if this.PROFILE != 'DEV':
+    //               sh 'make backup-data'
+    //               sh 'make terraform-apply-auto-approve STACKS=infrastructure/stacks PROFILE=${this.PROFILE}'
+    //         }
+    //     }
+    // }
+    // stage("Deploy Application") {
+    //     steps {
+    //         script {
+    //             sh 'make deploy PROFILE=${this.PROFILE}'
+    //         }
+    //     }
+    // }
+    // stage("Prepare Data") {
+    //     steps {
+    //         script {
+    //             sh 'make prepare-data'
+    //         }
+    //     }
+    // }
+    // stage("Run Tests") {
+    //     steps {
+    //         script {
+    //             sh 'make test'
+    //         }
+    //     }
+    // }
+    // stage("Deployment Summary") {
+    //     steps {
+    //         scripts {
+    //             sh 'make deployment-summary'
+    //         }
+    //     }
+    // }
+  }
+  post {
+    failure {
+      script {
+        sh 'make jenkins-upload-workspace'
+        sh 'make slack-notification CONTENT= WEBHOOK_URL='
+        // TO DO: Create Make target to send slack notification on failure of a build
+      }
+    }
+    cleanup {
+      sh 'make jenkins-cleanup-workspace'
+      // TO DO: Create Make Targets for jenkins to cleanup the workspace after finishing
+    }
+  }
+}

@@ -1,24 +1,99 @@
 pipeline {
-    agent any
-    stages {
-        stage("Print Variables") {
-            steps {
-                script {
-                    sh 'make pipeline-print-variables'
-                }
-            }
+  agent {
+    label 'jenkins-slave'
+  }
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '10'))
+    disableConcurrentBuilds()
+  }
+  environment {
+    BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
+    GIT_COMMIT_HASH = sh(returnStdout: true, script: 'make git-commit-get-hash')
+    GIT_TAG = sh(returnStdout: true, script: 'make git-create-tag')
+  }
+
+  stages {
+    stage('Set up Variables') {
+      steps {
+        script {
+          sh "echo ${this.GIT_COMMIT_HASH}"
+          sh "echo ${this.BUILD_DATE}"
+          sh "echo ${GIT_TAG}"
+          sh 'make devops-print-variables'
         }
-        stage("Unit Test") {
-            steps {
-                script {
-                    sh 'make pipeline-test-suite'
-                }
-            }
-        }
+      }
     }
-    post {
-        always {
-            sh 'make pipeline-test-cleanup'
+    stage('Start up Test Database') {
+      steps {
+        script {
+          sh 'make test-db-start'
         }
+      }
     }
+    stage('Build Images') {
+      steps {
+        script {
+          sh 'make build'
+        }
+      }
+    }
+    stage('Run Tests') {
+      steps {
+        script {
+          sh 'echo Run Migration'
+          sh 'make migrate'
+        }
+        script {
+          sh 'echo Unit Tests'
+          sh 'make test-unit-only'
+        }
+        script {
+          sh 'echo Regression Tests'
+          sh 'make test-regression-only'
+        }
+      }
+    }
+    stage('Tag Docker Images') {
+      steps {
+        script {
+          sh "make docker-tag NAME=api TAG=${this.GIT_TAG}"
+          sh "make docker-tag NAME=proxy TAG=${this.GIT_TAG}"
+        }
+      }
+    }
+    stage('Push Images') {
+      steps {
+        script {
+          sh "make docker-push NAME=api TAG=${this.GIT_TAG}"
+          sh "make docker-push NAME=proxy TAG=${this.GIT_TAG}"
+        }
+      }
+    }
+    // stage("Tag Git Commit") {
+    //     steps {
+    //         script {
+    //             sh "make git-tag-master-commit TAG=${this.GIT_TAG}"
+    //             // Need user set up with git access, can wait until Dan is back, manual step for now
+    //         }
+    //     }
+    // }
+  }
+  post {
+    failure {
+      script {
+        sh """echo Build Failure
+                  export "RESULT=${currentBuild.currentResult}"
+                  export "PIPELINE_NAME=Commit Pipeline"
+                  make slack-send-notification PROFILE=dev GIT_TAG=${this.GIT_TAG}
+                  """
+      }
+    }
+    cleanup {
+      script {
+        sh 'make stop'
+        sh 'make api-clean'
+        sh 'make proxy-clean'
+      }
+    }
+  }
 }

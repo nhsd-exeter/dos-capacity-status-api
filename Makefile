@@ -20,9 +20,24 @@ stop: project-stop # Stop project
 log: project-log # Show project logs
 
 migrate:
-	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
-		DIR=application \
-		CMD="python manage.py migrate"
+	if [ "$(BUILD_ID)" != 0 ]; then
+		make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+			DIR=application \
+			DB_DOS_HOST=db-dos-$(BUILD_ID) \
+			API_DB_HOST=db-dos-$(BUILD_ID) \
+			CMD="python manage.py migrate"
+	else
+		make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+			DIR=application \
+			CMD="python manage.py migrate"
+	fi
+
+test-db-start:
+	if [ "$(BUILD_ID)" != 0 ]; then
+		make docker-compose-start-single-service NAME=db-dos-$(BUILD_ID)
+	else
+		make docker-compose-start-single-service NAME=db-dos
+	fi
 
 test: # Test project
 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
@@ -45,14 +60,30 @@ test-authentication: # Test dos interface
 		CMD="python manage.py test api/authentication/"
 
 test-regression-only: # Run only regression test suite
-	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
-		DIR=application \
-		CMD="python manage.py test --tag=regression api"
+	if [ "$(BUILD_ID)" != 0 ]; then
+		make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+			DIR=application \
+			DB_DOS_HOST=db-dos-$(BUILD_ID) \
+			API_DB_HOST=db-dos-$(BUILD_ID) \
+			CMD="python manage.py test --tag=regression api"
+	else
+		make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+			DIR=application \
+			CMD="python manage.py test --tag=regression api"
+	fi
 
 test-unit-only: # Run only unit test suite
-	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
-		DIR=application \
-		CMD="python manage.py test --exclude-tag=regression api"
+	if [ "$(BUILD_ID)" != 0 ]; then
+		make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+			DIR=application \
+			DB_DOS_HOST=db-dos-$(BUILD_ID) \
+			API_DB_HOST=db-dos-$(BUILD_ID) \
+			CMD="python manage.py test --exclude-tag=regression api"
+	else
+		make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+			DIR=application \
+			CMD="python manage.py test --exclude-tag=regression api"
+	fi
 
 push: # Push project artefacts to the registry
 	make docker-login
@@ -95,20 +126,16 @@ clean: # Clean up project
 	rm -rfv $(HOME)/.python/pip
 
 api-build:
-	make docker-run-python \
-		DIR=application \
-		CMD="pip install --upgrade pip && pip install -r requirements.txt && python manage.py collectstatic --noinput" SH=true
 	cd $(APPLICATION_DIR)
 	tar -czf $(PROJECT_DIR)/build/docker/api/assets/api-app.tar.gz \
 		api \
-		static \
 		manage.py \
 		requirements.txt
 	cp -f \
 		$(SSL_CERTIFICATE_DIR)/certificate.* \
 		$(DOCKER_DIR)/api/assets/certificate
 	cd $(PROJECT_DIR)
-	make docker-image NAME=api VERSION=0.0.1
+	make docker-image NAME=api
 
 api-clean:
 	make docker-image-clean NAME=api
@@ -118,6 +145,10 @@ api-clean:
 		$(PROJECT_DIR)/application/static
 
 proxy-build:
+	make docker-run-python \
+		DIR=application \
+		IMAGE=$(DOCKER_REGISTRY)/api:latest \
+		CMD="pip install --upgrade pip && pip install -r requirements.txt && python manage.py collectstatic --noinput" SH=true
 	cp -f \
 		$(SSL_CERTIFICATE_DIR)/certificate.* \
 		$(DOCKER_DIR)/proxy/assets/certificate

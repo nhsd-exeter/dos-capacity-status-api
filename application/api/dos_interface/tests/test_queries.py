@@ -1,5 +1,6 @@
 from unittest import TestCase
 from django.core.exceptions import ObjectDoesNotExist
+
 from datetime import datetime
 
 from ..queries import can_user_edit_service, get_dos_service_for_uid, get_service_info, Users
@@ -145,19 +146,26 @@ class TestDosInterfaceQueries(TestCase):
         for index in range(len(service_info)):
             service = service_info[index]
             self.assertListEqual(list(service.keys()), expected_keys)
+
             if index == 0:
                 assert type(service["depth"]) is int and service["depth"] == 0
-                assert service["uid"] == service_uid
-                assert "Capacity" in service["notes"]
-                assert type(service["modifiedby"]) is str and service["modifiedby"] is not None
-                assert type(service["modifieddate"]) is datetime
-                assert type(service["resetdatetime"]) is datetime
+                assert service["uid"] == service_uid, (
+                    "expected service uid to be " + service_uid + " but was " + service["uid"]
+                )
             else:
                 assert type(service["depth"]) is int and service["depth"] == 1
+
+            if service["resetdatetime"] is None:
                 assert service["uid"] is not service_uid and service["uid"] is not None
                 assert service["modifiedby"] is None
                 assert service["modifieddate"] is None
                 assert service["resetdatetime"] is None
+            else:
+                assert "Capacity" in service["notes"]
+                assert type(service["modifiedby"]) is str and service["modifiedby"] is not None
+                assert type(service["modifieddate"]) is datetime
+                assert type(service["resetdatetime"]) is datetime
+
             assert type(service["id"]) is int
             assert type(service["name"]) is str and service["name"] is not None
             assert type(service["typeid"]) is int

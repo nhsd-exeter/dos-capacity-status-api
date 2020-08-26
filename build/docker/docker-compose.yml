@@ -32,8 +32,8 @@ services:
 
   db-dos:
     image: $DOCKER_LIBRARY_REGISTRY/postgres:latest
-    container_name: dos-db
-    hostname: dos-db
+    container_name: db-dos
+    hostname: db-dos
     environment:
       PROFILE: $PROFILE
       POSTGRES_DB: $DB_DOS_NAME
@@ -44,6 +44,10 @@ services:
     ports:
       - "5432:5432"
     command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    networks:
+      default:
+        aliases:
+          - db.$PROJECT_NAME_SHORT.local
 
   proxy:
     depends_on:
