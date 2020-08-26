@@ -80,7 +80,7 @@ git-tag-master-commit: ### Tag any PR to master as `[YYYYmmddHHMMSS]-[commit-has
 	git push origin $$tag
 
 git-tag-get-latest: ### Returns the latest git timestamp prefixed tag on the current branch
-	git tag --sort version:refname | grep -o '^[0-9]*'| tail -1
+	git tag --sort version:refname | grep '^[0-9]*'| tail -1
 
 git-tag-is-present-on-branch: ### Returns true if the given branch contains the given tag else it returns false - mandatory: BRANCH=[branch name] TAG=[tag name]
 	if [ $$(git branch --contains tags/$(TAG) | grep -ow $(BRANCH)) ]; then
