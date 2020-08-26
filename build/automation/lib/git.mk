@@ -128,4 +128,6 @@ git-tag-clear: ### Remove tags from the specified commit - optional: COMMIT=[co
 	git-tag-is-environment-deployment \
 	git-tag-is-release-candidate \
 	git-tag-list \
+	git-tag-get-latest \
+	git-tag-is-present-on-branch \
 	git-create-tag
