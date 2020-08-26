@@ -246,6 +246,9 @@ aws-ecr-get-login-password: ### Get ECR user login password
 		$(AWSCLI) ecr get-login-password --region $(AWS_REGION) \
 	"
 
+aws-ecr-get-login-password-jenkins: ### Get ECR user login password
+		aws ecr get-login-password --region $(AWS_REGION)
+
 aws-ecr-create-repository: ### Create ECR repository to store an image - mandatory: NAME
 	make file-copy-and-replace SRC=$(LIB_DIR_REL)/aws/aws-ecr-create-repository-policy.json DEST=$(TMP_DIR_REL)/$(@)_$(BUILD_ID) && trap "{ rm -f $(TMP_DIR_REL)/$(@)_$(BUILD_ID); }" EXIT
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
@@ -309,9 +312,6 @@ _aws-elasticsearch-register-snapshot-repository: ### Register Elasticsearch snap
 	# 			$(TF_VAR_es_snapshot_bucket) \
 	# 			$(TF_VAR_es_snapshot_role) \
 	# 	"
-
-aws-ecr-get-login-password-jenkins: ### Get ECR user login password
-		aws ecr get-login-password --region $(AWS_REGION)
 
 # ==============================================================================
 

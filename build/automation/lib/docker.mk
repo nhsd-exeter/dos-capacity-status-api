@@ -134,11 +134,28 @@ docker-login: ### Log into the Docker registry - optional: DOCKER_USERNAME,DOCKE
 		make aws-ecr-get-login-password | docker login --username AWS --password-stdin $(AWS_ECR)
 	fi
 
+docker-login-jenkins: ### TEMPORARY Log into the Docker registry - optional: DOCKER_USERNAME,DOCKER_PASSWORD
+	if [ -n "$(DOCKER_USERNAME)" ] && [ -n "$(DOCKER_PASSWORD)" ]; then
+		make _docker-get-login-password | docker login --username "$(DOCKER_USERNAME)" --password-stdin
+	else
+		make aws-ecr-get-login-password-jenkins | docker login --username AWS --password-stdin $(AWS_ECR)
+	fi
+
 docker-create-repository: ### Create Docker repository to store an image - mandatory: NAME
 	make aws-ecr-create-repository NAME=$(NAME)
 
 docker-push: ### Push Docker image - mandatory: NAME; optional: VERSION|TAG
 	make docker-login
+	reg=$$(make _docker-get-reg)
+	if [ -n "$(or $(VERSION), $(TAG))" ]; then
+		docker push $$reg/$(NAME):$(or $(VERSION), $(TAG))
+	else
+		docker push $$reg/$(NAME):$$(make docker-image-get-version)
+	fi
+	docker push $$reg/$(NAME):latest
+
+docker-push-jenkins: ### Temp workaround to bypass the docker-run-tools issues
+	make docker-login-jenkins
 	reg=$$(make _docker-get-reg)
 	if [ -n "$(or $(VERSION), $(TAG))" ]; then
 		docker push $$reg/$(NAME):$(or $(VERSION), $(TAG))
@@ -715,23 +732,6 @@ docker-tag-as-environment-deployment: ### Tag environment deployment - mandatory
 	hash=$$(make git-commit-get-hash COMMIT=$$commit)
 	digest=$$(make docker-image-get-digest NAME=$(IMAGE) COMMIT=$$hash)
 	make docker-pull NAME=$(IMAGE) DIGEST=$$digest
-
-docker-push-jenkins: ### Temp workaround to bypass the docker-run-tools issues
-	make docker-login-jenkins
-	reg=$$(make _docker-get-reg)
-	if [ -n "$(or $(VERSION), $(TAG))" ]; then
-		docker push $$reg/$(NAME):$(or $(VERSION), $(TAG))
-	else
-		docker push $$reg/$(NAME):$$(make docker-image-get-version)
-	fi
-	docker push $$reg/$(NAME):latest
-
-docker-login-jenkins: ### TEMPORARY Log into the Docker registry - optional: DOCKER_USERNAME,DOCKER_PASSWORD
-	if [ -n "$(DOCKER_USERNAME)" ] && [ -n "$(DOCKER_PASSWORD)" ]; then
-		make _docker-get-login-password | docker login --username "$(DOCKER_USERNAME)" --password-stdin
-	else
-		make aws-ecr-get-login-password-jenkins | docker login --username AWS --password-stdin $(AWS_ECR)
-	fi
 
 # ==============================================================================
 
