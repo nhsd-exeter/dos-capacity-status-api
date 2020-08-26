@@ -65,7 +65,6 @@ pipeline {
                 //     sh "make aws-rds-wait-for-snapshot SNAPSHOT_NAME=${GIT_TAG}"
                 // }
                 script {
-                    sh "docker pull nhsd/tools:20200701"
                     sh "echo Provisioning infrasturcture for ${PROFILE} environment"
                     sh "make docker-config" // need to clean up the network this statment creates
                     // need to asume aws role related to profile e.g. non-prod for DEV, prod for DEMO and PROD
