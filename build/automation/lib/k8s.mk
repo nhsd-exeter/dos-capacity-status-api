@@ -202,7 +202,6 @@ k8s-kubeconfig-get: ### Get configuration file - mandatory: PROFILE=[name]
 
 k8s-kubeconfig-get-jenkins: ### Get configuration file - mandatory: PROFILE=[name]
 	mkdir -p $(HOME)/etc
-	mkdir -p $(TMP_DIR)/etc
 	make aws-s3-download \
 		URI=$(K8S_KUBECONFIG_FILE) \
 		FILE=$(TMP_DIR)/etc/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig
