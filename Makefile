@@ -100,9 +100,6 @@ plan: # Show the creation instance plan - mandatory: PROFILE=[profile name]
 
 deploy: # Deploy project - mandatory: PROFILE=[name]
 	[ local == $(PROFILE) ] && exit 1
-	eval "$$(make aws-assume-role-export-variables)"
-	make k8s-kubeconfig-get
-	eval "$$(make k8s-kubeconfig-export)"
 	eval "$$(make project-populate-secret-variables)"
 	make k8s-deploy STACK=service
 	# TODO: What's the URL?
@@ -172,6 +169,7 @@ proxy-clean:
 # ---
 
 project-populate-secret-variables:
+	eval "$$(make aws-assume-role-export-variables)"
 	make secret-fetch-and-export-variables NAME=uec-dos-api-capacity-status-$(PROFILE)
 
 # ---

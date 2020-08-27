@@ -188,17 +188,9 @@ k8s-get-namespace-ttl: ### Get the length of time for the namespace to live
 	date -u +"%d-%b-%Y" -d "+$(K8S_TTL_LENGTH)"
 
 k8s-kubeconfig-get: ### Get configuration file - mandatory: PROFILE=[name]
-	mkdir -p $(HOME)/etc
 	make aws-s3-download \
 		URI=$(K8S_KUBECONFIG_FILE) \
-		FILE=/tmp/etc/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig
-	if [ $(PROFILE) == "local" ]; then
-		mkdir -p $(HOME)/.kube/configs
-		cp -f \
-			$(HOME)/etc/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig \
-			$(HOME)/.kube/configs/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig
-	fi
-
+		FILE=$(TMP_DIR_REL)/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig
 
 k8s-kubeconfig-get-jenkins: ### Get configuration file - mandatory: PROFILE=[name]
 	mkdir -p $(HOME)/etc
@@ -213,7 +205,7 @@ k8s-kubeconfig-get-jenkins: ### Get configuration file - mandatory: PROFILE=[na
 	fi
 
 k8s-kubeconfig-export-variables k8s-kubeconfig-export: ### Export configuration file - mandatory: PROFILE=[name]
-	echo "export KUBECONFIG=$(HOME)/etc/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig"
+	echo "export KUBECONFIG=$(TMP_DIR_REL)/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig"
 
 
 k8s-kubeconfig-export-variables-jenkins k8s-kubeconfig-export-jenkins: ### Export configuration file - mandatory: PROFILE=[name]
