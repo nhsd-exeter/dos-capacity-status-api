@@ -32,7 +32,7 @@ k8s-create-overlay-from-template: ### Create Kubernetes overlay deployment from 
 
 k8s-deploy: ### Deploy application to the Kubernetes cluster - mandatory: STACK=[name],PROFILE=[name]
 	# set up
-	eval "$$(make aws-assume-role-export-variables)" ||:
+	eval "$$(make aws-assume-role-export-variables)"
 	make k8s-kubeconfig-get
 	eval "$$(make k8s-kubeconfig-export-variables)"
 	# deploy

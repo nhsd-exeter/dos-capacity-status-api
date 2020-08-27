@@ -14,6 +14,9 @@ aws-assume-role-export-variables: ### Get assume role export for the Jenkins use
 				| sed -E 's/[[:blank:]]+/ /g' \
 			"
 		))
+		if [ -z "$${array[0]}" ] || [ -z "$${array[1]}" ] || [ -z "$${array[2]}" ]; then
+			exit
+		fi
 		echo "export AWS_ACCESS_KEY_ID=$${array[0]}"
 		echo "export AWS_SECRET_ACCESS_KEY=$${array[1]}"
 		echo "export AWS_SESSION_TOKEN=$${array[2]}"
