@@ -91,6 +91,8 @@ k8s-undeploy-job: ### Remove Kubernetes resources from job namespace
 	fi
 
 k8s-monitor-deployment:
+	eval "$$(make aws-assume-role-export-variables)"
+	eval "$$(make project-populate-secret-variables)"
 	aws=($$(make aws-assume-role-export-variables PROFILE=$(PROFILE) | cut -d '=' -f 2))
 	export AWS_ACCESS_KEY_ID=$${aws[0]}
 	export AWS_SECRET_ACCESS_KEY=$${aws[1]}
