@@ -31,6 +31,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "cs.local",
     "uec-dos-api-cs-demo-uec-dos-api-cs-proxy-ingress.k8s-prod.texasplatform.uk",
+    "uec-dos-api-cs-dev-uec-dos-api-cs-proxy-ingress.k8s-nonprod.texasplatform.uk",
     "cs.api.directoryofservices.nhs.uk",
 ]
 
