@@ -155,6 +155,7 @@ aws-s3-create: ### Create secure bucket - mandatory: NAME=[bucket name]
 
 aws-s3-upload: ### Upload file to bucket - mandatory: FILE=[local path (inside container)],URI=[remote path]; optional: ARGS=[S3 cp options]
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		chmod -R o+rwx $(TMP_DIR)/etc \
 		$(AWSCLI) s3 cp \
 			$(FILE) \
 			s3://$(URI) \
