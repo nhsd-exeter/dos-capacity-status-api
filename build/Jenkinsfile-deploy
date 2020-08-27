@@ -96,13 +96,15 @@ pipeline {
     //         }
     //     }
     // }
-    // stage("Deployment Summary") {
-    //     steps {
-    //         scripts {
-    //             sh 'make deployment-summary'
-    //         }
-    //     }
-    // }
+    stage("Deployment Summary") {
+        steps {
+            scripts {
+                sh "make k8s-pod-get-status-phase"
+                sh """make aws-assume-role-export-variables
+                      kubectl get pods -l app=uec-dos-api-cs"""
+            }
+        }
+    }
   }
   post {
     success {
