@@ -49,6 +49,7 @@ k8s-deploy-jenkins: ### Deploy application to the Kubernetes cluster - mandatory
 	export AWS_SESSION_TOKEN=$${aws[2]}
 	eval "$$(make secret-fetch-and-export-variables-jenkins NAME=uec-dos-api-capacity-status-$(PROFILE))"
 	make k8s-kubeconfig-get-jenkins
+	eval "ls $$KUBECONFIG"
 	eval "$$(make k8s-kubeconfig-export-variables-jenkins)"
 	# deploy
 	make k8s-replace-variables STACK=$(STACK) PROFILE=$(PROFILE)
