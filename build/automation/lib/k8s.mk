@@ -98,12 +98,7 @@ k8s-monitor-deployment:
 	export AWS_SECRET_ACCESS_KEY=$${aws[1]}
 	export AWS_SESSION_TOKEN=$${aws[2]}
 	eval "$$(make secret-fetch-and-export-variables-jenkins NAME=uec-dos-api-capacity-status-$(PROFILE))"
-	make k8s-kubeconfig-get-jenkins
-	eval "ls $$KUBECONFIG"
-	eval "$$(make k8s-kubeconfig-export-variables-jenkins)"
-	kubectl get services \
-		--namespace=$(K8S_APP_NAMESPACE) \
-		--selector "env=$(PROFILE)"
+	make k8s-sts
 
 k8s-alb-get-ingress-endpoint: ### Get ALB ingress enpoint - mandatory: PROFILE=[name]
 	# set up
