@@ -100,9 +100,9 @@ pipeline {
         steps {
             script {
                 sh "echo Is deployment running?"
-                sh "make k8s-pod-get-status-phase"
-                sh """make aws-assume-role-export-variables
-                      kubectl get pods -l app=uec-dos-api-cs"""
+                sh """make k8s-monitor-deployment PROFILE=${PROFILE}
+                      make k8s-sts
+                """
             }
         }
     }
