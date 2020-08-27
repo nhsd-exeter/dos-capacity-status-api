@@ -99,7 +99,7 @@ k8s-monitor-deployment:
 	make k8s-kubeconfig-get-jenkins
 	eval "ls $$KUBECONFIG"
 	eval "$$(make k8s-kubeconfig-export-variables-jenkins)"
-	k8s-pod-get-status-phase
+	make k8s-pod-get-status-phase
 
 k8s-alb-get-ingress-endpoint: ### Get ALB ingress enpoint - mandatory: PROFILE=[name]
 	# set up
