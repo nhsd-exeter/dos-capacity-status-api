@@ -78,7 +78,7 @@ pipeline {
         //TODO Need additional step to set the docker images used for the deploy to the one matching the git tag being pulled
         script {
           sh "make deploy PROFILE=${PROFILE}"
-          // Add API_IMAGE_TAG=${GIT_TAG} PROXY_IMAGE_TAG=${GIT_TAG} to above command
+          // Add  to above command
         }
       }
     }
