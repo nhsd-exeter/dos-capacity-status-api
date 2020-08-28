@@ -114,7 +114,7 @@ pipeline {
                 sh 'echo Terraform Changes'
                 sh "echo ${TERRAFORM_CHANGES}"
                 sh "echo Is deployment running?"
-                sh "while IFS= read -r line ; do echo $line; done <<< ${DEPLOYMENT_STATS}"
+                sh "echo ${DEPLOYMENT_STATS} | while IFS= read -r line ; do echo $line; done"
                 sh "echo URL"
                 sh "make url"
             }
