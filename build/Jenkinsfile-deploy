@@ -73,7 +73,7 @@ pipeline {
           // sh "make terraform-apply-auto-approve STACKS=infrastructure/stacks PROFILE=${this.PROFILE}"
           TERRAFORM_OPTS='"--var-file=../tfvars/nonprod.tfvars"'
           sh "make terraform-apply-auto-approve STACKS=service PROFILE=${PROFILE} OPTS=${TERRAFORM_OPTS} | tee /tmp/file"
-          TERRAFORM_CHANGES = sh(returnStdout: true, script: "cat /tmp/terraform_changes.txt | grep -E "Apply..."")
+          TERRAFORM_CHANGES = sh(returnStdout: true, script: "cat /tmp/terraform_changes.txt | grep -E 'Apply...'")
         }
         // Extra maybe add some way of git tagging the infrastructure with the git_tag and the commit
       }
