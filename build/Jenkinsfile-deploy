@@ -110,7 +110,7 @@ pipeline {
                 sh 'echo Terraform Changes'
                 sh "cat /tmp/terraform_changes.txt | grep -E 'Apply...'"
                 sh "echo Is deployment running?"
-                sh "cat /tmp/deployment_stats.txt | grep -E 'Display namespaces' --after-context=50"
+                sh "cat /tmp/deployment_stats.txt | grep -E 'Display namespaces' --after-context=100"
                 sh "echo URL"
                 sh "make url"
             }
