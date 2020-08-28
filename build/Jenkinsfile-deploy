@@ -93,14 +93,14 @@ pipeline {
         }
       }
     }
-    stage("Load Test Data") {
-        when { expression { this.PROFILE = 'dev' } }
-        steps {
-            script {
-                sh "make deploy-job PROFILE=${PROFILE}"
-            }
-        }
-    }
+    // stage("Load Test Data") {
+    //     when { expression { this.PROFILE = 'dev' } }
+    //     steps {
+    //         script {
+    //             sh "make deploy-job PROFILE=${PROFILE}"
+    //         }
+    //     }
+    // }
     // stage("Run Tests") {
     //     steps {
     //         script {
