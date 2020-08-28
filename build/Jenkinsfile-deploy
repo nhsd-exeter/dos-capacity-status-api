@@ -14,6 +14,8 @@ pipeline {
     BRANCH_NAME = "${GIT_BRANCH}"
     GIT_COMMIT = sh(returnStdout: true, script: 'make git-commit-get-hash')
     GIT_TAG = sh(returnStdout: true, script: "make git-tag-get-latest").trim()
+    TERRAFORM_CHANGES = ''
+    DEPLOYMENT_STATS = ''
   }
 
   stages {
@@ -68,6 +70,7 @@ pipeline {
           // need to assume aws role related to profile e.g. non-prod for DEV, prod for DEMO and PROD
           // sh "make terraform-apply-auto-approve STACKS=infrastructure/stacks PROFILE=${this.PROFILE}"
           TERRAFORM_OPTS='"--var-file=../tfvars/nonprod.tfvars"'
+          TERRAFORM_CHANGES = sh(returnStdout: true, script: "make terraform-plan STACKS=service PROFILE=${PROFILE} OPTS=${TERRAFORM_OPTS}")
           sh "make terraform-apply-auto-approve STACKS=service PROFILE=${PROFILE} OPTS=${TERRAFORM_OPTS}"
         }
         // Extra maybe add some way of git tagging the infrastructure with the git_tag and the commit
@@ -78,6 +81,7 @@ pipeline {
         //TODO Need additional step to set the docker images used for the deploy to the one matching the git tag being pulled
         script {
           sh "make deploy PROFILE=${PROFILE}"
+          DEPLOYMENT_STATS = sh(returnStdout: true, script: "make k8s-sts")
           // Add  to above command
         }
       }
@@ -99,11 +103,10 @@ pipeline {
     stage("Deployment Summary") {
         steps {
             script {
+                sh 'echo Terraform Changes'
+                sh "echo ${TERRAFORM_CHANGES}"
                 sh "echo Is deployment running?"
-                sh "make k8s-sts"
-                sh """
-                    make k8s-monitor-deployment PROFILE=${PROFILE}
-                  """
+                sh "echo ${DEPLOYMENT_STATS}"
             }
         }
     }
