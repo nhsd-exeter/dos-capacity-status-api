@@ -120,6 +120,10 @@ deploy-job: # Deploy project - mandatory: PROFILE=[name]
 	eval "$$(make project-populate-secret-variables)"
 	make k8s-deploy-job STACK=data
 
+build-dos-data: # Builds an image that can populate a database with a small subset of DoS tables
+	cd data/aws-rds-sql
+	make build
+
 # ==============================================================================
 # Supporting targets and variables
 
