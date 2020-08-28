@@ -56,10 +56,6 @@ k8s-deploy-jenkins: ### Deploy application to the Kubernetes cluster - mandatory
 	kubectl apply -k $$(make -s _k8s-get-deployment-directory)
 	make k8s-clean # TODO: Create a flag to switch it off
 	make k8s-sts
-	K8S_STATS=$$(make k8s-sts)
-
-k8s-monitor-deployment:
-	echo $(K8S_STATS)
 
 k8s-undeploy: ### Remove Kubernetes resources
 	# set up
