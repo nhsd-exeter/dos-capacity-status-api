@@ -251,7 +251,7 @@ url:
 slack-it:
 	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"
 	eval "$$(make secret-fetch-and-export-variables NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)/deployment)"
-	make slack-send-standard-notification NAME=jenkins-pipeline
+	make slack-send-standard-notification NAME=jenkins-pipeline SLACK_EXTRA_DETAILS="Git Tag: $(GIT_TAG)"
 
 # ==============================================================================
 # Refactor

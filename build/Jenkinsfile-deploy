@@ -27,6 +27,8 @@ pipeline {
           sh "echo BRANCH_NAME=${BRANCH_NAME}"
           sh "echo GIT_COMMIT=${GIT_COMMIT}"
           sh "echo GIT_TAG=${GIT_TAG}"
+          currentBuild.result = 'FAILURE'
+          return
         }
       }
     }
@@ -71,7 +73,7 @@ pipeline {
           // sh "make terraform-apply-auto-approve STACKS=infrastructure/stacks PROFILE=${this.PROFILE}"
           TERRAFORM_OPTS='"--var-file=../tfvars/nonprod.tfvars"'
           sh "make terraform-apply-auto-approve STACKS=service PROFILE=${PROFILE} OPTS=${TERRAFORM_OPTS} | tee /tmp/file"
-          TERRAFORM_CHANGES = sh(returnStdout: true, script: "cat /tmp/file | grep -E "Apply..."")
+          TERRAFORM_CHANGES = sh(returnStdout: true, script: "cat /tmp/terraform_changes.txt | grep -E "Apply..."")
         }
         // Extra maybe add some way of git tagging the infrastructure with the git_tag and the commit
       }
@@ -87,8 +89,8 @@ pipeline {
       steps {
         //TODO Need additional step to set the docker images used for the deploy to the one matching the git tag being pulled
         script {
-          sh """make deploy PROFILE=${PROFILE}
-                ${this.DEPLOYMENT_STATS} = make k8s-monitor-deployment"""
+          sh "make deploy PROFILE=${PROFILE}  tee /tmp/deployment_stats.txt"
+          DEPLOYMENT_STATS = sh(returnStdout: true, script: "cat /tmp/deployment_stats.txt")
           // Add to above command
         }
       }
