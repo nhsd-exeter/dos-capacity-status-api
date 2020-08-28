@@ -76,13 +76,13 @@ pipeline {
         // Extra maybe add some way of git tagging the infrastructure with the git_tag and the commit
       }
     }
-    stage("Migrate Changes to Database") {
-      steps {
-        script {
-          sh "make migrate PROFILE=${PROFILE}"
-        }
-      }
-    }
+    // stage("Migrate Changes to Database") {
+    //   steps {
+    //     script {
+    //       sh "make migrate PROFILE=${PROFILE}"
+    //     }
+    //   }
+    // }
     stage("Deploy Application") {
       steps {
         //TODO Need additional step to set the docker images used for the deploy to the one matching the git tag being pulled
