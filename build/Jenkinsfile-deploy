@@ -23,12 +23,11 @@ pipeline {
       steps {
         script {
           sh 'make devops-print-variables'
+          sh 'false'
           this.BRANCH_NAME = env.BRANCH_NAME
           sh "echo BRANCH_NAME=${BRANCH_NAME}"
           sh "echo GIT_COMMIT=${GIT_COMMIT}"
           sh "echo GIT_TAG=${GIT_TAG}"
-          currentBuild.result = 'FAILURE'
-          return
         }
       }
     }
