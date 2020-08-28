@@ -68,26 +68,13 @@ git-tag-create-environment-deployment: ### Tag environment deployment as `[YYYYm
 		git push origin $$tag
 	fi
 
-git-create-tag: ### Tag PR to master for auto pipeline
-	timestamp=$$(date --date=$(BUILD_DATE) -u +"%Y%m%d%H%M%S")
-	commit=$$(make git-commit-get-hash)
-	echo $$timestamp-$$commit
-
-git-tag-master-commit: ### Tag any PR to master as `[YYYYmmddHHMMSS]-[commit-hash]` - mandatory: TAG=[timestamp-commithash]
-	tag=$(TAG)
-	commit=$$(make git-commit-get-hash)
-	git tag $$tag $$commit
-	git push origin $$tag
+git-tag-create: ### Tag a commit - mandatory: TAG=[tag name]; optional: COMMIT=[commit, defaults to master]
+	commit=$(or $(COMMIT), master)
+	git tag $(TAG) $$commit
+	git push origin $(TAG)
 
 git-tag-get-latest: ### Returns the latest git timestamp prefixed tag on the current branch
 	git tag --sort version:refname | grep '^[0-9]*'| tail -1
-
-git-tag-is-present-on-branch: ### Returns true if the given branch contains the given tag else it returns false - mandatory: BRANCH=[branch name] TAG=[tag name]
-	if [ $$(git branch --contains tags/$(TAG) | grep -ow $(BRANCH)) ]; then
-		echo true
-	else
-		echo false
-	fi
 
 git-tag-get-release-candidate: ### Get the latest release candidate tag for the whole repository or just the specified commit - optional: COMMIT=[commit]
 	if [ -z "$(COMMIT)" ]; then

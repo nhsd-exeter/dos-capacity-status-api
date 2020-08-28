@@ -248,6 +248,26 @@ dev-smoke-test:
 url:
 	echo https://$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(PROFILE)-$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-proxy-ingress.$(TEXAS_HOSTED_ZONE)/api/v0.0.1/capacity/apidoc/
 
+slack-it:
+	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"
+	eval "$$(make secret-fetch-and-export-variables NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)/deployment)"
+	make slack-send-standard-notification NAME=jenkins-pipeline
+
+# ==============================================================================
+# Refactor
+
+git-create-tag: ### Tag PR to master for auto pipeline
+	timestamp=$$(date --date=$(BUILD_DATE) -u +"%Y%m%d%H%M%S")
+	commit=$$(make git-commit-get-hash)
+	echo $$timestamp-$$commit
+
+git-tag-is-present-on-branch: ### Returns true if the given branch contains the given tag else it returns false - mandatory: BRANCH=[branch name] TAG=[tag name]
+	if [ $$(git branch --contains tags/$(TAG) | grep -ow $(BRANCH)) ]; then
+		echo true
+	else
+		echo false
+	fi
+
 # ==============================================================================
 
 .SILENT: \
