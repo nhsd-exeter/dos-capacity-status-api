@@ -32,6 +32,12 @@ migrate:
 			CMD="python manage.py migrate"
 	fi
 
+migrate-to-infrastructure: # migrate db changes to deployment mandatory: API_VERSION=[api image version] optional: PROFILE=[profile name]
+	make docker-login
+	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
+		DIR=application \
+		CMD="python manage.py migrate"
+
 test-db-start:
 	if [ "$(BUILD_ID)" != 0 ]; then
 		make docker-compose-start-single-service NAME=db-dos-$(BUILD_ID)
