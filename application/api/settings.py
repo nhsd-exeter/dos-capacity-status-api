@@ -24,7 +24,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "=tapo65h_g^cf4sxjawp-tl&z@1@5*&)p5g
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # TODO: get that from the make profile rather than hardcoding
-DEBUG = False
+DEBUG = os.getenv("API_DEBUG", False)
 
 ALLOWED_HOSTS = [
     ".amazonaws.com",
