@@ -58,6 +58,9 @@ k8s-deploy-jenkins: ### Deploy application to the Kubernetes cluster - mandatory
 	make k8s-sts
 	K8S_STATS=$$(make k8s-sts)
 
+k8s-monitor-deployment:
+	echo $(K8S_STATS)
+
 k8s-undeploy: ### Remove Kubernetes resources
 	# set up
 	eval "$$(make aws-assume-role-export-variables)"
