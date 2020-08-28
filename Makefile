@@ -33,6 +33,8 @@ migrate:
 	fi
 
 migrate-to-infrastructure: # migrate db changes to deployment mandatory: API_VERSION=[api image version] optional: PROFILE=[profile name]
+	eval "$$(make aws-assume-role-export-variables)"
+	eval "$$(make project-populate-secret-variables)"
 	make docker-login
 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
 		DIR=application \
