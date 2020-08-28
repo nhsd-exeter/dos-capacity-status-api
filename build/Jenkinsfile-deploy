@@ -76,8 +76,7 @@ pipeline {
     stage("Migrate Changes to Database") {
       steps {
         script {
-          sh "make docker-pull NAME=api:latest"
-          sh "make migrate PROFILE=${PROFILE}"
+          sh "make migrate-to-infrastructure API_VERSION=latest PROFILE=${PROFILE}"
         }
       }
     }
