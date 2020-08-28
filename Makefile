@@ -21,6 +21,10 @@ log: project-log # Show project logs
 
 migrate:
 	if [ "$(BUILD_ID)" != 0 ]; then
+		aws=($$(make aws-assume-role-export-variables PROFILE=$(PROFILE) | cut -d '=' -f 2))
+			export AWS_ACCESS_KEY_ID=$${aws[0]}
+			export AWS_SECRET_ACCESS_KEY=$${aws[1]}
+			export AWS_SESSION_TOKEN=$${aws[2]}
 		make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
 			DIR=application \
 			DB_DOS_HOST=db-dos-$(BUILD_ID) \
