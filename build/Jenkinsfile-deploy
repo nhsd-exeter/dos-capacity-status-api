@@ -70,7 +70,7 @@ pipeline {
           // need to assume aws role related to profile e.g. non-prod for DEV, prod for DEMO and PROD
           // sh "make terraform-apply-auto-approve STACKS=infrastructure/stacks PROFILE=${this.PROFILE}"
           TERRAFORM_OPTS='"--var-file=../tfvars/nonprod.tfvars"'
-          TERRAFORM_CHANGES = sh(returnStdout: true, script: "make terraform-plan STACKS=service PROFILE=${PROFILE} OPTS=${TERRAFORM_OPTS}")
+          TERRAFORM_CHANGES = sh(returnStdout: true, script: "make terraform-show")
           sh "make terraform-apply-auto-approve STACKS=service PROFILE=${PROFILE} OPTS=${TERRAFORM_OPTS}"
         }
         // Extra maybe add some way of git tagging the infrastructure with the git_tag and the commit
@@ -81,7 +81,8 @@ pipeline {
         //TODO Need additional step to set the docker images used for the deploy to the one matching the git tag being pulled
         script {
           sh "make deploy PROFILE=${PROFILE}"
-          // Add  to above command
+          this.DEPLOYMENT_STATS = sh(returnStdout: true, script: "echo $(K8S_STATS)")
+          // Add to above command
         }
       }
     }
@@ -105,8 +106,9 @@ pipeline {
                 sh 'echo Terraform Changes'
                 sh "echo ${TERRAFORM_CHANGES}"
                 sh "echo Is deployment running?"
-                sh "echo ${K8S_DEPLOYMENT_STATS}"
-                sh "echo ${DEPLOYMENT_STATS}"
+                sh "echo "
+                sh "echo URL"
+                sh "echo https://$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(PROFILE)-$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-proxy-ingress.$(TEXAS_HOSTED_ZONE)/api/v0.0.1/capacity/apidoc/"
             }
         }
     }
