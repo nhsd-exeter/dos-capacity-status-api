@@ -23,7 +23,6 @@ pipeline {
       steps {
         script {
           sh 'make devops-print-variables'
-          sh 'false'
           this.BRANCH_NAME = env.BRANCH_NAME
           sh "echo BRANCH_NAME=${BRANCH_NAME}"
           sh "echo GIT_COMMIT=${GIT_COMMIT}"
@@ -127,7 +126,7 @@ pipeline {
       script {
         if (this.PROFILE != 'dev') {
           sh """
-            export "RESULT=${currentBuild.currentResult}"
+            export "STATUS=${currentBuild.currentResult}"
             export "PIPELINE_NAME=Deploy Pipeline"
             make slack-it
           """
@@ -137,7 +136,7 @@ pipeline {
     failure {
       script {
         sh """
-          export "RESULT=${currentBuild.currentResult}"
+          export "STATUS=${currentBuild.currentResult}"
           export "PIPELINE_NAME=Deploy Pipeline"
           make slack-it
         """

@@ -4,7 +4,7 @@
       "type": "header",
       "text": {
         "type": "plain_text",
-        "text": "JOB_NAME_TO_REPLACE",
+        "text": "PIPELINE_NAME_TO_REPLACE",
         "emoji": true
       }
     },
