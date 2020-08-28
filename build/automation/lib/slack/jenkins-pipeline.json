@@ -4,7 +4,7 @@
       "type": "header",
       "text": {
         "type": "plain_text",
-        "text": "PIPELINE_NAME_TO_REPLACE Results",
+        "text": "JOB_NAME_TO_REPLACE",
         "emoji": true
       }
     },
@@ -12,7 +12,15 @@
       "type": "section",
       "text": {
         "type": "mrkdwn",
-        "text": "Result: RESULT_TO_REPLACE \n Tag: GIT_TAG_TO_REPLACE \n Commit Hash: BUILD_COMMIT_HASH_TO_REPLACE \n Profile: PROFILE_TO_REPLACE \n For more information click here BUILD_URL_TO_REPLACE"
+        "text": "Status: BUILD_STATUS_TO_REPLACE \n
+        Profile: PROFILE_TO_REPLACE \n
+        Build Date: BUILD_DATE_TO_REPLACE \n
+        Commit Date: BUILD_COMMIT_DATE_TO_REPLACE \n
+        Commit Hash: BUILD_COMMIT_HASH_TO_REPLACE \n
+        Branch: BUILD_BRANCH_TO_REPLACE \n
+        Repository: BUILD_REPO_TO_REPLACE \n
+        For more information click here BUILD_URL_TO_REPLACE \n
+        SLACK_EXTRA_DETAILS_TO_REPLACE"
       }
     }
   ]
