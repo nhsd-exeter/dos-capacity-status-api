@@ -56,6 +56,7 @@ k8s-deploy-jenkins: ### Deploy application to the Kubernetes cluster - mandatory
 	kubectl apply -k $$(make -s _k8s-get-deployment-directory)
 	make k8s-clean # TODO: Create a flag to switch it off
 	make k8s-sts
+	K8S_STATS=$$(make k8s-sts)
 
 k8s-undeploy: ### Remove Kubernetes resources
 	# set up
@@ -89,9 +90,6 @@ k8s-undeploy-job: ### Remove Kubernetes resources from job namespace
 	if kubectl get namespaces | grep -o "$(K8S_JOB_NAMESPACE) "; then
 		kubectl delete namespace $(K8S_JOB_NAMESPACE)
 	fi
-
-k8s-monitor-deployment:
-	K8S_DEPLOYMENT_STATS=($$(make k8s-sts))
 
 k8s-alb-get-ingress-endpoint: ### Get ALB ingress enpoint - mandatory: PROFILE=[name]
 	# set up
