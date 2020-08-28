@@ -80,8 +80,10 @@ pipeline {
       steps {
         //TODO Need additional step to set the docker images used for the deploy to the one matching the git tag being pulled
         script {
-          sh "make deploy PROFILE=${PROFILE}"
-          DEPLOYMENT_STATS = sh(returnStdout: true, script: "make k8s-sts")
+          sh """make deploy PROFILE=${PROFILE}
+          make k8s-monitor-deployment
+          """
+          DEPLOYMENT_STATS = sh "${K8S_DEPLOYMENT_STATS}"
           // Add  to above command
         }
       }
@@ -106,6 +108,7 @@ pipeline {
                 sh 'echo Terraform Changes'
                 sh "echo ${TERRAFORM_CHANGES}"
                 sh "echo Is deployment running?"
+                sh "echo ${K8S_DEPLOYMENT_STATS}"
                 sh "echo ${DEPLOYMENT_STATS}"
             }
         }

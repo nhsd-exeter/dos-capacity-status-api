@@ -91,14 +91,7 @@ k8s-undeploy-job: ### Remove Kubernetes resources from job namespace
 	fi
 
 k8s-monitor-deployment:
-	eval "$$(make aws-assume-role-export-variables)"
-	eval "$$(make project-populate-secret-variables)"
-	aws=($$(make aws-assume-role-export-variables PROFILE=$(PROFILE) | cut -d '=' -f 2))
-	export AWS_ACCESS_KEY_ID=$${aws[0]}
-	export AWS_SECRET_ACCESS_KEY=$${aws[1]}
-	export AWS_SESSION_TOKEN=$${aws[2]}
-	eval "$$(make secret-fetch-and-export-variables-jenkins NAME=uec-dos-api-capacity-status-$(PROFILE))"
-	make k8s-sts
+	K8S_DEPLOYMENT_STATS = $$(make k8s-sts)
 
 k8s-alb-get-ingress-endpoint: ### Get ALB ingress enpoint - mandatory: PROFILE=[name]
 	# set up
