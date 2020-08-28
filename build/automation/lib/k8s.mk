@@ -91,7 +91,7 @@ k8s-undeploy-job: ### Remove Kubernetes resources from job namespace
 	fi
 
 k8s-monitor-deployment:
-	K8S_DEPLOYMENT_STATS = $$(make k8s-sts)
+	K8S_DEPLOYMENT_STATS=($$(make k8s-sts))
 
 k8s-alb-get-ingress-endpoint: ### Get ALB ingress enpoint - mandatory: PROFILE=[name]
 	# set up
