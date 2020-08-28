@@ -20,6 +20,10 @@ pipeline {
     stage("Set up Variables") {
       steps {
         script {
+          sh '''
+            git pull --all
+            false
+          '''
           sh 'make devops-print-variables'
           this.BRANCH_NAME = env.BRANCH_NAME
           sh "echo BRANCH_NAME=${BRANCH_NAME}"
