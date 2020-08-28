@@ -80,9 +80,7 @@ pipeline {
       steps {
         //TODO Need additional step to set the docker images used for the deploy to the one matching the git tag being pulled
         script {
-          sh "make deploy PROFILE=${PROFILE}
-          "
-          DEPLOYMENT_STATS = sh "${K8S_DEPLOYMENT_STATS}"
+          sh "make deploy PROFILE=${PROFILE}"
           // Add  to above command
         }
       }
