@@ -88,7 +88,7 @@ pipeline {
         //TODO Need additional step to set the docker images used for the deploy to the one matching the git tag being pulled
         script {
           sh "make deploy PROFILE=${PROFILE} | tee /tmp/deployment_stats.txt"
-          DEPLOYMENT_STATS = sh(returnStdout: true, script: "cat /tmp/deployment_stats.txt")
+          DEPLOYMENT_STATS = sh(returnStdout: true, script: "cat /tmp/deployment_stats.txt | grep -E 'Display namespaces'")
           // Add to above command
         }
       }
