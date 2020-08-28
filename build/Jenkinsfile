@@ -16,6 +16,10 @@ pipeline {
     stage('Set up Variables') {
       steps {
         script {
+          sh ''
+            git pull --all
+            false
+          '''
           sh "echo ${this.GIT_COMMIT_HASH}"
           sh "echo ${this.BUILD_DATE}"
           sh "echo ${GIT_TAG}"
@@ -56,19 +60,19 @@ pipeline {
     stage('Push Images') {
       steps {
         script {
-          sh "make docker-push NAME=api"
-          sh "make docker-push NAME=proxy"
+          sh 'make docker-push NAME=api'
+          sh 'make docker-push NAME=proxy'
         }
       }
     }
-    // stage("Tag Git Commit") {
-    //     steps {
-    //         script {
-    //             sh "make git-tag-create TAG=${this.GIT_TAG}"
-    //             // Need user set up with git access, can wait until Dan is back, manual step for now
-    //         }
-    //     }
-    // }
+  // stage("Tag Git Commit") {
+  //     steps {
+  //         script {
+  //             sh "make git-tag-create TAG=${this.GIT_TAG}"
+  //             // Need user set up with git access, can wait until Dan is back, manual step for now
+  //         }
+  //     }
+  // }
   }
   post {
     failure {
