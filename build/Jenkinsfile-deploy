@@ -116,7 +116,7 @@ pipeline {
                 sh "echo Is deployment running?"
                 sh "echo "
                 sh "echo URL"
-                sh "echo https://$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(PROFILE)-$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-proxy-ingress.$(TEXAS_HOSTED_ZONE)/api/v0.0.1/capacity/apidoc/"
+                sh "make url"
             }
         }
     }

@@ -120,10 +120,6 @@ deploy-job: # Deploy project - mandatory: PROFILE=[name]
 	eval "$$(make project-populate-secret-variables)"
 	make k8s-deploy-job STACK=data
 
-build-dos-data: # Builds an image that can populate a database with a small subset of DoS tables
-	cd data/aws-rds-sql
-	make build
-
 # ==============================================================================
 # Supporting targets and variables
 
@@ -244,6 +240,9 @@ dev-smoke-test:
 	token=$$(make dev-create-user)
 	service_id=153455
 	curl -H "Authorization: Token $$token" http://localhost:8080/api/v0.0.1/capacity/services/$$service_id/capacitystatus/
+
+url:
+	echo https://$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(PROFILE)-$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-proxy-ingress.$(TEXAS_HOSTED_ZONE)/api/v0.0.1/capacity/apidoc/
 
 # ==============================================================================
 
