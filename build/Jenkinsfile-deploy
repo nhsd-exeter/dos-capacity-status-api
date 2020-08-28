@@ -70,7 +70,7 @@ pipeline {
           // need to assume aws role related to profile e.g. non-prod for DEV, prod for DEMO and PROD
           // sh "make terraform-apply-auto-approve STACKS=infrastructure/stacks PROFILE=${this.PROFILE}"
           TERRAFORM_OPTS='"--var-file=../tfvars/nonprod.tfvars"'
-          sh "make terraform-apply-auto-approve STACKS=service PROFILE=${PROFILE} OPTS=${TERRAFORM_OPTS} | tee /tmp/file"
+          sh "make terraform-apply-auto-approve STACKS=service PROFILE=${PROFILE} OPTS=${TERRAFORM_OPTS} | tee /tmp/terraform_changes.txt"
           TERRAFORM_CHANGES = sh(returnStdout: true, script: "cat /tmp/terraform_changes.txt | grep -E 'Apply...'")
         }
         // Extra maybe add some way of git tagging the infrastructure with the git_tag and the commit
@@ -126,7 +126,7 @@ pipeline {
       script {
         if (this.PROFILE != 'dev') {
           sh """
-            export "STATUS=${currentBuild.currentResult}"
+            export "BUILD_STATUS=${currentBuild.currentResult}"
             export "PIPELINE_NAME=Deploy Pipeline"
             make slack-it
           """
@@ -136,7 +136,7 @@ pipeline {
     failure {
       script {
         sh """
-          export "STATUS=${currentBuild.currentResult}"
+          export "BUILD_STATUS=${currentBuild.currentResult}"
           export "PIPELINE_NAME=Deploy Pipeline"
           make slack-it
         """

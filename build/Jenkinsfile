@@ -74,7 +74,7 @@ pipeline {
     failure {
       script {
         sh """echo Build Failure
-                  export "STATUS=${currentBuild.currentResult}"
+                  export "BUILD_STATUS=${currentBuild.currentResult}"
                   export "PIPELINE_NAME=Commit Pipeline"
                   make slack-it
                   """
