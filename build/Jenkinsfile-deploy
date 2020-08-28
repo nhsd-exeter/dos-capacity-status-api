@@ -14,8 +14,6 @@ pipeline {
     BRANCH_NAME = "${GIT_BRANCH}"
     GIT_COMMIT = sh(returnStdout: true, script: 'make git-commit-get-hash')
     GIT_TAG = sh(returnStdout: true, script: "make git-tag-get-latest").trim()
-    TERRAFORM_CHANGES = ''
-    DEPLOYMENT_STATS = ''
   }
 
   stages {
@@ -71,7 +69,6 @@ pipeline {
           // sh "make terraform-apply-auto-approve STACKS=infrastructure/stacks PROFILE=${this.PROFILE}"
           TERRAFORM_OPTS='"--var-file=../tfvars/nonprod.tfvars"'
           sh "make terraform-apply-auto-approve STACKS=service PROFILE=${PROFILE} OPTS=${TERRAFORM_OPTS} | tee /tmp/terraform_changes.txt"
-          TERRAFORM_CHANGES = sh(returnStdout: true, script: "cat /tmp/terraform_changes.txt | grep -E 'Apply...'")
         }
         // Extra maybe add some way of git tagging the infrastructure with the git_tag and the commit
       }
@@ -88,7 +85,6 @@ pipeline {
         //TODO Need additional step to set the docker images used for the deploy to the one matching the git tag being pulled
         script {
           sh "make deploy PROFILE=${PROFILE} | tee /tmp/deployment_stats.txt"
-          DEPLOYMENT_STATS = sh(returnStdout: true, script: "cat /tmp/deployment_stats.txt | grep -E 'Display namespaces' --after-context=10")
           // Add to above command
         }
       }
@@ -112,9 +108,9 @@ pipeline {
         steps {
             script {
                 sh 'echo Terraform Changes'
-                sh "echo ${TERRAFORM_CHANGES}"
+                sh "cat /tmp/terraform_changes.txt | grep -E 'Apply...'"
                 sh "echo Is deployment running?"
-                sh "echo ${DEPLOYMENT_STATS} | while IFS= read -r line ; do echo \$line; done"
+                sh "cat /tmp/deployment_stats.txt | grep -E 'Display namespaces' --after-context=10"
                 sh "echo URL"
                 sh "make url"
             }
