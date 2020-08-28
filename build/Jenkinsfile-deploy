@@ -73,13 +73,14 @@ pipeline {
         // Extra maybe add some way of git tagging the infrastructure with the git_tag and the commit
       }
     }
-    // stage("Migrate Changes to Database") {
-    //   steps {
-    //     script {
-    //       sh "make migrate PROFILE=${PROFILE}"
-    //     }
-    //   }
-    // }
+    stage("Migrate Changes to Database") {
+      steps {
+        script {
+          sh "make docker-pull IMAGE=$(DOCKER_REGISTRY)/api:latest"
+          sh "make migrate PROFILE=${PROFILE}"
+        }
+      }
+    }
     stage("Deploy Application") {
       steps {
         //TODO Need additional step to set the docker images used for the deploy to the one matching the git tag being pulled
@@ -89,14 +90,14 @@ pipeline {
         }
       }
     }
-    // stage("Load Test Data") {
-    //     when { expression { this.PROFILE = 'dev' } }
-    //     steps {
-    //         script {
-    //             sh "make deploy-job PROFILE=${PROFILE}"
-    //         }
-    //     }
-    // }
+    stage("Load Test Data") {
+        when { expression { this.PROFILE = 'dev' } }
+        steps {
+            script {
+                sh "make deploy-job PROFILE=${PROFILE}"
+            }
+        }
+    }
     // stage("Run Tests") {
     //     steps {
     //         script {
