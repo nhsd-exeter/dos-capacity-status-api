@@ -120,13 +120,10 @@ deploy-jenkins: # Deploy project - mandatory: PROFILE=[name]
 	# TODO: What's the URL?
 	echo "The URL is $(UI_URL)"
 
-deploy-job: # Deploy project - mandatory: PROFILE=[name]
+deploy-job: # Deploy project - mandatory: PROFILE=[name], STACK=[stack]
 	[ local == $(PROFILE) ] && exit 1
-	eval "$$(make aws-assume-role-export-variables)"
-	make k8s-kubeconfig-get
-	eval "$$(make k8s-kubeconfig-export)"
 	eval "$$(make project-populate-secret-variables)"
-	make k8s-deploy-job STACK=data
+	make k8s-deploy-job STACK=$(STACK)
 
 # ==============================================================================
 # Supporting targets and variables
@@ -256,6 +253,13 @@ slack-it:
 	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"
 	eval "$$(make secret-fetch-and-export-variables NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)/deployment)"
 	make slack-send-standard-notification NAME=jenkins-pipeline SLACK_EXTRA_DETAILS="Git Tag: $(GIT_TAG)"
+
+secret-update-db-password: ### Update DB password for K8s deployment with new DB password
+	pw=$$(make secret-fetch NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(AWS_ACCOUNT_NAME)-capacity_status_db_password)
+	secrets=$$(make secret-fetch NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME)-$(PROFILE) | jq -rc --arg pw "$$pw" '.API_DB_PASSWORD = $$pw')
+	echo $$secrets > $(TMP_DIR)/secrets-update.json
+	file=$(TMP_DIR)/secrets-update.json
+	make aws-secret-put NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME)-$(PROFILE) VALUE=file://$$file
 
 # ==============================================================================
 # Refactor

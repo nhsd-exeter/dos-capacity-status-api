@@ -13,7 +13,8 @@ pipeline {
     PROFILE = 'dev'
     BRANCH_NAME = "${GIT_BRANCH}"
     GIT_COMMIT = sh(returnStdout: true, script: 'make git-commit-get-hash')
-    GIT_TAG = sh(returnStdout: true, script: 'make git-tag-get-latest').trim()
+    // GIT_TAG = sh(returnStdout: true, script: 'make git-tag-get-latest').trim() // Wrong Tag?? Branch Name is the Tag wanted
+    GIT_TAG = this.BRANCH_NAME
   }
 
   stages {
@@ -65,9 +66,10 @@ pipeline {
         script {
           sh "echo Provisioning infrastructure for ${PROFILE} environment"
           sh 'make docker-config' // need to clean up the network this statement creates
-          // need to assume aws role related to profile e.g. non-prod for DEV, prod for DEMO and PROD
-          // sh "make terraform-apply-auto-approve STACKS=infrastructure/stacks PROFILE=${this.PROFILE}"
           sh "make terraform-apply-auto-approve STACKS=service PROFILE=${PROFILE} OPTS='--var-file=../tfvars/nonprod.tfvars' | tee /tmp/terraform_changes.txt"
+        }
+        script {
+          sh "make secret-update-db-password"
         }
       // Extra maybe add some way of git tagging the infrastructure with the git_tag and the commit
       }
@@ -75,7 +77,7 @@ pipeline {
     // stage("Migrate Changes to Database") {
     //   steps {
     //     script {
-    //       sh "make migrate-to-infrastructure API_VERSION=latest PROFILE=${PROFILE}"
+    //       sh "make deploy-job PROFILE=${PROFILE} STACK=migrate"
     //     }
     //   }
     // }
@@ -84,7 +86,7 @@ pipeline {
         //TODO Need additional step to set the docker images used for the deploy to the one matching the git tag being pulled
         script {
           sh "make deploy PROFILE=${PROFILE} | tee /tmp/deployment_stats.txt"
-        // Add to above command
+        // Add to above command API_IMAGE_TAG=${GIT_TAG} PROXY_IMAGE_TAG=${GIT_TAG}
         }
       }
     }
@@ -92,7 +94,7 @@ pipeline {
       when { expression { this.PROFILE == 'dev' } }
       steps {
         script {
-          sh "make deploy-job PROFILE=${PROFILE}"
+          sh "make deploy-job PROFILE=${PROFILE} STACK=data || :"
         }
       }
     }
