@@ -1,7 +1,7 @@
 namespace: K8S_NAMESPACE_TO_REPLACE
 
 commonLabels:
-  env: demo
+  env: PROFILE_TO_REPLACE
 
 resources:
   - namespace.yaml
