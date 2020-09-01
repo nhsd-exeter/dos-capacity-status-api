@@ -19,9 +19,13 @@ package:
     installed: true
   gnupg:
     installed: true
+  graphviz:
+    installed: true
   iputils:
     installed: true
   make:
+    installed: true
+  msttcorefonts-installer:
     installed: true
   net-tools:
     installed: true
@@ -31,7 +35,7 @@ package:
     installed: true
 
 command:
-  pip list | grep -iE 'awscli-local.*0.7':
+  pip list | grep -iE 'awscli-local.*0.8':
     exit-status: 0
   pip list | grep -iE 'awscli.*1.18':
     exit-status: 0

@@ -5,13 +5,6 @@ secret-fetch-and-export-variables: ### Get secret and print variable exports - m
 	secret=$$(make aws-secret-get NAME=$(NAME))
 	make _secret-export-variables-from-json JSON="$$secret"
 
-secret-fetch-and-export-variables-jenkins: ### Get secret and print variable exports - mandatory: NAME=[secret name]; return: [variables export]
-	# set up
-	# eval "$$(make aws-assume-role-export-variables)"
-	# fetch
-	secret=$$(make aws-secret-get NAME=$(NAME))
-	make _secret-export-variables-from-json JSON="$$secret"
-
 secret-fetch: ### Get secret - mandatory: NAME=[secret name]
 	# set up
 	eval "$$(make aws-assume-role-export-variables)"
