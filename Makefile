@@ -255,6 +255,7 @@ slack-it:
 	make slack-send-standard-notification NAME=jenkins-pipeline SLACK_EXTRA_DETAILS="Git Tag: $(GIT_TAG)"
 
 secret-update-db-password: ### Update DB password for K8s deployment with new DB password
+	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"
 	pw=$$(make secret-fetch NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(AWS_ACCOUNT_NAME)-capacity_status_db_password)
 	secrets=$$(make secret-fetch NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME)-$(PROFILE) | jq -rc --arg pw "$$pw" '.API_DB_PASSWORD = $$pw')
 	echo $$secrets > $(TMP_DIR)/secrets-update.json
