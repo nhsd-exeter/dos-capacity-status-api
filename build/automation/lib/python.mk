@@ -3,13 +3,14 @@ PYTHON_VERSION_MINOR = 8
 PYTHON_VERSION_PATCH = 5
 PYTHON_VERSION = $(PYTHON_VERSION_MAJOR).$(PYTHON_VERSION_MINOR).$(PYTHON_VERSION_PATCH)
 PYTHON_BASE_PACKAGES = \
-	awscli-local==0.7 \
-	awscli==1.18.122 \
+	awscli-local==0.8 \
+	awscli==1.18.128 \
 	black \
-	boto3==1.14.45 \
+	boto3==1.14.51 \
 	bpython \
 	configparser \
 	coverage \
+	diagrams \
 	flake8 \
 	mypy \
 	pygments \
@@ -21,16 +22,18 @@ python-virtualenv: ### Setup Python virtual environment - optional: PYTHON_VERSI
 	brew update
 	brew upgrade pyenv
 	pyenv install --skip-existing $(PYTHON_VERSION)
-	pyenv virtualenv --force $(PYTHON_VERSION) $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME)
-	pyenv local $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME)
+	pyenv local $(PYTHON_VERSION)
 	pip install --upgrade pip
 	pip install $(PYTHON_BASE_PACKAGES)
-	sed -i 's;    "python.pythonPath":.*;    "python.pythonPath": "$(HOME)/.pyenv/versions/$(PYTHON_VERSION)",;g' $(PROJECT_DIR)/$(PROJECT_NAME).code-workspace
+	sed -i 's;    "python.linting.flake8Path":.*;    "python.linting.flake8Path": "$(HOME)/.pyenv/versions/$(PYTHON_VERSION)/bin/flake8",;g' $(PROJECT_DIR)/$(PROJECT_NAME).code-workspace
+	sed -i 's;    "python.linting.mypyPath":.*;    "python.linting.mypyPath": "$(HOME)/.pyenv/versions/$(PYTHON_VERSION)/bin/mypy",;g' $(PROJECT_DIR)/$(PROJECT_NAME).code-workspace
+	sed -i 's;    "python.linting.pylintPath":.*;    "python.linting.pylintPath": "$(HOME)/.pyenv/versions/$(PYTHON_VERSION)/bin/pylint",;g' $(PROJECT_DIR)/$(PROJECT_NAME).code-workspace
+	sed -i 's;    "python.pythonPath":.*;    "python.pythonPath": "$(HOME)/.pyenv/versions/$(PYTHON_VERSION)/bin/python",;g' $(PROJECT_DIR)/$(PROJECT_NAME).code-workspace
 
 python-virtualenv-clean: ### Clean up Python virtual environment - optional: PYTHON_VERSION
-	rm -rf \
-		.python-version \
-		~/.pyenv/versions/$(PYTHON_VERSION)/envs/$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME)
+	pyenv uninstall --force $(PYTHON_VERSION)
+	rm -rf .python-version
+	pyenv global system
 
 python-code-format: ### Format Python code with 'balck' - optional: FILES=[directory, file or pattern]
 	make docker-run-tools CMD=" \

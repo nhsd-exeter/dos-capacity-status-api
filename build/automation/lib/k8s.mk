@@ -41,22 +41,6 @@ k8s-deploy: ### Deploy application to the Kubernetes cluster - mandatory: STACK=
 	make k8s-clean # TODO: Create a flag to switch it off
 	make k8s-sts
 
-k8s-deploy-jenkins: ### Deploy application to the Kubernetes cluster - mandatory: STACK=[name],PROFILE=[name]
-	# set up
-	aws=($$(make aws-assume-role-export-variables PROFILE=$(PROFILE) | cut -d '=' -f 2))
-	export AWS_ACCESS_KEY_ID=$${aws[0]}
-	export AWS_SECRET_ACCESS_KEY=$${aws[1]}
-	export AWS_SESSION_TOKEN=$${aws[2]}
-	eval "$$(make secret-fetch-and-export-variables-jenkins NAME=uec-dos-api-capacity-status-$(PROFILE))"
-	make k8s-kubeconfig-get-jenkins
-	eval "ls $$KUBECONFIG"
-	eval "$$(make k8s-kubeconfig-export-variables-jenkins)"
-	# deploy
-	make k8s-replace-variables STACK=$(STACK) PROFILE=$(PROFILE)
-	kubectl apply -k $$(make -s _k8s-get-deployment-directory)
-	make k8s-clean # TODO: Create a flag to switch it off
-	make k8s-sts
-
 k8s-undeploy: ### Remove Kubernetes resources
 	# set up
 	eval "$$(make aws-assume-role-export-variables)"
@@ -187,29 +171,19 @@ k8s-replace-variables: ### Replace variables in base and overlay of a stack - ma
 k8s-get-namespace-ttl: ### Get the length of time for the namespace to live
 	date -u +"%d-%b-%Y" -d "+$(K8S_TTL_LENGTH)"
 
-k8s-kubeconfig-get: ### Get configuration file - mandatory: PROFILE=[name]
+k8s-kubeconfig-get: ### Get configuration file
 	make aws-s3-download \
 		URI=$(K8S_KUBECONFIG_FILE) \
 		FILE=$(TMP_DIR_REL)/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig
-
-k8s-kubeconfig-get-jenkins: ### Get configuration file - mandatory: PROFILE=[name]
-	mkdir -p $(HOME)/etc
-	make aws-s3-download \
-		URI=$(K8S_KUBECONFIG_FILE) \
-		FILE=$(TMP_DIR)/etc/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig
-	if [ $(PROFILE) == "local" ]; then
+	if [ $(PROFILE) == "local" ] && [ $(BUILD_ID) -eq 0 ]; then
 		mkdir -p $(HOME)/.kube/configs
 		cp -f \
-			$(HOME)/etc/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig \
+			$(TMP_DIR_REL)/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig \
 			$(HOME)/.kube/configs/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig
 	fi
 
-k8s-kubeconfig-export-variables k8s-kubeconfig-export: ### Export configuration file - mandatory: PROFILE=[name]
+k8s-kubeconfig-export-variables k8s-kubeconfig-export: ### Export configuration file
 	echo "export KUBECONFIG=$(TMP_DIR_REL)/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig"
-
-
-k8s-kubeconfig-export-variables-jenkins k8s-kubeconfig-export-jenkins: ### Export configuration file - mandatory: PROFILE=[name]
-	echo "export KUBECONFIG=$(TMP_DIR)/etc/lk8s-$(AWS_ACCOUNT_NAME)-kubeconfig"
 
 k8s-clean: ### Clean Kubernetes files - mandatory: STACK=[name]
 	find $(K8S_DIR) -type f -name '*.yaml' -print | grep -v "/template/" | xargs rm -fv

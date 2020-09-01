@@ -1,11 +1,25 @@
+PROJECT_CONFIG_TIMESTAMP_FILE = $(TMP_DIR)/project-config-timestamp
+#PROJECT_CONFIG_TARGET
+#PROJECT_CONFIG_TIMESTAMP
+#PROJECT_CONFIG_FORCE
+
 project-config: ### Configure project environment
 	make \
 		git-config \
 		docker-config
-	if [ ! -f $(PROJECT_DIR)/$(PROJECT_NAME).code-workspace ]; then
-		cp -fv \
-			$(PROJECT_DIR)/$(PROJECT_NAME).code-workspace.template \
-			$(PROJECT_DIR)/$(PROJECT_NAME).code-workspace
+	if [ ! -f $(PROJECT_DIR)/project.code-workspace ]; then
+		cp -fv $(LIB_DIR)/project/template/project.code-workspace $(PROJECT_DIR)
+	fi
+	# Re-configure developer's environment on demand
+	if [ -n "$(PROJECT_CONFIG_TIMESTAMP)" ] && ([ ! -f $(PROJECT_CONFIG_TIMESTAMP_FILE) ] || [ $(PROJECT_CONFIG_TIMESTAMP) -gt $$(cat $(PROJECT_CONFIG_TIMESTAMP_FILE)) ]) && [ $(BUILD_ID) -eq 0 ]; then
+		if [[ ! "$(PROJECT_CONFIG_FORCE)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then
+			read -p "Your development environment needs to be re-configured, would you like to proceed? (yes or no) " answer
+			if [[ ! "$$answer" =~ ^(yes|y|YES|Y)$$ ]]; then
+				exit 1
+			fi
+		fi
+		make $(PROJECT_CONFIG_TARGET)
+		echo $(BUILD_TIMESTAMP) > $(PROJECT_CONFIG_TIMESTAMP_FILE)
 	fi
 
 project-start: ### Start Docker Compose
@@ -19,6 +33,12 @@ project-log: ### Print log from Docker Compose
 
 project-deploy: ### Deploy application service stack to the Kubernetes cluster - mandatory: PROFILE=[profile name]
 	make k8s-deploy STACK=$(or $(NAME), service)
+
+project-document-infrastructure: ### Generate infrastructure diagram - optional: FIN=[Python file path, defaults to infrastructure/diagram.py],FOUT=[PNG file path, defaults to documentation/Infrastructure_Diagram]
+	make docker-run-tools CMD="python \
+		$(or $(FIN), $(INFRASTRUCTURE_DIR_REL)/diagram.py) \
+		$(or $(FOUT), $(DOCUMENTATION_DIR_REL)/Infrastructure_Diagram) \
+	"
 
 # ==============================================================================
 
@@ -61,6 +81,7 @@ project-create-deployment: ### Create deployment from template - mandatory: STAC
 project-create-infrastructure: ### Create infrastructure from template - mandatory: STACK=[infrastructure name],TEMPLATE=[library template infrastructure name]
 	make -s terraform-create-module-from-template TEMPLATE=$(TEMPLATE)
 	make -s terraform-create-stack-from-template NAME=$(STACK) TEMPLATE=$(TEMPLATE)
+	cp -fv $(LIB_DIR_REL)/project/template/infrastructure/diagram.py $(INFRASTRUCTURE_DIR_REL)/diagram.py
 
 project-create-pipeline: ### Create pipeline
 	make -s jenkins-create-pipeline-from-template
