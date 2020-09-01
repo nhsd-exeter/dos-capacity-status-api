@@ -16,10 +16,6 @@ pipeline {
     stage('Set up Variables') {
       steps {
         script {
-          sh ''
-            git pull --all
-            false
-          '''
           sh "echo ${this.GIT_COMMIT_HASH}"
           sh "echo ${this.BUILD_DATE}"
           sh "echo ${GIT_TAG}"
@@ -44,15 +40,12 @@ pipeline {
     stage('Run Tests') {
       steps {
         script {
-          sh 'echo Run Migration'
           sh 'make migrate'
         }
         script {
-          sh 'echo Unit Tests'
           sh 'make test-unit-only'
         }
         script {
-          sh 'echo Regression Tests'
           sh 'make test-regression-only'
         }
       }
@@ -77,11 +70,11 @@ pipeline {
   post {
     failure {
       script {
-        sh """echo Build Failure
-                  export "BUILD_STATUS=${currentBuild.currentResult}"
-                  export "PIPELINE_NAME=Commit Pipeline"
-                  make slack-it
-                  """
+        sh """
+          export "BUILD_STATUS=${currentBuild.currentResult}"
+          export "PIPELINE_NAME=Commit Pipeline"
+          make slack-it
+        """
       }
     }
     cleanup {

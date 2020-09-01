@@ -13,17 +13,13 @@ pipeline {
     PROFILE = 'dev'
     BRANCH_NAME = "${GIT_BRANCH}"
     GIT_COMMIT = sh(returnStdout: true, script: 'make git-commit-get-hash')
-    GIT_TAG = sh(returnStdout: true, script: "make git-tag-get-latest").trim()
+    GIT_TAG = sh(returnStdout: true, script: 'make git-tag-get-latest').trim()
   }
 
   stages {
-    stage("Set up Variables") {
+    stage('Set up Variables') {
       steps {
         script {
-          sh '''
-            git pull --all
-            false
-          '''
           sh 'make devops-print-variables'
           this.BRANCH_NAME = env.BRANCH_NAME
           sh "echo BRANCH_NAME=${BRANCH_NAME}"
@@ -32,11 +28,11 @@ pipeline {
         }
       }
     }
-    stage("Check Deployment") {
+    stage('Check Deployment') {
       steps {
         script {
           IS_MASTER_BRANCH = sh(returnStdout: true, script: "make git-tag-is-present-on-branch TAG=${GIT_TAG} BRANCH=task/build_phase_two_deploy_pipeline") //TODO change BRANCH to master when finalising pipeline
-          if (IS_MASTER_BRANCH == "false") {
+          if (IS_MASTER_BRANCH == 'false') {
             currentBuild.result = 'FAILURE'
             return
           }
@@ -56,7 +52,7 @@ pipeline {
         }
       }
     }
-    stage("Provision Infrastructure") {
+    stage('Provision Infrastructure') {
       steps {
         // script {
         //     sh "echo Checking to see if RDS Snapshot is needed"
@@ -68,13 +64,12 @@ pipeline {
         // }
         script {
           sh "echo Provisioning infrastructure for ${PROFILE} environment"
-          sh "make docker-config" // need to clean up the network this statement creates
+          sh 'make docker-config' // need to clean up the network this statement creates
           // need to assume aws role related to profile e.g. non-prod for DEV, prod for DEMO and PROD
           // sh "make terraform-apply-auto-approve STACKS=infrastructure/stacks PROFILE=${this.PROFILE}"
-          TERRAFORM_OPTS='"--var-file=../tfvars/nonprod.tfvars"'
-          sh "make terraform-apply-auto-approve STACKS=service PROFILE=${PROFILE} OPTS=${TERRAFORM_OPTS} | tee /tmp/terraform_changes.txt"
+          sh "make terraform-apply-auto-approve STACKS=service PROFILE=${PROFILE} OPTS='--var-file=../tfvars/nonprod.tfvars' | tee /tmp/terraform_changes.txt"
         }
-        // Extra maybe add some way of git tagging the infrastructure with the git_tag and the commit
+      // Extra maybe add some way of git tagging the infrastructure with the git_tag and the commit
       }
     }
     // stage("Migrate Changes to Database") {
@@ -84,22 +79,22 @@ pipeline {
     //     }
     //   }
     // }
-    stage("Deploy Application") {
+    stage('Deploy Application') {
       steps {
         //TODO Need additional step to set the docker images used for the deploy to the one matching the git tag being pulled
         script {
           sh "make deploy PROFILE=${PROFILE} | tee /tmp/deployment_stats.txt"
-          // Add to above command
+        // Add to above command
         }
       }
     }
-    stage("Load Test Data") {
-        when { expression { this.PROFILE == 'dev' } }
-        steps {
-            script {
-                sh "make deploy-job PROFILE=${PROFILE}"
-            }
+    stage('Load Test Data') {
+      when { expression { this.PROFILE == 'dev' } }
+      steps {
+        script {
+          sh "make deploy-job PROFILE=${PROFILE}"
         }
+      }
     }
     // stage("Run Tests") {
     //     steps {
@@ -108,17 +103,17 @@ pipeline {
     //         }
     //     }
     // }
-    stage("Deployment Summary") {
-        steps {
-            script {
-                sh 'echo Terraform Changes'
-                sh "cat /tmp/terraform_changes.txt | grep -E 'Apply...'"
-                sh "echo Is deployment running?"
-                sh "cat /tmp/deployment_stats.txt | grep -E 'Display namespaces' --after-context=100"
-                sh "echo URL"
-                sh "make url"
-            }
+    stage('Deployment Summary') {
+      steps {
+        script {
+          sh 'echo Terraform Changes'
+          sh "cat /tmp/terraform_changes.txt | grep -E 'Apply...'"
+          sh 'echo Is deployment running?'
+          sh "cat /tmp/deployment_stats.txt | grep -E 'Display namespaces' --after-context=100"
+          sh 'echo URL'
+          sh 'make url'
         }
+      }
     }
   }
   post {
@@ -126,8 +121,8 @@ pipeline {
       script {
         if (this.PROFILE != 'dev') {
           sh """
-            export "BUILD_STATUS=${currentBuild.currentResult}"
-            export "PIPELINE_NAME=Deploy Pipeline"
+            export BUILD_STATUS=${currentBuild.currentResult}
+            export PIPELINE_NAME='Deploy Pipeline'
             make slack-it
           """
         }
@@ -136,12 +131,12 @@ pipeline {
     failure {
       script {
         sh """
-          export "BUILD_STATUS=${currentBuild.currentResult}"
-          export "PIPELINE_NAME=Deploy Pipeline"
+          export BUILD_STATUS=${currentBuild.currentResult}
+          export PIPELINE_NAME='Deploy Pipeline'
           make slack-it
         """
-        sh "make jenkins-upload-workspace"
-        }
+        sh 'make jenkins-upload-workspace'
+      }
     }
     cleanup {
       script {
