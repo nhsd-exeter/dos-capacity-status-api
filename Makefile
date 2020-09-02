@@ -106,12 +106,6 @@ deploy: # Deploy project - mandatory: PROFILE=[name]
 	# TODO: What's the URL?
 	echo "The URL is $(UI_URL)"
 
-deploy-jenkins: # Deploy project - mandatory: PROFILE=[name]
-	[ local == $(PROFILE) ] && exit 1
-	make k8s-deploy-jenkins STACK=service
-	# TODO: What's the URL?
-	echo "The URL is $(UI_URL)"
-
 deploy-job: # Deploy project - mandatory: PROFILE=[name], STACK=[stack]
 	[ local == $(PROFILE) ] && exit 1
 	eval "$$(make project-populate-secret-variables)"
@@ -280,4 +274,5 @@ git-tag-is-present-on-branch: ### Returns true if the given branch contains the 
 	dev-create-user \
 	dev-smoke-test \
 	project-populate-application-variables \
-	project-populate-db-pu-job-variables
+	project-populate-db-pu-job-variables \
+	git-tag-is-present-on-branch
