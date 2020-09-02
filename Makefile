@@ -32,14 +32,6 @@ migrate:
 			CMD="python manage.py migrate"
 	fi
 
-migrate-to-infrastructure: # migrate db changes to deployment mandatory: API_VERSION=[api image version] optional: PROFILE=[profile name]
-	make docker-login
-	eval "$$(make aws-assume-role-export-variables)"
-	eval "$$(make project-populate-secret-variables)"
-	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
-		DIR=application \
-		CMD="python manage.py migrate"
-
 test-db-start:
 	if [ "$(BUILD_ID)" != 0 ]; then
 		make docker-compose-start-single-service NAME=db-dos-$(BUILD_ID)
@@ -261,6 +253,11 @@ secret-update-db-password: ### Update DB password for K8s deployment with new DB
 	echo $$secrets > $(TMP_DIR)/secrets-update.json
 	file=$(TMP_DIR)/secrets-update.json
 	make aws-secret-put NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME)-$(PROFILE) VALUE=file://$$file
+
+backup-data:
+	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"
+	make aws-rds-create-snapshot DB_INSTANCE=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(AWS_ACCOUNT_NAME)-db SNAPSHOT_NAME=$(GIT_TAG)
+	make aws-rds-wait-for-snapshot SNAPSHOT_NAME=$(GIT_TAG)
 
 # ==============================================================================
 # Refactor

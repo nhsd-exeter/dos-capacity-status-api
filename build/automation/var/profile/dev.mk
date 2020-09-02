@@ -26,10 +26,6 @@ DB_DOS_USERNAME = capacity_status_api
 HTTP_PROTOCOL = https
 REQUEST_ID_HEADER = HTTP_X_REQUEST_ID
 
-# TODO: This has to go
-API_IMAGE_TAG = 0.0.1
-PROXY_IMAGE_TAG = 0.0.1
-
 # ==============================================================================
 # Infrastructure variables
 

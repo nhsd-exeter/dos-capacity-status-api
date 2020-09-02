@@ -5,7 +5,7 @@ aws-session-fail-if-invalid: ### Fail if the session variables are not set
 aws-assume-role-export-variables: ### Get assume role export for the Jenkins user - optional: PROFILE=[name]
 	if [ $(AWS_ROLE) == $(AWS_ROLE_JENKINS) ]; then
 		if [ $(AWS_ACCOUNT_ID) == "$$(make aws-account-get-id)" ]; then
-			echo "Already assumed arn:aws:iam::$(AWS_ACCOUNT_ID):role/$(AWS_ROLE)"
+			>&2 echo "Already assumed arn:aws:iam::$(AWS_ACCOUNT_ID):role/$(AWS_ROLE)"
 			exit
 		fi
 		array=($$(

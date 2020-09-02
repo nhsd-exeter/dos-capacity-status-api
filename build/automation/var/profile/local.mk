@@ -25,7 +25,3 @@ DB_DOS_PASSWORD = $(API_DB_PASSWORD)
 # TODO: What is this variable for? We always should be using https
 HTTP_PROTOCOL = http
 REQUEST_ID_HEADER =
-
-# TODO: This has to go
-API_IMAGE_TAG = 0.0.1
-PROXY_IMAGE_TAG = 0.0.1
