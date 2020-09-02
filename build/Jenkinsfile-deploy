@@ -33,6 +33,7 @@ pipeline {
         script {
           IS_MASTER_BRANCH = sh(returnStdout: true, script: "make git-tag-is-present-on-branch TAG=${GIT_TAG} BRANCH=master").trim()
           if (IS_MASTER_BRANCH == 'false') {
+            sh "echo Git Tag is not present on specified branch"
             error('Failing build because tag is not on the correct branch...')
           }
           if (this.GIT_TAG.split('-')[-1] == 'prod') {
