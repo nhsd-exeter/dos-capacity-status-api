@@ -214,9 +214,9 @@ The `PROFILE` variable can be set to other environments.
       -backend-config="bucket=nhsd-texasplatform-terraform-service-state-store-lk8s-nonprod" \
       -backend-config="key=uec-dos-api-cs/terraform.tfstate" \
       -backend-config="region=eu-west-2"
-    terraform plan -var-file=../tfvars/nonprod.tfvars
-    terraform destroy -var-file=../tfvars/nonprod.tfvars
-    terraform apply -var-file=../tfvars/nonprod.tfvars
+    terraform plan -var-file=../tfvars/dev.tfvars
+    terraform destroy -var-file=../tfvars/dev.tfvars
+    terraform apply -var-file=../tfvars/dev.tfvars
     # Go to AWS SM, copy from `uec-dos-api-cs-nonprod-capacity_status_db_password` to `uec-dos-api-capacity-status-dev.API_DB_PASSWORD`
     # Go to AWS RDS VPC security groups, add the nonprod open VPN security group (live-lk8s-nonprod-openvpn-sg) to the RDS instance as an INBOUND rule to our RDS security group
     cd ../../..

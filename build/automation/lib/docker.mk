@@ -8,20 +8,20 @@ DOCKER_REGISTRY = $(AWS_ECR)/$(PROJECT_GROUP_SHORT)/$(PROJECT_NAME_SHORT)
 DOCKER_LIBRARY_REGISTRY = nhsd
 
 DOCKER_ALPINE_VERSION = 3.12.0
-DOCKER_COMPOSER_VERSION = 1.10.6
-DOCKER_DOTNET_VERSION = 3.1.201
-DOCKER_ELASTICSEARCH_VERSION = 7.7.0
-DOCKER_GRADLE_VERSION = 6.5.0-jdk$(JAVA_VERSION)
+DOCKER_COMPOSER_VERSION = 1.10.10
+DOCKER_DOTNET_VERSION = 3.1.401
+DOCKER_ELASTICSEARCH_VERSION = 7.9.0
+DOCKER_GRADLE_VERSION = 6.6.1-jdk$(JAVA_VERSION)
 DOCKER_LOCALSTACK_VERSION = $(LOCALSTACK_VERSION)
 DOCKER_MAVEN_VERSION = 3.6.3-openjdk-$(JAVA_VERSION)-slim
 DOCKER_NGINX_VERSION = 1.19.2-alpine
-DOCKER_NODE_VERSION = 14.8.0-alpine
+DOCKER_NODE_VERSION = 14.9.0-alpine
 DOCKER_OPENJDK_VERSION = $(JAVA_VERSION)-alpine
 DOCKER_POSTGRES_VERSION = $(POSTGRES_VERSION)-alpine
 DOCKER_POSTMAN_NEWMAN_VERSION = $(POSTMAN_NEWMAN_VERSION)-alpine
-DOCKER_PULUMI_VERSION = v2.3.0
+DOCKER_PULUMI_VERSION = v2.9.1
 DOCKER_PYTHON_VERSION = $(PYTHON_VERSION)-alpine
-DOCKER_TERRAFORM_VERSION = $(or $(TEXAS_TERRAFORM_VERSION), $(TERRAFORM_VERSION))
+DOCKER_TERRAFORM_VERSION = $(TERRAFORM_VERSION)
 DOCKER_WIREMOCK_VERSION = $(WIREMOCK_VERSION)-alpine
 
 DOCKER_LIBRARY_ELASTICSEARCH_VERSION = $(shell cat $(DOCKER_LIB_IMAGE_DIR)/elasticsearch/VERSION 2> /dev/null)
@@ -195,7 +195,7 @@ docker-create-dockerfile: ### Create effective Dockerfile - mandatory: NAME; op
 		s#FROM $(DOCKER_LIBRARY_REGISTRY)/python-app:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/python-app:${DOCKER_LIBRARY_PYTHON_APP_VERSION}#g; \
 		s#FROM $(DOCKER_LIBRARY_REGISTRY)/tools:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/tools:${DOCKER_LIBRARY_TOOLS_VERSION}#g; \
 		s#FROM alpine:latest#FROM alpine:${DOCKER_ALPINE_VERSION}#g; \
-		s#FROM elasticsearch:latest#FROM elasticsearch:${DOCKER_ELASTICSEARCH_VERSION}#g; \
+		s#FROM bitnami/elasticsearch:latest#FROM bitnami/elasticsearch:${DOCKER_ELASTICSEARCH_VERSION}#g; \
 		s#FROM gradle:latest#FROM gradle:${DOCKER_GRADLE_VERSION}#g; \
 		s#FROM maven:latest#FROM maven:${DOCKER_MAVEN_VERSION}#g; \
 		s#FROM mcr.microsoft.com/dotnet/core/sdk:latest#FROM mcr.microsoft.com/dotnet/core/sdk:${DOCKER_DOTNET_VERSION}#g; \
@@ -319,6 +319,7 @@ docker-image-load: ### Load image from a flat file - mandatory: NAME; optional: 
 # ==============================================================================
 
 docker-run: ### Run specified image - mandatory: IMAGE; optional: CMD,SH=true,DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],CONTAINER=[container name]
+	make docker-config > /dev/null 2>&1
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo $$(echo '$(IMAGE)' | md5sum | cut -c1-7)-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
 	if [[ ! "$(SH)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then
 		docker run --interactive $(_TTY) --rm \
@@ -353,7 +354,8 @@ docker-run: ### Run specified image - mandatory: IMAGE; optional: CMD,SH=true,DI
 	fi
 
 docker-run-composer: ### Run composer container - mandatory: CMD; optional: DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
-	mkdir -p $(HOME)/.composer
+	make docker-config > /dev/null 2>&1
+	mkdir -p $(TMP_DIR)/.composer
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo composer:$(DOCKER_COMPOSER_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo composer-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
 	docker run --interactive $(_TTY) --rm \
@@ -364,7 +366,7 @@ docker-run-composer: ### Run composer container - mandatory: CMD; optional: DIR,
 		--env-file <(env | grep -Ei "^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
 		--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
 		--volume $(PROJECT_DIR):/project \
-		--volume $(HOME)/.composer:/tmp \
+		--volume $(TMP_DIR)/.composer:/tmp \
 		--network $(DOCKER_NETWORK) \
 		--workdir /project/$(shell echo $(abspath $(DIR)) | sed "s;$(PROJECT_DIR);;g") \
 		$(ARGS) \
@@ -372,6 +374,7 @@ docker-run-composer: ### Run composer container - mandatory: CMD; optional: DIR,
 			$(CMD)
 
 docker-run-dotnet: ### Run dotnet container - mandatory: CMD; optional: DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
+	make docker-config > /dev/null 2>&1
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo mcr.microsoft.com/dotnet/core/sdk:$(DOCKER_DOTNET_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo dotnet-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
 	docker run --interactive $(_TTY) --rm \
@@ -389,7 +392,8 @@ docker-run-dotnet: ### Run dotnet container - mandatory: CMD; optional: DIR,ARGS
 			dotnet $(CMD)
 
 docker-run-gradle: ### Run gradle container - mandatory: CMD; optional: DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
-	mkdir -p $(HOME)/.gradle
+	make docker-config > /dev/null 2>&1
+	mkdir -p $(TMP_DIR)/.gradle
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo gradle:$(DOCKER_GRADLE_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo gradle-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
 	docker run --interactive $(_TTY) --rm \
@@ -401,7 +405,7 @@ docker-run-gradle: ### Run gradle container - mandatory: CMD; optional: DIR,ARGS
 		--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
 		--env GRADLE_USER_HOME=/home/gradle/.gradle \
 		--volume $(PROJECT_DIR):/project \
-		--volume $(HOME)/.gradle:/home/gradle/.gradle \
+		--volume $(TMP_DIR)/.gradle:/home/gradle/.gradle \
 		--network $(DOCKER_NETWORK) \
 		--workdir /project/$(shell echo $(abspath $(DIR)) | sed "s;$(PROJECT_DIR);;g") \
 		$(ARGS) \
@@ -409,7 +413,8 @@ docker-run-gradle: ### Run gradle container - mandatory: CMD; optional: DIR,ARGS
 			$(CMD)
 
 docker-run-mvn: ### Run maven container - mandatory: CMD; optional: DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
-	mkdir -p $(HOME)/.m2
+	make docker-config > /dev/null 2>&1
+	mkdir -p $(TMP_DIR)/.m2
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo maven:$(DOCKER_MAVEN_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo mvn-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
 	docker run --interactive $(_TTY) --rm \
@@ -421,7 +426,7 @@ docker-run-mvn: ### Run maven container - mandatory: CMD; optional: DIR,ARGS=[Do
 		--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
 		--env MAVEN_CONFIG=/var/maven/.m2 \
 		--volume $(PROJECT_DIR):/project \
-		--volume $(HOME)/.m2:/var/maven/.m2 \
+		--volume $(TMP_DIR)/.m2:/var/maven/.m2 \
 		--network $(DOCKER_NETWORK) \
 		--workdir /project/$(shell echo $(abspath $(DIR)) | sed "s;$(PROJECT_DIR);;g") \
 		$(ARGS) \
@@ -431,7 +436,8 @@ docker-run-mvn: ### Run maven container - mandatory: CMD; optional: DIR,ARGS=[Do
 			"
 
 docker-run-node: ### Run node container - mandatory: CMD; optional: DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
-	mkdir -p $(HOME)/.cache
+	make docker-config > /dev/null 2>&1
+	mkdir -p $(TMP_DIR)/.cache
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo node:$(DOCKER_NODE_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo node-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
 	docker run --interactive $(_TTY) --rm \
@@ -441,7 +447,7 @@ docker-run-node: ### Run node container - mandatory: CMD; optional: DIR,ARGS=[Do
 		--env-file <(env | grep -Ei "^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
 		--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
 		--volume $(PROJECT_DIR):/project \
-		--volume $(HOME)/.cache:/home/default/.cache \
+		--volume $(TMP_DIR)/.cache:/home/default/.cache \
 		--network $(DOCKER_NETWORK) \
 		--workdir /project/$(shell echo $(abspath $(DIR)) | sed "s;$(PROJECT_DIR);;g") \
 		$(ARGS) \
@@ -454,12 +460,14 @@ docker-run-node: ### Run node container - mandatory: CMD; optional: DIR,ARGS=[Do
 			"
 
 docker-run-postman: ### Run postman (newman) container - mandatory: DIR,CMD
+	make docker-config > /dev/null 2>&1
 	make docker-run IMAGE=postman/newman:$(DOCKER_POSTMAN_NEWMAN_VERSION) \
 		ARGS="--volume $(DIR):/etc/newman" \
 		DIR="$(DIR)" \
 		CMD="$(CMD)"
 
 docker-run-pulumi: ### Run pulumi container - mandatory: CMD; optional: DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
+	make docker-config > /dev/null 2>&1
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo pulumi/pulumi:$(DOCKER_PULUMI_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo pulumi-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
 	docker run --interactive $(_TTY) --rm \
@@ -480,7 +488,8 @@ docker-run-pulumi: ### Run pulumi container - mandatory: CMD; optional: DIR,ARGS
 			-c "$(CMD)"
 
 docker-run-python: ### Run python container - mandatory: CMD; optional: SH=true,DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
-	mkdir -p $(HOME)/.python/pip/{cache,packages}
+	make docker-config > /dev/null 2>&1
+	mkdir -p $(TMP_DIR)/.python/pip/{cache,packages}
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo python:$(DOCKER_PYTHON_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo python-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
 	if [[ ! "$(SH)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then
@@ -495,8 +504,8 @@ docker-run-python: ### Run python container - mandatory: CMD; optional: SH=true,
 			--env PYTHONPATH=/tmp/.packages \
 			--env XDG_CACHE_HOME=/tmp/.cache \
 			--volume $(PROJECT_DIR):/project \
-			--volume $(HOME)/.python/pip/cache:/tmp/.cache/pip \
-			--volume $(HOME)/.python/pip/packages:/tmp/.packages \
+			--volume $(TMP_DIR)/.python/pip/cache:/tmp/.cache/pip \
+			--volume $(TMP_DIR)/.python/pip/packages:/tmp/.packages \
 			--network $(DOCKER_NETWORK) \
 			--workdir /project/$(shell echo $(abspath $(DIR)) | sed "s;$(PROJECT_DIR);;g") \
 			$(ARGS) \
@@ -514,8 +523,8 @@ docker-run-python: ### Run python container - mandatory: CMD; optional: SH=true,
 			--env PYTHONPATH=/tmp/.packages \
 			--env XDG_CACHE_HOME=/tmp/.cache \
 			--volume $(PROJECT_DIR):/project \
-			--volume $(HOME)/.python/pip/cache:/tmp/.cache/pip \
-			--volume $(HOME)/.python/pip/packages:/tmp/.packages \
+			--volume $(TMP_DIR)/.python/pip/cache:/tmp/.cache/pip \
+			--volume $(TMP_DIR)/.python/pip/packages:/tmp/.packages \
 			--network $(DOCKER_NETWORK) \
 			--workdir /project/$(shell echo $(abspath $(DIR)) | sed "s;$(PROJECT_DIR);;g") \
 			$(ARGS) \
@@ -526,6 +535,7 @@ docker-run-python: ### Run python container - mandatory: CMD; optional: SH=true,
 	fi
 
 docker-run-terraform: ### Run terraform container - mandatory: CMD; optional: DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
+	make docker-config > /dev/null 2>&1
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo hashicorp/terraform:$(DOCKER_TERRAFORM_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo terraform-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
 	docker run --interactive $(_TTY) --rm \
@@ -546,6 +556,7 @@ docker-run-terraform: ### Run terraform container - mandatory: CMD; optional: DI
 # ==============================================================================
 
 docker-run-postgres: ### Run postgres container - mandatory: CMD; optional: DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
+	make docker-config > /dev/null 2>&1
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo $(DOCKER_LIBRARY_REGISTRY)/postgres:$(DOCKER_LIBRARY_POSTGRES_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo postgres-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
 	make docker-image-pull-or-build NAME=postgres VERSION=$(DOCKER_LIBRARY_POSTGRES_VERSION) LATEST=true > /dev/null 2>&1
@@ -564,7 +575,9 @@ docker-run-postgres: ### Run postgres container - mandatory: CMD; optional: DIR,
 			$(CMD)
 
 docker-run-tools: ### Run tools (Python) container - mandatory: CMD; optional: SH=true,DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
-	mkdir -p $(HOME)/{.aws,.python/pip/{cache,packages}}
+	make docker-config > /dev/null 2>&1
+	mkdir -p $(TMP_DIR)/.python/pip/{cache,packages}
+	mkdir -p $(HOME)/.aws
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo $(DOCKER_LIBRARY_REGISTRY)/tools:$(DOCKER_LIBRARY_TOOLS_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo tools-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
 	make docker-image-pull-or-build NAME=tools VERSION=$(DOCKER_LIBRARY_TOOLS_VERSION) LATEST=true > /dev/null 2>&1
@@ -581,9 +594,9 @@ docker-run-tools: ### Run tools (Python) container - mandatory: CMD; optional: S
 			--env PYTHONPATH=/tmp/.packages \
 			--env XDG_CACHE_HOME=/tmp/.cache \
 			--volume $(PROJECT_DIR):/project \
+			--volume $(TMP_DIR)/.python/pip/cache:/tmp/.cache/pip \
+			--volume $(TMP_DIR)/.python/pip/packages:/tmp/.packages \
 			--volume $(HOME)/.aws:/tmp/.aws \
-			--volume $(HOME)/.python/pip/cache:/tmp/.cache/pip \
-			--volume $(HOME)/.python/pip/packages:/tmp/.packages \
 			--volume $(HOME)/bin:/tmp/bin \
 			--volume $(HOME)/etc:/tmp/etc \
 			--volume $(HOME)/usr:/tmp/usr \
@@ -605,9 +618,9 @@ docker-run-tools: ### Run tools (Python) container - mandatory: CMD; optional: S
 			--env PYTHONPATH=/tmp/.packages \
 			--env XDG_CACHE_HOME=/tmp/.cache \
 			--volume $(PROJECT_DIR):/project \
+			--volume $(TMP_DIR)/.python/pip/cache:/tmp/.cache/pip \
+			--volume $(TMP_DIR)/.python/pip/packages:/tmp/.packages \
 			--volume $(HOME)/.aws:/tmp/.aws \
-			--volume $(HOME)/.python/pip/cache:/tmp/.cache/pip \
-			--volume $(HOME)/.python/pip/packages:/tmp/.packages \
 			--volume $(HOME)/bin:/tmp/bin \
 			--volume $(HOME)/etc:/tmp/etc \
 			--volume $(HOME)/usr:/tmp/usr \
@@ -631,8 +644,9 @@ docker-compose-start: ### Start Docker Compose - optional: YML=[docker-compose.y
 docker-compose-start-single-service: ### Start Docker Compose - mandatory: NAME=[service name]; optional: YML=[docker-compose.yml, defaults to $(DOCKER_COMPOSE_YML)]
 	make docker-config
 	yml=$$(make _docker-get-docker-compose-yml YML=$(YML))
+	name=$$([ "$(BUILD_ID)" != 0 ] && echo $(NAME)-$(BUILD_ID) || echo $(NAME))
 	docker-compose --file $$yml \
-		up --no-build --detach $(NAME)
+		up --no-build --detach $$name
 
 docker-compose-stop: ### Stop Docker Compose - optional: YML=[docker-compose.yml, defaults to $(DOCKER_COMPOSE_YML)],ALL=true
 	make docker-config

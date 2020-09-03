@@ -1,3 +1,4 @@
 !data-job.yaml
 !kustomization.yaml
 !namespace.yaml
+!network-policy/*

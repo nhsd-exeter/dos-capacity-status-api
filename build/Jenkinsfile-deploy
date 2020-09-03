@@ -1,80 +1,91 @@
+#!/usr/bin/env groovy
+
 pipeline {
-  agent any
+  agent {
+    label 'jenkins-slave'
+  }
 
   options {
     buildDiscarder(logRotator(numToKeepStr: '5'))
   }
+
   environment {
-    BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
-    BRANCH_NAME = sh(returnStdout: true, script: 'echo $(BUILD_BRANCH)')
-    GIT_TAG = ''
-    PROFILE = 'DEV'
+    PROFILE = 'dev'
+    BRANCH_NAME = "${GIT_BRANCH}"
     GIT_COMMIT = sh(returnStdout: true, script: 'make git-commit-get-hash')
+    GIT_TAG = "${GIT_BRANCH}"
   }
 
   stages {
-    stage("Check Deployment") {
-      steps {
-        script {
-          if (this.BRANCH_NAME != 'master') {
-            currentBuild.result = 'FAILURE'
-            return
-          }
-          this.GIT_COMMIT = this.GIT_TAG.split('-')[1]
-          this.GIT_TAG = 'GRAB GIT TAG FROM JENKINS JOB'
-          if this.GIT_TAG.split('-')[-1] == 'PROD' {
-            this.PROFILE = 'PROD'
-          } else if this.GIT_TAG.split('-')[-1] == 'DEMO' {
-            this.PROFILE = 'DEMO'
-          } else {
-            this.PROFILE = 'DEV'
-          }
-          if this.PROFILE == 'PROD' or this.PROFILE == 'DEMO' {
-            // Evaluate tags to check for Release Candidate, if no RC tag, don't deploy
-            sh 'make git-tag-is-release-candidate'
-            // If not, stop deployment
-          }
-        }
-      }
-    }
-    stage("Set up Variables") {
+    stage('Set up Variables') {
       steps {
         script {
           sh 'make devops-print-variables'
+          this.BRANCH_NAME = env.BRANCH_NAME
+          sh "echo BRANCH_NAME=${BRANCH_NAME}"
+          sh "echo GIT_COMMIT=${GIT_COMMIT}"
+          sh "echo GIT_TAG=${GIT_TAG}"
         }
       }
     }
-    stage("Pull Images") {
+    stage('Check Deployment') {
       steps {
         script {
-          sh 'make docker-pull NAME=proxy TAG=${this.GIT_TAG}'
-          sh 'make docker-pull NAME=api TAG=${this.GIT_TAG}'
+          IS_MASTER_BRANCH = sh(returnStdout: true, script: "make git-tag-is-present-on-branch TAG=${GIT_TAG} BRANCH=master").trim()
+          if (IS_MASTER_BRANCH == 'false') {
+            sh "echo Git Tag is not present on specified branch"
+            error('Failing build because tag is not on the correct branch...')
+          }
+          if (this.GIT_TAG.split('-')[-1] == 'prod') {
+            this.PROFILE = 'prod'
+          } else if (this.GIT_TAG.split('-')[-1] == 'demo') {
+            this.PROFILE = 'demo'
+          } else {
+            this.PROFILE = 'dev'
+          }
+          IS_RC = sh(returnStdout: true, script: "make git-tag-is-release-candidate COMMIT=${GIT_COMMIT}").trim()
+          if ((this.PROFILE == 'prod' || this.PROFILE == 'demo') && IS_RC == 'false') {
+            // Evaluate tags to check for Release Candidate, if no RC tag, don't deploy
+            sh "echo Not a release candidate"
+            error('Failing build because commit is not marked as a release candidate...')
+          }
         }
       }
     }
-    // stage("Provision Infrastructure") {
-    //     steps {
-    //         script {
-    //             if this.PROFILE != 'DEV':
-    //               sh 'make backup-data'
-    //               sh 'make terraform-apply-auto-approve STACKS=infrastructure/stacks PROFILE=${this.PROFILE}'
-    //         }
-    //     }
-    // }
-    // stage("Deploy Application") {
-    //     steps {
-    //         script {
-    //             sh 'make deploy PROFILE=${this.PROFILE}'
-    //         }
-    //     }
-    // }
-    // stage("Prepare Data") {
-    //     steps {
-    //         script {
-    //             sh 'make prepare-data'
-    //         }
-    //     }
-    // }
+    stage('Provision Infrastructure') {
+      steps {
+        script {
+            sh "echo Checking to see if RDS Snapshot is needed"
+            if (this.PROFILE != 'dev') {
+              sh "echo Creating RDS Snapshot"
+              sh "make backup-data"
+            }
+        }
+        script {
+          sh "echo Provisioning infrastructure for ${PROFILE} environment"
+          sh 'make docker-config'
+          sh "make terraform-apply-auto-approve STACKS=service PROFILE=${PROFILE} OPTS='--var-file=../tfvars/${PROFILE}.tfvars' | tee /tmp/terraform_changes.txt"
+        }
+        script {
+          sh "make secret-update-db-password"
+        }
+      }
+    }
+    stage('Deploy Application') {
+      steps {
+        script {
+          sh "make deploy PROFILE=${PROFILE} API_IMAGE_TAG=${GIT_TAG} PROXY_IMAGE_TAG=${GIT_TAG} | tee /tmp/deployment_stats.txt"
+        }
+      }
+    }
+    stage('Load Test Data') {
+      when { expression { this.PROFILE == 'dev' } }
+      steps {
+        script {
+          sh "make deploy-job PROFILE=${PROFILE} STACK=data || :"
+        }
+      }
+    }
     // stage("Run Tests") {
     //     steps {
     //         script {
@@ -82,25 +93,47 @@ pipeline {
     //         }
     //     }
     // }
-    // stage("Deployment Summary") {
-    //     steps {
-    //         scripts {
-    //             sh 'make deployment-summary'
-    //         }
-    //     }
-    // }
+    stage('Deployment Summary') {
+      steps {
+        script {
+          sh 'echo Terraform Changes'
+          sh "cat /tmp/terraform_changes.txt | grep -E 'Apply...'"
+          sh 'echo Is deployment running?'
+          sh "cat /tmp/deployment_stats.txt | grep -E 'Display namespaces' --after-context=100"
+          sh 'echo URL'
+          sh 'make url'
+        }
+      }
+    }
   }
   post {
+    success {
+      script {
+        if (this.PROFILE != 'dev') {
+          sh """
+            export BUILD_STATUS=${currentBuild.currentResult}
+            export PIPELINE_NAME='Deploy Pipeline'
+            make slack-it
+          """
+        }
+      }
+    }
     failure {
       script {
+        sh """
+          export BUILD_STATUS=${currentBuild.currentResult}
+          export PIPELINE_NAME='Deploy Pipeline'
+          make slack-it
+        """
         sh 'make jenkins-upload-workspace'
-        sh 'make slack-notification CONTENT= WEBHOOK_URL='
-        // TO DO: Create Make target to send slack notification on failure of a build
       }
     }
     cleanup {
-      sh 'make jenkins-cleanup-workspace'
-      // TO DO: Create Make Targets for jenkins to cleanup the workspace after finishing
+      script {
+        script {
+          sh 'make clean'
+        }
+      }
     }
   }
 }

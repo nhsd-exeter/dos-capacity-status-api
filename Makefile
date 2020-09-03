@@ -87,6 +87,7 @@ test-unit-only: # Run only unit test suite
 
 push: # Push project artefacts to the registry
 	make docker-login
+	# TODO: Do we still need the `VERSION` argument?
 	make docker-push NAME=api VERSION=0.0.1
 	make docker-push NAME=proxy VERSION=0.0.1
 
@@ -101,20 +102,15 @@ plan: # Show the creation instance plan - mandatory: PROFILE=[profile name]
 deploy: # Deploy project - mandatory: PROFILE=[name]
 	[ local == $(PROFILE) ] && exit 1
 	eval "$$(make aws-assume-role-export-variables)"
-	make k8s-kubeconfig-get
-	eval "$$(make k8s-kubeconfig-export)"
 	eval "$$(make project-populate-secret-variables)"
 	make k8s-deploy STACK=service
 	# TODO: What's the URL?
 	echo "The URL is $(UI_URL)"
 
-deploy-job: # Deploy project - mandatory: PROFILE=[name]
+deploy-job: # Deploy project - mandatory: PROFILE=[name], STACK=[stack]
 	[ local == $(PROFILE) ] && exit 1
-	eval "$$(make aws-assume-role-export-variables)"
-	make k8s-kubeconfig-get
-	eval "$$(make k8s-kubeconfig-export)"
 	eval "$$(make project-populate-secret-variables)"
-	make k8s-deploy-job STACK=data
+	make k8s-deploy-job STACK=$(STACK)
 
 # ==============================================================================
 # Supporting targets and variables
@@ -237,10 +233,48 @@ dev-smoke-test:
 	service_id=153455
 	curl -H "Authorization: Token $$token" http://localhost:8080/api/v0.0.1/capacity/services/$$service_id/capacitystatus/
 
+url:
+	echo https://$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(PROFILE)-$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-proxy-ingress.$(TEXAS_HOSTED_ZONE)/api/v0.0.1/capacity/apidoc/
+
+slack-it:
+	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"
+	eval "$$(make secret-fetch-and-export-variables NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)/deployment)"
+	make slack-send-standard-notification NAME=jenkins-pipeline SLACK_EXTRA_DETAILS="Git Tag: $(GIT_TAG)"
+
+backup-data:
+	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"
+	make aws-rds-create-snapshot DB_INSTANCE=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(AWS_ACCOUNT_NAME)-db SNAPSHOT_NAME=$(GIT_TAG)
+	make aws-rds-wait-for-snapshot SNAPSHOT_NAME=$(GIT_TAG)
+
+# ==============================================================================
+# Refactor
+
+# TODO: Remove it in favour of `secret-copy-value-from` once updated to the latest Make DevOps autoamtion scripts
+secret-update-db-password: ### Update DB password for K8s deployment with new DB password
+	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"
+	pw=$$(make secret-fetch NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(AWS_ACCOUNT_NAME)-capacity_status_db_password)
+	secrets=$$(make secret-fetch NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME)-$(PROFILE) | jq -rc --arg pw "$$pw" '.API_DB_PASSWORD = $$pw')
+	echo $$secrets > $(TMP_DIR)/secrets-update.json
+	file=$(TMP_DIR)/secrets-update.json
+	make aws-secret-put NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME)-$(PROFILE) VALUE=file://$$file
+
+git-create-tag: ### Tag PR to master for auto pipeline
+	timestamp=$$(date --date=$(BUILD_DATE) -u +"%Y%m%d%H%M%S")
+	commit=$$(make git-commit-get-hash)
+	echo $$timestamp-$$commit
+
+git-tag-is-present-on-branch: ### Returns true if the given branch contains the given tag else it returns false - mandatory: BRANCH=[branch name] TAG=[tag name]
+	if [ $$(git branch --contains tags/$(TAG) | grep -ow $(BRANCH)) ]; then
+		echo true
+	else
+		echo false
+	fi
+
 # ==============================================================================
 
 .SILENT: \
 	dev-create-user \
 	dev-smoke-test \
 	project-populate-application-variables \
-	project-populate-db-pu-job-variables
+	project-populate-db-pu-job-variables \
+	git-tag-is-present-on-branch

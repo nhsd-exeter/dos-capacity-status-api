@@ -8,8 +8,8 @@ pipeline {
   }
   environment {
     BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
-    GIT_COMMIT_HASH = sh(returnStdout: true, script: 'make git-commit-get-hash')
-    GIT_TAG = sh(returnStdout: true, script: 'make git-create-tag')
+    GIT_COMMIT_HASH = sh(returnStdout: true, script: 'make git-commit-get-hash').trim()
+    GIT_TAG = sh(returnStdout: true, script: 'make git-create-tag').trim()
   }
 
   stages {
@@ -40,52 +40,41 @@ pipeline {
     stage('Run Tests') {
       steps {
         script {
-          sh 'echo Run Migration'
           sh 'make migrate'
         }
         script {
-          sh 'echo Unit Tests'
           sh 'make test-unit-only'
         }
         script {
-          sh 'echo Regression Tests'
           sh 'make test-regression-only'
-        }
-      }
-    }
-    stage('Tag Docker Images') {
-      steps {
-        script {
-          sh "make docker-tag NAME=api TAG=${this.GIT_TAG}"
-          sh "make docker-tag NAME=proxy TAG=${this.GIT_TAG}"
         }
       }
     }
     stage('Push Images') {
       steps {
         script {
-          sh "make docker-push NAME=api TAG=${this.GIT_TAG}"
-          sh "make docker-push NAME=proxy TAG=${this.GIT_TAG}"
+          sh 'make docker-push NAME=api'
+          sh 'make docker-push NAME=proxy'
         }
       }
     }
-    // stage("Tag Git Commit") {
-    //     steps {
-    //         script {
-    //             sh "make git-tag-master-commit TAG=${this.GIT_TAG}"
-    //             // Need user set up with git access, can wait until Dan is back, manual step for now
-    //         }
-    //     }
-    // }
+  // stage("Tag Git Commit") {
+  //     steps {
+  //         script {
+  //             sh "make git-tag-create TAG=${this.GIT_TAG}"
+  //             // Need user set up with git access, can wait until Dan is back, manual step for now
+  //         }
+  //     }
+  // }
   }
   post {
     failure {
       script {
-        sh """echo Build Failure
-                  export "RESULT=${currentBuild.currentResult}"
-                  export "PIPELINE_NAME=Commit Pipeline"
-                  make slack-send-notification PROFILE=dev GIT_TAG=${this.GIT_TAG}
-                  """
+        sh """
+          export "BUILD_STATUS=${currentBuild.currentResult}"
+          export "PIPELINE_NAME=Commit Pipeline"
+          make slack-it
+        """
       }
     }
     cleanup {

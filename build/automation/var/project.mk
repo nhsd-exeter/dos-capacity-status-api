@@ -10,6 +10,8 @@ PROJECT_TAG = $(PROJECT_NAME)
 
 TEXAS_ROLE_PREFIX = UECDoSAPI
 TEXAS_SERVICE_TAG = $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)
+# TODO: Remove it once we migrate to the latestes (3rd Sep or newer) Make DevOps automation sctipts
+TEXAS_TERRAFORM_VERSION = $(TERRAFORM_VERSION)
 
 # ==============================================================================
 # Business rules
@@ -17,10 +19,6 @@ TEXAS_SERVICE_TAG = $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)
 SERVICE_RESET_STATUS_IN_DEFAULT_MINS = 240
 SERVICE_RESET_STATUS_IN_MINIMUM_MINS = 0
 SERVICE_RESET_STATUS_IN_MAX_MINS = 7200
-
-# ==============================================================================
-
-PYTHON_VERSION = 3.8.2
 
 # ==============================================================================
 

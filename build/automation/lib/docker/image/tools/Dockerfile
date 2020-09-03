@@ -61,12 +61,15 @@ RUN set -eux && \
         curl \
         git \
         gnupg \
+        graphviz \
         iputils \
         make \
+        msttcorefonts-installer \
         net-tools \
         netcat-openbsd \
         wget \
     && \
+    update-ms-fonts && \
     \
     # Install aws-iam-authenticator
     curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.17.9/2020-08-04/bin/linux/amd64/aws-iam-authenticator && \
@@ -84,7 +87,7 @@ RUN set -eux && \
     mv ./yq_linux_amd64 /usr/local/bin/yq && \
     \
     # Install kubectl
-    curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.18.8/bin/linux/amd64/kubectl && \
+    curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl && \
     chmod +x ./kubectl && \
     mv ./kubectl /usr/local/bin/kubectl && \
     \
