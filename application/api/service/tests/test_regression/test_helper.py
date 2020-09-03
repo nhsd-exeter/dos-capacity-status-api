@@ -17,41 +17,52 @@ class TestHelper(unittest.TestCase):
         modified_by="TestUser",
     ):
         self.assertEqual(
-            json_response["id"], service_uid,
+            json_response["id"],
+            service_uid,
         )
         self.assertEqual(
-            json_response["name"], service_name,
+            json_response["name"],
+            service_name,
         )
         self.assertEqual(
-            json_response["status"], capacity_status,
+            json_response["status"],
+            capacity_status,
         )
         if expected_reset_date_time:
-            (expected_reset_time_str_upper, expected_reset_time_str_lower,) = self._get_expected_reset_time(
-                reset_status_in=reset_status_in
-            )
+            (
+                expected_reset_time_str_upper,
+                expected_reset_time_str_lower,
+            ) = self._get_expected_reset_time(reset_status_in=reset_status_in)
 
             self.assertGreater(
-                json_response["resetDateTime"], expected_reset_time_str_lower,
+                json_response["resetDateTime"],
+                expected_reset_time_str_lower,
             )
             self.assertLess(
-                json_response["resetDateTime"], expected_reset_time_str_upper,
+                json_response["resetDateTime"],
+                expected_reset_time_str_upper,
             )
         else:
             reset_date_time_present = "resetDateTime" in json_response
             self.assertFalse(
-                reset_date_time_present, "A reset date time is present in the JSON response.",
+                reset_date_time_present,
+                "A reset date time is present in the JSON response.",
             )
         self.assertEqual(
-            json_response["notes"], notes,
+            json_response["notes"],
+            notes,
         )
         self.assertGreaterEqual(
-            json_response["modifiedDate"], TestEnv.expected_modified_time_str_lower,
+            json_response["modifiedDate"],
+            TestEnv.expected_modified_time_str_lower,
         )
         self.assertLess(
-            json_response["modifiedDate"], TestEnv.expected_modified_time_str_upper,
+            json_response["modifiedDate"],
+            TestEnv.expected_modified_time_str_upper,
         )
         self.assertEqual(
-            json_response["modifiedBy"], modified_by,
+            json_response["modifiedBy"],
+            modified_by,
         )
 
     def _get_expected_reset_time(self, reset_status_in=240):
