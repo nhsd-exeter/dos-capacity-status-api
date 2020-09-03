@@ -19,7 +19,7 @@ data "terraform_remote_state" "security-groups-k8s" {
 }
 
 resource "aws_security_group" "rds-postgres-sg" {
-  name        = "${var.service_prefix}-${var.cloud_env_type}-db-sg"
+  name        = "${var.service_prefix}-${var.profile}-sg"
   description = "Allow connection by appointed rds postgres clients"
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
 

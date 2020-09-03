@@ -2,7 +2,7 @@ resource "aws_db_subnet_group" "db_subnet_group" {
   name       = var.db_subnet_group_name
   subnet_ids = var.private_subnets_ids
   tags = {
-    Name        = "${var.service_prefix}-${var.cloud_env_type}-db"
+    Name        = "${var.service_prefix}-${var.profile}"
     BillingCode = var.billing_code_tag
     Environment = var.environment_tag
     Version     = var.version_tag
@@ -23,9 +23,9 @@ resource "aws_db_instance" "db_instance" {
   engine                    = var.db_engine
   engine_version            = var.db_engine_version
   instance_class            = var.db_size
-  identifier                = "${var.service_prefix}-${var.cloud_env_type}-db"
+  identifier                = "${var.service_prefix}-${var.profile}"
   name                      = var.db_name
-  final_snapshot_identifier = "${var.service_prefix}-${var.cloud_env_type}-db-final-snapshot"
+  final_snapshot_identifier = "${var.service_prefix}-${var.profile}-final-snapshot"
   skip_final_snapshot       = var.skip_final_snapshot #TODO check : added based off looking at SF
   copy_tags_to_snapshot     = true
   username                  = var.db_master_username
@@ -39,7 +39,7 @@ resource "aws_db_instance" "db_instance" {
   auto_minor_version_upgrade = var.db_auto_minor_version_upgrade #TODO check this is needed not in SF setup
 
   tags = {
-    Name        = "${var.service_prefix}-${var.cloud_env_type}-db"
+    Name        = "${var.service_prefix}-${var.profile}"
     BillingCode = var.billing_code_tag
     Environment = var.environment_tag
     Version     = var.version_tag

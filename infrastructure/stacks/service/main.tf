@@ -19,6 +19,7 @@ module "rds" {
   db_engine                     = var.db_engine
   db_engine_version             = var.db_engine_version
   cloud_env_type                = var.cloud_env_type
+  profile                       = var.profile
   db_port                       = var.db_port
   db_auto_minor_version_upgrade = var.db_auto_minor_version_upgrade
 

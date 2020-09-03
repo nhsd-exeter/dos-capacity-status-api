@@ -15,7 +15,13 @@ variable "aws_region" {
 # variable "aws_profile" {
 #   description = "The AWS profile"
 # }
-variable "cloud_env_type" { description = "The cloud enviroment type e.g. nonprod, prod" }
+variable "cloud_env_type" {
+  description = "The cloud enviroment type e.g. nonprod, prod"
+}
+
+variable "profile" {
+  description = "The profile for the deployment e.g. dev, demo, live"
+}
 
 ############################
 # TERRAFORM COMMON
