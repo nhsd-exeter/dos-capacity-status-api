@@ -277,4 +277,5 @@ git-tag-is-present-on-branch: ### Returns true if the given branch contains the 
 	dev-smoke-test \
 	project-populate-application-variables \
 	project-populate-db-pu-job-variables \
-	git-tag-is-present-on-branch
+	git-tag-is-present-on-branch \
+	git-create-tag
