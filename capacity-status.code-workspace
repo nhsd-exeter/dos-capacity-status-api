@@ -1,6 +1,10 @@
 {
   "folders": [
     {
+      "name": "Capacity Status API",
+      "path": "application/api"
+    },
+    {
       "name": "[Repository]",
       "path": "."
     }
@@ -8,7 +12,7 @@
   "settings": {
     "breadcrumbs.enabled": true,
     "editor.autoIndent": "full",
-    "editor.fontSize": 18,
+    "editor.fontSize": 12,
     "editor.formatOnSave": true,
     "editor.renderWhitespace": "all",
     "editor.suggestSelection": "recentlyUsedByPrefix",
@@ -25,25 +29,18 @@
       "**/.factorypath": true
     },
     "files.insertFinalNewline": true,
-    "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
-    "java.completion.enabled": true,
     "java.configuration.updateBuildConfiguration": "automatic",
     "java.format.enabled": false,
-    "java.home": "~/.jenv/versions/14.0",
     "python.formatting.blackArgs": ["--line-length", "120"],
     "python.formatting.provider": "black",
     "python.linting.flake8Args": ["--max-line-length=120"],
     "python.linting.flake8Enabled": true,
-    "python.linting.flake8Path": "~/.pyenv/versions/3.8.5/bin/flake8",
     "python.linting.mypyArgs": [],
     "python.linting.mypyEnabled": true,
-    "python.linting.mypyPath": "~/.pyenv/versions/3.8.5/bin/mypy",
     "python.linting.pylintArgs": [],
     "python.linting.pylintEnabled": true,
-    "python.linting.pylintPath": "~/.pyenv/versions/3.8.5/bin/pylint",
-    "python.pythonPath": "~/.pyenv/versions/3.8.5/bin/python",
-    "python.terminal.activateEnvironment": false,
+    "python.pythonPath": "~/.pyenv/versions/uec-dos-api-capacity-status/",
     "telemetry.enableCrashReporter": false,
     "telemetry.enableTelemetry": false,
     "terminal.integrated.fontFamily": "Hack Nerd Font",
@@ -52,7 +49,7 @@
     /*"workbench.colorCustomizations": {
       "editorWhitespace.foreground": "#FF0000",
     },*/
-    "workbench.colorTheme": "Better Solarized Dark Italics",
+    "workbench.colorTheme": "Noctis Azureus",
     "workbench.editor.enablePreview": false,
     "workbench.tree.indent": 24,
     "[dockerfile]": {
@@ -124,6 +121,23 @@
           "cmd": "/usr/local/bin/google-java-format --replace ${file}"
         }
       ]
-    }
+    },
+    "workbench.colorCustomizations": {
+      "activityBar.activeBackground": "#fbed80",
+      "activityBar.activeBorder": "#06b9a5",
+      "activityBar.background": "#fbed80",
+      "activityBar.foreground": "#15202b",
+      "activityBar.inactiveForeground": "#15202b99",
+      "activityBarBadge.background": "#06b9a5",
+      "activityBarBadge.foreground": "#15202b",
+      "statusBar.background": "#f9e64f",
+      "statusBar.foreground": "#15202b",
+      "statusBarItem.hoverBackground": "#f7df1e",
+      "titleBar.activeBackground": "#f9e64f",
+      "titleBar.activeForeground": "#15202b",
+      "titleBar.inactiveBackground": "#f9e64f99",
+      "titleBar.inactiveForeground": "#15202b99"
+    },
+    "peacock.color": "#f9e64f"
   }
 }
