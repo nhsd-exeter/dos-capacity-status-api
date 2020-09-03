@@ -8,6 +8,7 @@ export PYFLAKES_BUILTINS=_
 
 OMIT := */tests/*,*/migrations/*,*apps.py,*asgi.py,*wsgi.py,*manage.py,*api/settings.py
 
+# TODO: Use `python-clean` instead
 clean: # Reset the project and remove auto-generated assets
 	rm -rf build
 	rm -rf dist
@@ -18,17 +19,6 @@ clean: # Reset the project and remove auto-generated assets
 	find . \( -name '*.bak' -o -name dropin.cache \) -delete
 	find . \( -name '*.tgz' -o -name dropin.cache \) -delete
 	find . | grep -E "(__pycache__)" | xargs rm -rf
-
-code-format: # Format code with 'black'
-	black \
-		--line-length 120 \
-		api
-
-code-check: # Check code with 'flake8'
-	flake8 \
-		--max-line-length=120 \
-		--exclude */tests/__init__.py,api/service/documentation.py \
-		api
 
 test-dos-interface: clean
 	python manage.py test api/dos_interface/
@@ -42,17 +32,20 @@ test-authentication: clean
 test-api: clean
 	python manage.py test api/
 
+# TODO: Use `python-code-coverage` instead
 coverage: clean # View a report on test coverage
 	coverage run --source='.' --omit=$(OMIT) manage.py test api/
 	coverage report -m
 	coverage erase
 
+# TODO: Use `python-code-coverage` instead
 unit-test-coverage: clean # View a report on test coverage
 	coverage run --source='.' --omit=$(OMIT) manage.py test api/ \
 		--exclude-tag=regression
 	coverage report -m
 	coverage erase
 
+# TODO: Use `python-code-coverage` instead
 regression-test-coverage: clean # View a report on test coverage
 	coverage run --source='.' --omit=$(OMIT) manage.py test api/ \
 		--tag=regression

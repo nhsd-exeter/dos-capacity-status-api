@@ -87,6 +87,7 @@ test-unit-only: # Run only unit test suite
 
 push: # Push project artefacts to the registry
 	make docker-login
+	# TODO: Do we still need the `VERSION` argument?
 	make docker-push NAME=api VERSION=0.0.1
 	make docker-push NAME=proxy VERSION=0.0.1
 
@@ -240,14 +241,6 @@ slack-it:
 	eval "$$(make secret-fetch-and-export-variables NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)/deployment)"
 	make slack-send-standard-notification NAME=jenkins-pipeline SLACK_EXTRA_DETAILS="Git Tag: $(GIT_TAG)"
 
-secret-update-db-password: ### Update DB password for K8s deployment with new DB password
-	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"
-	pw=$$(make secret-fetch NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(AWS_ACCOUNT_NAME)-capacity_status_db_password)
-	secrets=$$(make secret-fetch NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME)-$(PROFILE) | jq -rc --arg pw "$$pw" '.API_DB_PASSWORD = $$pw')
-	echo $$secrets > $(TMP_DIR)/secrets-update.json
-	file=$(TMP_DIR)/secrets-update.json
-	make aws-secret-put NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME)-$(PROFILE) VALUE=file://$$file
-
 backup-data:
 	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"
 	make aws-rds-create-snapshot DB_INSTANCE=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(AWS_ACCOUNT_NAME)-db SNAPSHOT_NAME=$(GIT_TAG)
@@ -255,6 +248,15 @@ backup-data:
 
 # ==============================================================================
 # Refactor
+
+# TODO: Remove it in favour of `secret-copy-value-from` once updated to the latest Make DevOps autoamtion scripts
+secret-update-db-password: ### Update DB password for K8s deployment with new DB password
+	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"
+	pw=$$(make secret-fetch NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(AWS_ACCOUNT_NAME)-capacity_status_db_password)
+	secrets=$$(make secret-fetch NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME)-$(PROFILE) | jq -rc --arg pw "$$pw" '.API_DB_PASSWORD = $$pw')
+	echo $$secrets > $(TMP_DIR)/secrets-update.json
+	file=$(TMP_DIR)/secrets-update.json
+	make aws-secret-put NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME)-$(PROFILE) VALUE=file://$$file
 
 git-create-tag: ### Tag PR to master for auto pipeline
 	timestamp=$$(date --date=$(BUILD_DATE) -u +"%Y%m%d%H%M%S")

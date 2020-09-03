@@ -1,4 +1,5 @@
 #!/bin/bash
 
-cd $(git rev-parse --show-toplevel)/application
-make -s code-format code-check
+make -s python-code-format python-code-check \
+  FILES=application/api \
+  EXCLUDE=application/api/service/documentation.py
