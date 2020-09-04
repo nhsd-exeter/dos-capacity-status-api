@@ -99,7 +99,7 @@ plan: # Show the creation instance plan - mandatory: PROFILE=[profile name]
 		PROFILE=dev \
 		NAME=$(or $(NAME), test)
 
-deploy: # Deploy project - mandatory: PROFILE=[name]
+deploy: # Deploy project - mandatory: PROFILE=[name], API_IMAGE_TAG=[docker tag], PROXY_IMAGE_TAG[docker-tag]
 	[ local == $(PROFILE) ] && exit 1
 	eval "$$(make aws-assume-role-export-variables)"
 	eval "$$(make project-populate-secret-variables)"
