@@ -44,7 +44,7 @@ vpc_terraform_state_key = "vpc/terraform.tfstate"
 # SERVICE RDS POSTGRES
 ####################################################################################
 db_identifier                 = "uec-dos-api-cs-demo"
-db_name                       = "postgres"
+db_name                       = "capacity_status"
 db_master_username            = "postgres"
 db_size                       = "db.t3.micro"
 db_engine_version             = "11.6"
