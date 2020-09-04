@@ -2,20 +2,15 @@
 
 ## Priority list
 
-- Application
-  - PUT vs. PATCH
 - Documentation
   - Generate API Documentation automatically (CSAPI-9)
 - Testing
-  - Check for unit and integration test completeness (CSAPI-64)
   - Can unit and integration tests be run independently
   - Implement smoke test suite
 
 ## Other tasks
 
 - Security
-  - API throttling (CSAPI-44)
-  - Toggle Django debug mode using environment variable
   - Use the library Docker NGINX image for proxy and make sure it is in the latest version
 - Application
   - Let's revisit the domain model and consider again the naming of `serviceUid` (just `id`), `serviceName` (just `name`?), `capacityStatus` (just `status`?)
@@ -30,7 +25,7 @@
   - Refactor RDS configuration
   - Refactor ALB and WAF configuration
   - Refactor Kubernetes deployment scripts
-  - Crete Route 53 record automatically (CSAPI-55)
+  - Create Route 53 record automatically (CSAPI-55)
   - Create Secrets Manager entry automatically
   - Database backup and restore scripts
 - Testing
@@ -39,14 +34,10 @@
   - Provide security test suite
 - Deployment
   - Deploy to production (CSAPI-65, CSAPI-66)
-  - Implement Jenkins pipeline (CSAPI-65, CSAPI-66)
   - Tagging upon deployment (CSAPI-65, CSAPI-66)
 - Monitoring:
   - Configure Splunk (CSAPI-70)
-  - Configure Instana (CSAPI-69)
-  - Configure Pingdom
   - Configure CloudWatch
-  - Configure Slack
 - Development
   - Externalise `flake8` and `black` configuration
   - Consider renaming our development DoS DB to pathwaysdos to match the real version
