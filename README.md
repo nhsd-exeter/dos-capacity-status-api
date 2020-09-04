@@ -217,7 +217,7 @@ The `PROFILE` variable can be set to other environments.
     terraform plan -var-file=../tfvars/dev.tfvars
     terraform destroy -var-file=../tfvars/dev.tfvars
     terraform apply -var-file=../tfvars/dev.tfvars
-    # Go to AWS SM, copy from `uec-dos-api-cs-nonprod-capacity_status_db_password` to `uec-dos-api-capacity-status-dev.API_DB_PASSWORD`
+    # Go to AWS SM, copy from `uec-dos-api-cs-dev-capacity_status_db_password` to `uec-dos-api-capacity-status-dev.API_DB_PASSWORD`
     # Go to AWS RDS VPC security groups, add the nonprod open VPN security group (live-lk8s-nonprod-openvpn-sg) to the RDS instance as an INBOUND rule to our RDS security group
     cd ../../..
     eval $(make secret-fetch-and-export-variables NAME=uec-dos-api-capacity-status-dev)

@@ -21,8 +21,6 @@
   - Let's revisit the domain model and consider again the naming of `serviceUid` (just `id`), `serviceName` (just `name`?), `capacityStatus` (just `status`?)
 - Infrastructure
   - Split DB responsibility, DoS DB should run a container and API connects to it's own RDS
-  - Change RDS DB identifier, currently it is `uec-dos-api-cs-nonprod-db`
-  - Change RDS Security Group, currently it is `uec-dos-api-cs-nonprod-db-sg`
   - Move RDS Terraform variables to Make profile
   - Sort out tags
   - Create [custom option group](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithOptionGroups.html) for the RDS instance

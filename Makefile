@@ -99,7 +99,7 @@ plan: # Show the creation instance plan - mandatory: PROFILE=[profile name]
 		PROFILE=dev \
 		NAME=$(or $(NAME), test)
 
-deploy: # Deploy project - mandatory: PROFILE=[name]
+deploy: # Deploy project - mandatory: PROFILE=[name], API_IMAGE_TAG=[docker tag], PROXY_IMAGE_TAG[docker-tag]
 	[ local == $(PROFILE) ] && exit 1
 	eval "$$(make aws-assume-role-export-variables)"
 	eval "$$(make project-populate-secret-variables)"
@@ -243,7 +243,7 @@ slack-it:
 
 backup-data:
 	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"
-	make aws-rds-create-snapshot DB_INSTANCE=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(AWS_ACCOUNT_NAME)-db SNAPSHOT_NAME=$(GIT_TAG)
+	make aws-rds-create-snapshot DB_INSTANCE=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(PROFILE) SNAPSHOT_NAME=$(GIT_TAG)
 	make aws-rds-wait-for-snapshot SNAPSHOT_NAME=$(GIT_TAG)
 
 # ==============================================================================
@@ -252,7 +252,7 @@ backup-data:
 # TODO: Remove it in favour of `secret-copy-value-from` once updated to the latest Make DevOps autoamtion scripts
 secret-update-db-password: ### Update DB password for K8s deployment with new DB password
 	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"
-	pw=$$(make secret-fetch NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(AWS_ACCOUNT_NAME)-capacity_status_db_password)
+	pw=$$(make secret-fetch NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(PROFILE)-capacity_status_db_password)
 	secrets=$$(make secret-fetch NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME)-$(PROFILE) | jq -rc --arg pw "$$pw" '.API_DB_PASSWORD = $$pw')
 	echo $$secrets > $(TMP_DIR)/secrets-update.json
 	file=$(TMP_DIR)/secrets-update.json
@@ -277,4 +277,5 @@ git-tag-is-present-on-branch: ### Returns true if the given branch contains the 
 	dev-smoke-test \
 	project-populate-application-variables \
 	project-populate-db-pu-job-variables \
-	git-tag-is-present-on-branch
+	git-tag-is-present-on-branch \
+	git-create-tag
