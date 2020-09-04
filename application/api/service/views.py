@@ -91,6 +91,7 @@ class CapacityStatusView(RetrieveUpdateAPIView):
             return error_response
         return self._handle_cannot_edit_service_response(request, str(id))
 
+    @swagger_auto_schema(auto_schema=None)
     def patch(self, request, id, partial=True):
         data = {"detail": 'Method "PATCH" not allowed. Please use "PUT" instead.'}
         return Response(data, status=status.HTTP_405_METHOD_NOT_ALLOWED)
