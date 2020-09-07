@@ -10,7 +10,6 @@ pipeline {
   }
 
   environment {
-    PROFILE = 'dev'
     BRANCH_NAME = "${GIT_BRANCH}"
     GIT_COMMIT = sh(returnStdout: true, script: 'make git-commit-get-hash')
     GIT_TAG = "${GIT_BRANCH}"
