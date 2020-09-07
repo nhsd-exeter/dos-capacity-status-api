@@ -45,7 +45,7 @@
 
   - Create `makemigrations` make target
   - Add `makemigration` make target to pipeline
-  - Add Check if migration step is needed to pipeline
+  - Add 'Check if migration step is needed' step to pipeline
   - Add choice between removing and not removing old models
   - Create make target for destroying old models
   - Add make target for destroying old models to deploy pipeline
