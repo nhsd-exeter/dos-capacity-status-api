@@ -267,9 +267,10 @@ git-tag-is-present-on-branch: ### Returns true if the given branch contains the 
 	fi
 
 set-profile-for-deployment: ### Returns the profile based on the git tag on the commit - mandatory: TAG=[tag name]
-	if [ $${$(TAG)##*-} == live ]; then
+	profile=$${$(TAG)}
+	if [ $$profile == live ]; then
 		echo live
-	elif [ $${$(TAG)##*-} == demo ]; then
+	elif [ $$profile == demo ]; then
 		echo demo
 	else
 		echo dev
