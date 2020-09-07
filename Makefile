@@ -33,11 +33,7 @@ migrate:
 	fi
 
 test-db-start:
-	if [ "$(BUILD_ID)" != 0 ]; then
-		make docker-compose-start-single-service NAME=db-dos-$(BUILD_ID)
-	else
 		make docker-compose-start-single-service NAME=db-dos
-	fi
 
 test: # Test project
 	make docker-run-python IMAGE=$(DOCKER_REGISTRY)/api:latest \
@@ -270,6 +266,23 @@ git-tag-is-present-on-branch: ### Returns true if the given branch contains the 
 		echo false
 	fi
 
+set-profile-for-deployment: ### Returns the profile based on the git tag on the commit - mandatory: TAG=[tag name]
+	if [ $${$(TAG)##*-} == live ]; then
+		echo live
+	elif [ $${$(TAG)##*-} == demo ]; then
+		echo demo
+	else
+		echo dev
+	fi
+
+deployment-summary: ### Returns a deployment summary
+	echo Terraform Changes
+	cat /tmp/terraform_changes.txt | grep -E 'Apply...'
+	echo Is deployment running?
+	cat /tmp/deployment_stats.txt | grep -E 'Display namespaces' --after-context=100
+	echo URL
+	make url
+
 # ==============================================================================
 
 .SILENT: \
@@ -278,4 +291,5 @@ git-tag-is-present-on-branch: ### Returns true if the given branch contains the 
 	project-populate-application-variables \
 	project-populate-db-pu-job-variables \
 	git-tag-is-present-on-branch \
-	git-create-tag
+	git-create-tag \
+	set-profile-for-deployment
