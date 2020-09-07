@@ -13,7 +13,7 @@ pipeline {
   }
 
   stages {
-    stage('Set up Variables') {
+    stage('Setup Variables') {
       steps {
         script {
           sh "echo ${this.GIT_COMMIT_HASH}"
