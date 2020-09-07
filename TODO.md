@@ -35,6 +35,21 @@
 - Deployment
   - Deploy to production (CSAPI-65, CSAPI-66)
   - Tagging upon deployment (CSAPI-65, CSAPI-66)
+- Amend Pipelines
+
+  - Commit Pipeline - Create a Git User for Jenkins so that it can Tag the Git Commits at the end of the pipeline (Card 150)
+  - Deploy Pipeline - Add AWS/assurance/load testing when they have been written (Card 145)
+
+- API ORM Migration
+  (See `Capacity Status API ORM Migration Strategy.draw.io` for more info)
+
+  - Create `makemigrations` make target
+  - Add `makemigration` make target to pipeline
+  - Add Check if migration step is needed to pipeline
+  - Add choice between removing and not removing old models
+  - Create make target for destroying old models
+  - Add make target for destroying old models to deploy pipeline
+
 - Monitoring:
   - Configure Splunk (CSAPI-70)
   - Configure CloudWatch
