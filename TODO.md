@@ -38,13 +38,17 @@
 - Amend Pipelines
 
   - Commit Pipeline - Create a Git User for Jenkins so that it can Tag the Git Commits at the end of the pipeline (Card 150)
-  - Deploy Pipeline - Add AWS/assurance/load testing when they have been written (Card 145)
+  - Deploy Pipeline - Add Assurance and load testing when they have been written (Card 145)
 
 - API ORM Migration
+  The ORM migration strategy is to have a step in the deployment pipeline that runs a make target
+  which in turn runs the Django migration tool. The migration tool will then act on any migration
+  files made but not applied to the database in the environment being deployed. This migration may
+  also be done through a separate pipeline (still need to be determined if that pipeline is needed).
   (See `Capacity Status API ORM Migration Strategy.draw.io` for more info)
 
-  - Create `makemigrations` make target
-  - Add `makemigration` make target to pipeline
+  - Create `apply_migrations` make target
+  - Add `apply_migration` make target to pipeline
   - Add 'Check if migration step is needed' step to pipeline
   - Add choice between removing and not removing old models
   - Create make target for destroying old models
