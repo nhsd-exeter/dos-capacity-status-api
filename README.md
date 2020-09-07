@@ -24,6 +24,7 @@
       - [Running the unit tests from Make](#running-the-unit-tests-from-make)
     - [Deployment](#deployment)
       - [Temporary provision-build-deploy instruction set](#temporary-provision-build-deploy-instruction-set)
+    - [Pipeline Strategy](#pipeline-strategy)
 
 ## Quick Start
 
@@ -232,3 +233,37 @@ The `PROFILE` variable can be set to other environments.
     make clean
     cd ../..
     make project-clean-deploy PROFILE=dev
+
+### Pipeline Strategy
+
+This project is comprised of two pipelines a **Commit Pipeline** and a **Deploy Pipeline**
+
+The **Commit Pipeline** builds the project docker images after a commit to the master branch and push
+them to the texas registry. The images are also tag with the commit hash they are associated with and
+a timestamp when they were built. The two images it creates are the api image (the Django application)
+and the proxy image (an NGINX server). It also test the images against the unit and regression tests.
+
+The commit pipeline is comprise of the following stages :
+
+  - Setup Variables
+  - Start up Test Database
+  - Build Images
+  - Run Tests
+  - Push Images
+
+The **Deploy Pipeline** based on a given git tag provisions infrastructure and deploys the application
+to a give environment. The tag suffix determines the environment the application will be deployed to,
+with suffix being the `PROFILE` name from the deployment. If no suffix is present on a git tag it will
+instead be deployed as a dev `PROFILE` and will also load test data for a DoS database to the created
+RDS instance.
+
+The deploy pipeline is comprise of the following stages :
+
+  - Setup Variables
+  - Check Deployment
+  - Provision Infrastructure
+  - Deploy Application
+  - Load Test Data
+  - Deployment Summary
+
+The pipelines can be found on UEC's Jenkins MoM server under the DoS API tab
