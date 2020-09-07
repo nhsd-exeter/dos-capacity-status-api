@@ -260,7 +260,7 @@ git-create-tag: ### Tag PR to master for auto pipeline
 	echo $$timestamp-$$commit
 
 git-tag-is-present-on-branch: ### Returns true if the given branch contains the given tag else it returns false - mandatory: BRANCH=[branch name] TAG=[tag name]
-	if [ $$(git branch -r --contains tags/$(TAG) | grep -ow $(BRANCH)) ]; then
+	if [ $$(git branch --contains tags/$(TAG) | grep -ow $(BRANCH)) ]; then
 		echo true
 	else
 		echo false
