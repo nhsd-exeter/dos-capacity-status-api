@@ -15,13 +15,13 @@ pipeline {
     GIT_TAG = "${GIT_BRANCH}"
     PROFILE = sh(returnStdout: true, script: "make set-profile-for-deployment TAG=${GIT_TAG}").trim()
     IS_RC = sh(returnStdout: true, script: "make git-tag-is-release-candidate COMMIT=${GIT_COMMIT}").trim()
+    IS_MASTER_BRANCH = sh(returnStdout: true, script: "make git-tag-is-present-on-branch TAG=${GIT_TAG} BRANCH=task/deploy_pipeline_refactor").trim()
   }
 
   stages {
     stage('Setup Variables') {
       steps {
         script {
-          IS_MASTER_BRANCH = sh(returnStdout: true, script: "make git-tag-is-present-on-branch TAG=${GIT_TAG} BRANCH=task/deploy_pipeline_refactor").trim()
           sh 'make devops-print-variables'
           sh "echo BRANCH_NAME=${BRANCH_NAME}"
           sh "echo GIT_COMMIT=${GIT_COMMIT}"
