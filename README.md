@@ -128,7 +128,7 @@ on in the Django settings `application/api/settings.py`
 
 ##### Running the API in HTTP mode
 
-To run the API on localhost across port 8000 (from the command prompt), starting from the
+To run the API on localhost across port 8080 (from the command prompt), starting from the
 project root directory:
 
   Run the following make targets:
@@ -141,9 +141,9 @@ project root directory:
     make dev-migrate
     make dev-start
 
-The API will be running on localhost on port 8000. The URL to the API Documentation is:
+The API will be running on localhost on port 8080. The URL to the API Documentation is:
 
-http://localhost:8000/api/v0.0.1/capacity/apidoc
+http://localhost:8080/api/v0.0.1/capacity/apidoc
 
 Navigate here in a browser to see all available endpoints and routes.
 
