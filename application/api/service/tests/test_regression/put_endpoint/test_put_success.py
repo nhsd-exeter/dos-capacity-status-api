@@ -197,7 +197,9 @@ class TestPutSuccess(unittest.TestCase):
         self.assertEqual(response.status_code, 200, "Response status code is not as expected.")
 
         test_helper.check_response(
-            json_response, reset_status_in=50, notes="Capacity status set by Capacity Status API - some more notes",
+            json_response,
+            reset_status_in=50,
+            notes="Capacity status set by Capacity Status API - some more notes",
         )
 
     def test_update_capacity_additional_notes_loads(self):
@@ -216,5 +218,6 @@ class TestPutSuccess(unittest.TestCase):
         self.assertEqual(response.status_code, 200, "Response status code is not as expected.")
 
         test_helper.check_response(
-            json_response, notes="Capacity status set by Capacity Status API - " + TestEnv.max_notes,
+            json_response,
+            notes="Capacity status set by Capacity Status API - " + TestEnv.max_notes,
         )

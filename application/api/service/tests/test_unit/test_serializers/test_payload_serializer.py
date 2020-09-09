@@ -28,7 +28,9 @@ class TestPayloadSerializer(unittest.TestCase):
         returned_reset_time = CapacityStatusRequestPayloadSerializer._resetTime(self, current_time, payload_data)
 
         self.assertEqual(
-            returned_reset_time, expected_reset_time_str, "Returned reset data time is not as expected.",
+            returned_reset_time,
+            expected_reset_time_str,
+            "Returned reset data time is not as expected.",
         )
 
     def test_reset_time_amber(self):
@@ -45,7 +47,9 @@ class TestPayloadSerializer(unittest.TestCase):
         returned_reset_time = CapacityStatusRequestPayloadSerializer._resetTime(self, current_time, payload_data)
 
         self.assertEqual(
-            returned_reset_time, expected_reset_time_str, "Returned reset data time is not as expected.",
+            returned_reset_time,
+            expected_reset_time_str,
+            "Returned reset data time is not as expected.",
         )
 
     def test_reset_time_green(self):
@@ -60,7 +64,8 @@ class TestPayloadSerializer(unittest.TestCase):
         returned_reset_time = CapacityStatusRequestPayloadSerializer._resetTime(self, current_time, payload_data)
 
         self.assertIsNone(
-            returned_reset_time, "Returned reset data time is not None.",
+            returned_reset_time,
+            "Returned reset data time is not None.",
         )
 
     def test_convert_to_model(self):
@@ -87,7 +92,9 @@ class TestPayloadSerializer(unittest.TestCase):
 
         # Perform assertions
         self.assertDictEqual(
-            model_data["status"], {"color": "RED"}, "Model capacity status data incorrectly set",
+            model_data["status"],
+            {"color": "RED"},
+            "Model capacity status data incorrectly set",
         )
 
         model_reset_time_str = model_data["resetdatetime"]
@@ -110,11 +117,15 @@ class TestPayloadSerializer(unittest.TestCase):
         )
 
         self.assertEqual(
-            model_data["modifiedbyid"], self.api_user_id, "Model modified by id incorrectly set",
+            model_data["modifiedbyid"],
+            self.api_user_id,
+            "Model modified by id incorrectly set",
         )
 
         self.assertEqual(
-            model_data["modifiedby"], self.api_username, "Model modified by data incorrectly set",
+            model_data["modifiedby"],
+            self.api_username,
+            "Model modified by data incorrectly set",
         )
 
         modified_date_dt = datetime.strptime(model_data["modifieddate"], "%Y-%m-%dT%H:%M:%SZ")
@@ -124,5 +135,7 @@ class TestPayloadSerializer(unittest.TestCase):
             "Model modified date is a value greater than expected",
         )
         self.assertGreaterEqual(
-            modified_date_dt, current_time + timedelta(minutes=-1), "Model modified date is a value less than expected",
+            modified_date_dt,
+            current_time + timedelta(minutes=-1),
+            "Model modified date is a value less than expected",
         )

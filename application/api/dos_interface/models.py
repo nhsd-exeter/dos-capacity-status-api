@@ -40,7 +40,11 @@ class ServiceCapacities(models.Model):
     modifieddate = models.DateTimeField(blank=True, null=True)
     service = models.OneToOneField(Services, models.DO_NOTHING, db_column="serviceid", blank=True, null=True)
     status = models.ForeignKey(
-        Capacitystatuses, models.DO_NOTHING, db_column="capacitystatusid", blank=True, null=True,
+        Capacitystatuses,
+        models.DO_NOTHING,
+        db_column="capacitystatusid",
+        blank=True,
+        null=True,
     )
     resetdatetime = models.DateTimeField(blank=True, null=True)
 

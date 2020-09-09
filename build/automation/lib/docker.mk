@@ -59,7 +59,7 @@ docker-create-from-template: ### Create Docker image from template - mandatory: 
 docker-config: ### Configure Docker networking
 	docker network create $(DOCKER_NETWORK) 2> /dev/null ||:
 
-docker-build docker-image: ### Build Docker image - mandatory: NAME; optional: VERSION,FROM_CACHE=true,BUILD_OPTS=[build options],NAME_AS=[new name],EXAMPLE=true
+docker-build docker-image: ### Build Docker image - mandatory: NAME; optional: VERSION,FROM_CACHE=true,BUILD_OPTS=[build options],EXAMPLE=true
 	reg=$$(make _docker-get-reg)
 	# Try to execute `make build` from the image directory
 	if [ -d $(DOCKER_LIB_IMAGE_DIR)/$(NAME) ] && [ -z "$(__DOCKER_BUILD)" ]; then
@@ -104,15 +104,6 @@ docker-build docker-image: ### Build Docker image - mandatory: NAME; optional: V
 		$$reg/$(NAME)$(shell [ -n "$(EXAMPLE)" ] && echo -example):latest
 	docker rmi --force $$(docker images | grep "<none>" | awk '{ print $$3 }') 2> /dev/null ||:
 	make docker-image-keep-latest-only NAME=$(NAME)
-	if [ -n "$(NAME_AS)" ]; then
-		docker tag \
-			$$reg/$(NAME):$$(make docker-image-get-version) \
-			$$reg/$(NAME_AS):$$(make docker-image-get-version)
-		docker tag \
-			$$reg/$(NAME):latest \
-			$$reg/$(NAME_AS):latest
-		make docker-image-keep-latest-only NAME=$(NAME_AS)
-	fi
 	docker image inspect $$reg/$(NAME)$(shell [ -n "$(EXAMPLE)" ] && echo -example):latest --format='{{.Size}}'
 
 docker-test: ### Test image - mandatory: NAME; optional: ARGS,CMD,GOSS_OPTS,EXAMPLE=true
@@ -145,12 +136,16 @@ docker-push: ### Push Docker image - mandatory: NAME; optional: VERSION|TAG
 	else
 		docker push $$reg/$(NAME):$$(make docker-image-get-version)
 	fi
-	docker push $$reg/$(NAME):latest
+	docker push $$reg/$(NAME):latest 2> /dev/null ||:
 
-docker-pull: ### Pull Docker image - mandatory: NAME,VERSION|TAG|DIGEST
+docker-pull: ### Pull Docker image - mandatory: NAME,DIGEST|VERSION|TAG
 	[ $$(make _docker-is-lib-image) == false ] && make docker-login
 	reg=$$(make _docker-get-reg)
-	docker pull $$reg/$(NAME)$(or @$(DIGEST), $(or :$(VERSION), :$(TAG))) ||:
+	if [ -n "$(DIGEST)" ]; then
+		docker pull $$reg/$(NAME)@$(DIGEST) ||:
+	else
+		docker pull $$reg/$(NAME):$(or $(VERSION), $(TAG)) ||:
+	fi
 
 docker-tag: ### Tag latest or provide arguments - mandatory: NAME,VERSION|TAG|[SOURCE,TARGET]|[DIGEST,VERSION|TAG]
 	reg=$$(make _docker-get-reg)
@@ -167,6 +162,16 @@ docker-tag: ### Tag latest or provide arguments - mandatory: NAME,VERSION|TAG|[S
 			$$reg/$(NAME):latest \
 			$$reg/$(NAME):$(or $(VERSION), $(TAG))
 	fi
+
+docker-rename: ### Rename Docker image - mandatory: NAME,AS
+	reg=$$(make _docker-get-reg)
+	docker tag \
+		$$reg/$(NAME):$$(make docker-image-get-version) \
+		$$reg/$(AS):$$(make docker-image-get-version)
+	docker tag \
+		$$reg/$(NAME):latest \
+		$$reg/$(AS):latest
+	make docker-image-keep-latest-only NAME=$(AS)
 
 docker-clean: ### Clean Docker files
 	find $(DOCKER_DIR) -type f -name '.version' -print0 | xargs -0 rm -v 2> /dev/null ||:
@@ -559,7 +564,7 @@ docker-run-postgres: ### Run postgres container - mandatory: CMD; optional: DIR,
 	make docker-config > /dev/null 2>&1
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo $(DOCKER_LIBRARY_REGISTRY)/postgres:$(DOCKER_LIBRARY_POSTGRES_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo postgres-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
-	make docker-image-pull-or-build NAME=postgres VERSION=$(DOCKER_LIBRARY_POSTGRES_VERSION) LATEST=true > /dev/null 2>&1
+	make docker-image-pull-or-build NAME=postgres VERSION=$(DOCKER_LIBRARY_POSTGRES_VERSION) >&2
 	docker run --interactive $(_TTY) --rm \
 		--name $$container \
 		--user $$(id -u):$$(id -g) \
@@ -580,7 +585,7 @@ docker-run-tools: ### Run tools (Python) container - mandatory: CMD; optional: S
 	mkdir -p $(HOME)/.aws
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo $(DOCKER_LIBRARY_REGISTRY)/tools:$(DOCKER_LIBRARY_TOOLS_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo tools-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
-	make docker-image-pull-or-build NAME=tools VERSION=$(DOCKER_LIBRARY_TOOLS_VERSION) LATEST=true > /dev/null 2>&1
+	make docker-image-pull-or-build NAME=tools VERSION=$(DOCKER_LIBRARY_TOOLS_VERSION) >&2
 	if [[ ! "$(SH)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then
 		docker run --interactive $(_TTY) --rm \
 			--name $$container \
@@ -710,25 +715,19 @@ _docker-is-lib-image:
 
 # ==============================================================================
 
-docker-image-get-digest: ### Get image digest by matching tag pattern - mandatory: NAME=[image name],VERSION|TAG
-	[ $$(make _docker-is-lib-image) == false ] && make docker-login > /dev/null 2>&1
+docker-image-get-digest: ### Get image digest by matching tag pattern - mandatory: NAME=[image name],VERSION|TAG=[string to match version/tag of an image]
+	[ $$(make _docker-is-lib-image NAME=$(NAME)) == false ] && make docker-login > /dev/null 2>&1
 	make aws-ecr-get-image-digest \
 		REPO=$$(make _docker-get-reg)/$(NAME) \
 		TAG=$(or $(VERSION), $(TAG))
 
-docker-tag-as-release-candidate: ### Tag release candidate - mandatory: TAG,IMAGE=[image name]; optional: COMMIT=[git commit hash, defaults to HEAD]
+docker-image-find-and-tag-as: ### Find image based on commit and tag it - mandatory: TAG,IMAGE=[image name]; optional: COMMIT=[git commit hash, defaults to HEAD]
 	commit=$(or $(COMMIT), master)
 	hash=$$(make git-commit-get-hash COMMIT=$$commit)
-	digest=$$(make docker-image-get-digest NAME=$(IMAGE) COMMIT=$$hash)
+	digest=$$(make docker-image-get-digest NAME=$(IMAGE) TAG=$$hash)
 	make docker-pull NAME=$(IMAGE) DIGEST=$$digest
-	make docker-tag DIGEST=$$digest TAG=
-
-docker-tag-as-environment-deployment: ### Tag environment deployment - mandatory: TAG,IMAGE=[image name],PROFILE=[profile name]; optional: COMMIT=[git release candidate tag name, defaults to HEAD]
-	[ $(PROFILE) = local ] && (echo "ERROR: Please, specify the PROFILE"; exit 1)
-	commit=$(or $(COMMIT), master)
-	hash=$$(make git-commit-get-hash COMMIT=$$commit)
-	digest=$$(make docker-image-get-digest NAME=$(IMAGE) COMMIT=$$hash)
-	make docker-pull NAME=$(IMAGE) DIGEST=$$digest
+	make docker-tag NAME=$(IMAGE) DIGEST=$$digest TAG=$(TAG)
+	make docker-push NAME=$(IMAGE) TAG=$(TAG)
 
 # ==============================================================================
 

@@ -87,7 +87,8 @@ class CapacityStatusRequestPayloadSerializer(serializers.Serializer):
     def convertToModel(self, data):
 
         logger.debug(
-            "Data in CapacityStatusRequestPayloadSerializer for model conversion: %s", data,
+            "Data in CapacityStatusRequestPayloadSerializer for model conversion: %s",
+            data,
         )
 
         payload_data = super().validated_data

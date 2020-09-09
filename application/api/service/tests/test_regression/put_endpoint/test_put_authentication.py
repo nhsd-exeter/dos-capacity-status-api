@@ -10,7 +10,10 @@ class TestPutAuthentication(unittest.TestCase):
     client = Client()
 
     def test_unauthorised_user_no_creds(self):
-        response = self.client.put(TestEnv.api_url, HTTP_HOST=TestEnv.api_host,)
+        response = self.client.put(
+            TestEnv.api_url,
+            HTTP_HOST=TestEnv.api_host,
+        )
 
         self.assertEqual(response.status_code, 401, "Response status code is not as expected.")
         self.assertEqual(
@@ -24,7 +27,9 @@ class TestPutAuthentication(unittest.TestCase):
 
         self.assertEqual(response.status_code, 401, "Response status code is not as expected.")
         self.assertEqual(
-            response.content, b'{"detail":"Invalid token."}', "Response message is not as expected.",
+            response.content,
+            b'{"detail":"Invalid token."}',
+            "Response message is not as expected.",
         )
 
     def test_user_not_active(self):

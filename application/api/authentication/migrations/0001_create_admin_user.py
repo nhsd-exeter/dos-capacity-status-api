@@ -12,7 +12,10 @@ class Migration(migrations.Migration):
         if (DJANGO_SU_PASSWORD) is None:
             raise Exception("Admin password in API_ADMIN_PASSWORD environment variable has not been specified")
 
-        superuser = User.objects.create_superuser(username=DJANGO_SU_NAME, password=DJANGO_SU_PASSWORD,)
+        superuser = User.objects.create_superuser(
+            username=DJANGO_SU_NAME,
+            password=DJANGO_SU_PASSWORD,
+        )
 
         superuser.save()
 

@@ -24,7 +24,8 @@ class TestValidateDosUsernameExists(TestCase):
 
         mock_logger.info.assert_called_with("Validate DoS user exists for name: " + str(stub_dos_username))
         mock_logger.debug.assert_called_with(
-            "DoS user exists with values: %s", mock_get_dos_user_for_username.return_value,
+            "DoS user exists with values: %s",
+            mock_get_dos_user_for_username.return_value,
         )
 
     @mock.patch.object(models, "get_dos_user_for_username")
@@ -39,13 +40,15 @@ class TestValidateDosUsernameExists(TestCase):
 
             except ValidationError as e:
                 self.assertEqual(
-                    ["Username '" + stub_dos_username + "' is not an 'ACTIVE' DoS user"], e.messages,
+                    ["Username '" + stub_dos_username + "' is not an 'ACTIVE' DoS user"],
+                    e.messages,
                 )
                 raise e
 
         mock_logger.info.assert_called_with("Validate DoS user exists for name: " + str(stub_dos_username))
         mock_logger.debug.assert_called_with(
-            "DoS user exists with values: %s", mock_get_dos_user_for_username.return_value,
+            "DoS user exists with values: %s",
+            mock_get_dos_user_for_username.return_value,
         )
 
     @mock.patch.object(models, "get_dos_user_for_username")
@@ -62,7 +65,8 @@ class TestValidateDosUsernameExists(TestCase):
 
             except ValidationError as e:
                 self.assertEqual(
-                    ["Username '" + stub_dos_username + "' does not exist in DoS"], e.messages,
+                    ["Username '" + stub_dos_username + "' does not exist in DoS"],
+                    e.messages,
                 )
                 raise e
 
@@ -82,7 +86,8 @@ class TestValidateDosUsernameExists(TestCase):
 
             except ValidationError as e:
                 self.assertEqual(
-                    ["Unexpected multiple DoS users with given username '" + stub_dos_username + "'"], e.messages,
+                    ["Unexpected multiple DoS users with given username '" + stub_dos_username + "'"],
+                    e.messages,
                 )
                 raise e
 

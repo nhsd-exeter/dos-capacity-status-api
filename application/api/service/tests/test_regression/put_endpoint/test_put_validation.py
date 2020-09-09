@@ -23,7 +23,8 @@ class TestPutValidationVal0001(unittest.TestCase):
         self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0001") > 0), "Response message is not as expected.",
+            (str(response.content).find("VAL-0001") > 0),
+            "Response message is not as expected.",
         )
 
 
@@ -47,7 +48,8 @@ class TestPutValidationVal0002(unittest.TestCase):
         self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0002") > 0), "Response message is not as expected.",
+            (str(response.content).find("VAL-0002") > 0),
+            "Response message is not as expected.",
         )
 
     def test_invalid_capacity_status_given_text(self):
@@ -66,7 +68,8 @@ class TestPutValidationVal0002(unittest.TestCase):
         self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0002") > 0), "Response message is not as expected.",
+            (str(response.content).find("VAL-0002") > 0),
+            "Response message is not as expected.",
         )
 
     def test_invalid_capacity_status_given_blank(self):
@@ -85,7 +88,8 @@ class TestPutValidationVal0002(unittest.TestCase):
         self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0002") > 0), "Response message is not as expected.",
+            (str(response.content).find("VAL-0002") > 0),
+            "Response message is not as expected.",
         )
 
 
@@ -110,7 +114,8 @@ class TestPutValidationVal0003(unittest.TestCase):
         self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0003") > 0), "Response message is not as expected.",
+            (str(response.content).find("VAL-0003") > 0),
+            "Response message is not as expected.",
         )
 
     def test_invalid_reset_status_blank(self):
@@ -130,7 +135,8 @@ class TestPutValidationVal0003(unittest.TestCase):
         self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0003") > 0), "Response message is not as expected.",
+            (str(response.content).find("VAL-0003") > 0),
+            "Response message is not as expected.",
         )
 
 
@@ -155,7 +161,8 @@ class TestPutValidationVal0004(unittest.TestCase):
         self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0004") > 0), "Response message is not as expected.",
+            (str(response.content).find("VAL-0004") > 0),
+            "Response message is not as expected.",
         )
 
     def test_invalid_reset_status_in_given_too_high(self):
@@ -175,7 +182,8 @@ class TestPutValidationVal0004(unittest.TestCase):
         self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0004") > 0), "Response message is not as expected.",
+            (str(response.content).find("VAL-0004") > 0),
+            "Response message is not as expected.",
         )
 
 
@@ -200,7 +208,8 @@ class TestPutValidationVal0005(unittest.TestCase):
         self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0005") > 0), "Response message is not as expected.",
+            (str(response.content).find("VAL-0005") > 0),
+            "Response message is not as expected.",
         )
 
 
@@ -225,7 +234,8 @@ class TestPutValidationVal0006(unittest.TestCase):
         self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0006") > 0), "Response message is not as expected.",
+            (str(response.content).find("VAL-0006") > 0),
+            "Response message is not as expected.",
         )
 
 
@@ -251,13 +261,16 @@ class TestPutValidationMultipleVals(unittest.TestCase):
         self.assertEqual(response.status_code, 400, "Response status code is not as expected.")
 
         self.assertTrue(
-            (str(response.content).find("VAL-0002") > 0), "Response message is not as expected, no VAL-0002.",
+            (str(response.content).find("VAL-0002") > 0),
+            "Response message is not as expected, no VAL-0002.",
         )
 
         self.assertTrue(
-            (str(response.content).find("VAL-0004") > 0), "Response message is not as expected, no VAL-0004.",
+            (str(response.content).find("VAL-0004") > 0),
+            "Response message is not as expected, no VAL-0004.",
         )
 
         self.assertTrue(
-            (str(response.content).find("VAL-0006") > 0), "Response message is not as expected, no VAL-0006.",
+            (str(response.content).find("VAL-0006") > 0),
+            "Response message is not as expected, no VAL-0006.",
         )

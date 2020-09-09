@@ -67,7 +67,8 @@ class CapacityStatusModelSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
 
         logger.debug(
-            "Data passed into CapacityStatusModelSerializer for update: %s", validated_data,
+            "Data passed into CapacityStatusModelSerializer for update: %s",
+            validated_data,
         )
 
         ragStatusColor = validated_data.get("status", instance.status)["color"]

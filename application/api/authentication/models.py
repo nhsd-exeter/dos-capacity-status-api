@@ -20,13 +20,15 @@ def validate_dos_username_exists(value):
         logger.debug("DoS user exists with values: %s", user)
         if user.status != "ACTIVE":
             raise ValidationError(
-                "Username '%(value)s' is not an 'ACTIVE' DoS user", params={"value": value},
+                "Username '%(value)s' is not an 'ACTIVE' DoS user",
+                params={"value": value},
             )
     except ObjectDoesNotExist:
         raise ValidationError("Username '%(value)s' does not exist in DoS", params={"value": value})
     except MultipleObjectsReturned:
         raise ValidationError(
-            "Unexpected multiple DoS users with given username '%(value)s'", params={"value": value},
+            "Unexpected multiple DoS users with given username '%(value)s'",
+            params={"value": value},
         )
 
 
