@@ -1,1 +1,2 @@
 build/automation/* linguist-detectable=false
+data/* linguist-detectable=false
