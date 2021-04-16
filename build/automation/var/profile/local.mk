@@ -1,4 +1,4 @@
--include $(VAR_DIR)/platform-texas/account-live-k8s-nonprod.mk
+-include $(VAR_DIR)/platform-texas/v1/account-live-k8s-nonprod.mk
 
 # ==============================================================================
 # Service variables
@@ -23,5 +23,5 @@ DB_DOS_PASSWORD = $(API_DB_PASSWORD)
 
 
 # TODO: What is this variable for? We always should be using https
-HTTP_PROTOCOL = http
+HTTP_PROTOCOL = https
 REQUEST_ID_HEADER =

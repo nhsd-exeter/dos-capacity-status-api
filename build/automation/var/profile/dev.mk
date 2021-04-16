@@ -1,8 +1,9 @@
--include $(VAR_DIR)/platform-texas/account-live-k8s-nonprod.mk
+-include $(VAR_DIR)/platform-texas/v1/account-live-k8s-nonprod.mk
 
 # ==============================================================================
 # Service variables
 
+K8S_TTL = forever
 API_HOST = uec-dos-api-cs
 #API_ADMIN_ALLOWED_HOSTS = [secret]
 #API_ADMIN_PASSWORD = [secret]

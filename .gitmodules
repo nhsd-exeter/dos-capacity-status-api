@@ -1,3 +1,3 @@
 [submodule "build/automation/tmp/make-devops"]
-	path = build/automation/tmp/make-devops
-	url = https://github.com/nhsd-ddce/make-devops.git
+  path = build/automation/tmp/make-devops
+  url = https://github.com/nhsd-ddce/make-devops.git
