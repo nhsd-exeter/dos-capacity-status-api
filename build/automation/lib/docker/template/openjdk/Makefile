@@ -3,8 +3,8 @@ include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 
 # ==============================================================================
 
-build:
-	make docker-build NAME=openjdk
+build: project-config
+	make -s docker-build NAME=openjdk
 
 test:
 	make docker-test NAME=openjdk CMD="bash"

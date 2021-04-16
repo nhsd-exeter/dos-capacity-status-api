@@ -1,36 +1,48 @@
 PYTHON_VERSION_MAJOR = 3
-PYTHON_VERSION_MINOR = 8
-PYTHON_VERSION_PATCH = 5
+PYTHON_VERSION_MINOR = 9
+PYTHON_VERSION_PATCH = 0
 PYTHON_VERSION = $(PYTHON_VERSION_MAJOR).$(PYTHON_VERSION_MINOR).$(PYTHON_VERSION_PATCH)
 PYTHON_BASE_PACKAGES = \
-	awscli-local==0.8 \
-	awscli==1.18.131 \
+	awscli-local==0.13 \
+	awscli==1.18.207 \
 	black==20.8b1 \
-	boto3==1.14.54 \
+	boto3==1.16.47 \
 	bpython \
 	configparser \
 	coverage \
-	diagrams \
+	diagrams==0.18.0 \
 	flake8 \
 	mypy \
+	prettytable \
 	pygments \
 	pylint \
 	pyyaml \
-	requests==2.24.0
+	requests==2.25.1
 
-python-virtualenv: ### Setup Python virtual environment - optional: PYTHON_VERSION
+python-virtualenv: ### Setup Python virtual environment - optional: PYTHON_VERSION,PYTHON_VENV_NAME
 	brew update
 	brew upgrade pyenv
 	pyenv install --skip-existing $(PYTHON_VERSION)
-	pyenv local $(PYTHON_VERSION)
-	pip install --upgrade pip
-	pip install $(PYTHON_BASE_PACKAGES)
-	sed -i 's;    "python.linting.flake8Path":.*;    "python.linting.flake8Path": "~/.pyenv/versions/$(PYTHON_VERSION)/bin/flake8",;g' project.code-workspace
-	sed -i 's;    "python.linting.mypyPath":.*;    "python.linting.mypyPath": "~/.pyenv/versions/$(PYTHON_VERSION)/bin/mypy",;g' project.code-workspace
-	sed -i 's;    "python.linting.pylintPath":.*;    "python.linting.pylintPath": "~/.pyenv/versions/$(PYTHON_VERSION)/bin/pylint",;g' project.code-workspace
-	sed -i 's;    "python.pythonPath":.*;    "python.pythonPath": "~/.pyenv/versions/$(PYTHON_VERSION)/bin/python",;g' project.code-workspace
+	if [ -z "$(PYTHON_VENV_NAME)" ]; then
+		pyenv local $(PYTHON_VERSION)
+		pip install --upgrade pip || pyenv install --skip-existing $(PYTHON_VERSION) && pip install --upgrade pip
+		pip install $(PYTHON_BASE_PACKAGES)
+		sed -i 's;    "python.linting.flake8Path":.*;    "python.linting.flake8Path": "~/.pyenv/versions/$(PYTHON_VERSION)/bin/flake8",;g' project.code-workspace
+		sed -i 's;    "python.linting.mypyPath":.*;    "python.linting.mypyPath": "~/.pyenv/versions/$(PYTHON_VERSION)/bin/mypy",;g' project.code-workspace
+		sed -i 's;    "python.linting.pylintPath":.*;    "python.linting.pylintPath": "~/.pyenv/versions/$(PYTHON_VERSION)/bin/pylint",;g' project.code-workspace
+		sed -i 's;    "python.pythonPath":.*;    "python.pythonPath": "~/.pyenv/versions/$(PYTHON_VERSION)/bin/python",;g' project.code-workspace
+	else
+		pyenv virtualenv $(PYTHON_VERSION) $(PYTHON_VENV_NAME)
+		pyenv local $(PYTHON_VENV_NAME)
+		pip install --upgrade pip
+		pip install $(PYTHON_BASE_PACKAGES)
+		sed -i 's;    "python.linting.flake8Path":.*;    "python.linting.flake8Path": "~/.pyenv/versions/$(PYTHON_VENV_NAME)/bin/flake8",;g' project.code-workspace
+		sed -i 's;    "python.linting.mypyPath":.*;    "python.linting.mypyPath": "~/.pyenv/versions/$(PYTHON_VENV_NAME)/bin/mypy",;g' project.code-workspace
+		sed -i 's;    "python.linting.pylintPath":.*;    "python.linting.pylintPath": "~/.pyenv/versions/$(PYTHON_VENV_NAME)/bin/pylint",;g' project.code-workspace
+		sed -i 's;    "python.pythonPath":.*;    "python.pythonPath": "~/.pyenv/versions/$(PYTHON_VENV_NAME)/bin/python",;g' project.code-workspace
+	fi
 
-python-virtualenv-clean: ### Clean up Python virtual environment - optional: PYTHON_VERSION
+python-virtualenv-clean: ### Clean up Python virtual environment - optional: PYTHON_VERSION=[version or venv name]
 	pyenv uninstall --force $(PYTHON_VERSION)
 	rm -rf .python-version
 	pyenv global system
@@ -71,3 +83,13 @@ python-clean: ### Clean up Python project files - mandatory: DIR=[Python project
 		-name "coverage.xml" -o \
 		-name "db.sqlite3" -o \
 	\) -print | xargs rm -rfv
+
+python-check-versions: ### Check Python versions alignment
+	echo "python library: $(PYTHON_VERSION) (current $(DEVOPS_PROJECT_VERSION))"
+	echo "python library aws: none"
+	echo "python virtual: $$(pyenv install --list | grep -v - | grep -v b | tail -1 | sed "s/^[[:space:]]*//g") (latest)"
+	echo "python docker: $$(make docker-repo-list-tags REPO=python | grep -w "^[0-9]*\(\.[0-9]*\(\.[0-9]*\)\?\)\?-alpine$$" | sort -V -r | head -n 1 | sed "s/-alpine//g" | sed "s/^[[:space:]]*//g") (latest)"
+	echo "python aws: unknown"
+
+.SILENT: \
+	python-check-versions

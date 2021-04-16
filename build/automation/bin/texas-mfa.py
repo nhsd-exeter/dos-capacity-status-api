@@ -7,7 +7,7 @@ import random
 from configparser import ConfigParser
 from os import path
 
-SESSION_DURATION = 28800
+SESSION_DURATION = 3600
 
 
 def get_config_profiles():
@@ -24,20 +24,21 @@ def role_arn_to_session(aws_profile):
     config.read([path.join(path.expanduser("~"), ".aws/config")])
     role_arn = config.get("profile {aws_profile}".format(aws_profile=aws_profile), "role_arn")
     mfa_serial = config.get("profile {aws_profile}".format(aws_profile=aws_profile), "mfa_serial")
+    mfa_user = mfa_serial.split("/")[1] + "_" + str(random.randrange(1000, 9999))
     client = boto3.client("sts")
     response = client.assume_role(
         RoleArn=role_arn,
-        RoleSessionName=str(random.randrange(1000, 9999)),
+        RoleSessionName=mfa_user,
         SerialNumber=mfa_serial,
         DurationSeconds=SESSION_DURATION,
         TokenCode=getpass.getpass("MFA Token: "),
     )
     time_now = datetime.datetime.now()
     expiry_time = time_now + datetime.timedelta(seconds=SESSION_DURATION)
-    print("Expiry time: {}".format(expiry_time))
-    print(
+    fp = open(path.expanduser("~/.aws/session.tmp"), "w")
+    fp.write(
         """
-## Copy the below into your terminal to export your temporary credentials
+## Source this file or copy the below into your terminal to export your temporary credentials
 
 export AWS_ACCESS_KEY_ID={access_key_id}
 export AWS_SECRET_ACCESS_KEY={secret_access_key}
@@ -53,6 +54,7 @@ export TEXAS_SESSION_EXPIRY_TIME={expiry_time}
             expiry_time=expiry_time.strftime("%Y%m%d%H%M%S"),
         )
     )
+    fp.close()
 
 
 if __name__ == "__main__":

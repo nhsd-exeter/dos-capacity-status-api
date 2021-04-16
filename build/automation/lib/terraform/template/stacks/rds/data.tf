@@ -1,38 +1,19 @@
 # ==============================================================================
 # Data
 
-data "terraform_remote_state" "route53" {
+data "terraform_remote_state" "networking" {
   backend = "s3"
   config = {
-    key    = var.route53_terraform_state_key
-    bucket = var.terraform_platform_state_store
+    key    = "${var.terraform_state_key_shared}/networking/terraform.state"
+    bucket = var.terraform_state_store
     region = var.aws_region
   }
 }
-
-data "terraform_remote_state" "security_groups_k8s" {
+data "terraform_remote_state" "terraform-state" {
   backend = "s3"
   config = {
-    key    = var.security_groups_k8s_terraform_state_key
-    bucket = var.terraform_platform_state_store
-    region = var.aws_region
-  }
-}
-
-data "terraform_remote_state" "security_groups" {
-  backend = "s3"
-  config = {
-    key    = var.security_groups_terraform_state_key
-    bucket = var.terraform_platform_state_store
-    region = var.aws_region
-  }
-}
-
-data "terraform_remote_state" "vpc" {
-  backend = "s3"
-  config = {
-    key    = var.vpc_terraform_state_key
-    bucket = var.terraform_platform_state_store
+    key    = "${var.terraform_state_key_shared}/terraform-state/terraform.state"
+    bucket = var.terraform_state_store
     region = var.aws_region
   }
 }
@@ -40,9 +21,5 @@ data "terraform_remote_state" "vpc" {
 # ==============================================================================
 # Terraform state keys and store set by the Make DevOps automation scripts
 
-variable "route53_terraform_state_key" {}
-variable "security_groups_k8s_terraform_state_key" {}
-variable "security_groups_terraform_state_key" {}
-variable "vpc_terraform_state_key" {}
-
-variable "terraform_platform_state_store" {}
+variable "terraform_state_store" {}
+variable "terraform_state_key_shared" {}
