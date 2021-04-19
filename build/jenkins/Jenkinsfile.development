@@ -30,11 +30,11 @@ pipeline {
         script { sh 'make build' }
       }
     }
-    stage('Run Tests') {
+    stage('Run Unit Tests') {
       steps {
-        script { sh 'make migrate' }
-        script { sh 'make test-unit-only' }
-        script { sh 'make test-regression-only' }
+        script { sh 'make migrate PROFILE=local' }
+        script { sh 'make test-unit-only PROFILE=local' }
+        script { sh 'make test-regression-only PROFILE=local' }
       }
     }
     stage('Push Images') {
