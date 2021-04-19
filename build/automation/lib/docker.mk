@@ -2,24 +2,26 @@ DOCKER_COMPOSE_YML = $(DOCKER_DIR)/docker-compose.yml
 DOCKER_DIR = $(abspath $(PROJECT_DIR)/build/docker)
 DOCKER_DIR_REL = $(shell echo $(DOCKER_DIR) | sed "s;$(PROJECT_DIR);;g")
 DOCKER_LIB_DIR = $(LIB_DIR)/docker
+DOCKER_LIB_DIR_REL = $(shell echo $(DOCKER_LIB_DIR) | sed "s;$(PROJECT_DIR);;g")
 DOCKER_LIB_IMAGE_DIR = $(LIB_DIR)/docker/image
+DOCKER_LIB_IMAGE_DIR_REL = $(shell echo $(DOCKER_LIB_IMAGE_DIR) | sed "s;$(PROJECT_DIR);;g")
 DOCKER_NETWORK = $(PROJECT_GROUP_SHORT)/$(PROJECT_NAME_SHORT)/$(BUILD_ID)
 DOCKER_REGISTRY = $(AWS_ECR)/$(PROJECT_GROUP_SHORT)/$(PROJECT_NAME_SHORT)
 DOCKER_LIBRARY_REGISTRY = nhsd
 
-DOCKER_ALPINE_VERSION = 3.12.0
-DOCKER_COMPOSER_VERSION = 1.10.10
-DOCKER_DOTNET_VERSION = 3.1.401
-DOCKER_ELASTICSEARCH_VERSION = 7.9.0
-DOCKER_GRADLE_VERSION = 6.6.1-jdk$(JAVA_VERSION)
+DOCKER_ALPINE_VERSION = 3.12.1
+DOCKER_COMPOSER_VERSION = 2.0.6
+DOCKER_DIND_VERSION = 20.10.1-dind
+DOCKER_DOTNET_VERSION = 3.1.404
+DOCKER_ELASTICSEARCH_VERSION = 7.10.0
+DOCKER_GRADLE_VERSION = 6.7.1-jdk$(JAVA_VERSION)
 DOCKER_LOCALSTACK_VERSION = $(LOCALSTACK_VERSION)
 DOCKER_MAVEN_VERSION = 3.6.3-openjdk-$(JAVA_VERSION)-slim
-DOCKER_NGINX_VERSION = 1.19.2-alpine
-DOCKER_NODE_VERSION = 14.9.0-alpine
+DOCKER_NGINX_VERSION = 1.19.4-alpine
+DOCKER_NODE_VERSION = $(NODE_VERSION)-alpine
 DOCKER_OPENJDK_VERSION = $(JAVA_VERSION)-alpine
 DOCKER_POSTGRES_VERSION = $(POSTGRES_VERSION)-alpine
 DOCKER_POSTMAN_NEWMAN_VERSION = $(POSTMAN_NEWMAN_VERSION)-alpine
-DOCKER_PULUMI_VERSION = v2.9.1
 DOCKER_PYTHON_VERSION = $(PYTHON_VERSION)-alpine
 DOCKER_TERRAFORM_VERSION = $(TERRAFORM_VERSION)
 DOCKER_WIREMOCK_VERSION = $(WIREMOCK_VERSION)-alpine
@@ -27,9 +29,10 @@ DOCKER_WIREMOCK_VERSION = $(WIREMOCK_VERSION)-alpine
 DOCKER_LIBRARY_ELASTICSEARCH_VERSION = $(shell cat $(DOCKER_LIB_IMAGE_DIR)/elasticsearch/VERSION 2> /dev/null)
 DOCKER_LIBRARY_NGINX_VERSION = $(shell cat $(DOCKER_LIB_IMAGE_DIR)/nginx/VERSION 2> /dev/null)
 DOCKER_LIBRARY_NODE_VERSION = $(shell cat $(DOCKER_LIB_IMAGE_DIR)/node/VERSION 2> /dev/null)
+DOCKER_LIBRARY_PIPELINE_VERSION = $(shell cat $(DOCKER_LIB_IMAGE_DIR)/pipeline/VERSION 2> /dev/null)
 DOCKER_LIBRARY_POSTGRES_VERSION = $(shell cat $(DOCKER_LIB_IMAGE_DIR)/postgres/VERSION 2> /dev/null)
-DOCKER_LIBRARY_PYTHON_VERSION = $(shell cat $(DOCKER_LIB_IMAGE_DIR)/python/VERSION 2> /dev/null)
 DOCKER_LIBRARY_PYTHON_APP_VERSION = $(shell cat $(DOCKER_LIB_IMAGE_DIR)/python-app/VERSION 2> /dev/null)
+DOCKER_LIBRARY_PYTHON_VERSION = $(shell cat $(DOCKER_LIB_IMAGE_DIR)/python/VERSION 2> /dev/null)
 DOCKER_LIBRARY_TOOLS_VERSION = $(shell cat $(DOCKER_LIB_IMAGE_DIR)/tools/VERSION 2> /dev/null)
 
 COMPOSE_HTTP_TIMEOUT := $(or $(COMPOSE_HTTP_TIMEOUT), 6000)
@@ -41,8 +44,8 @@ docker-create-from-template: ### Create Docker image from template - mandatory: 
 	mkdir -p $(DOCKER_DIR)
 	if [ ! -f $(DOCKER_DIR)/docker-compose.yml ]; then
 		cp -rfv \
-			$(PROJECT_DIR)/build/automation/lib/project/template/build/docker/docker-compose.yml \
-			$(DOCKER_DIR)
+			build/automation/lib/project/template/build/docker/docker-compose.yml \
+			$(DOCKER_DIR_REL)
 	fi
 	rm -rf $(DOCKER_DIR)/$(NAME)
 	cp -rfv $(DOCKER_LIB_DIR)/template/$(TEMPLATE) $(DOCKER_DIR)/$(NAME)
@@ -85,15 +88,26 @@ docker-build docker-image: ### Build Docker image - mandatory: NAME; optional: V
 	fi
 	# Build
 	dir=$$(make _docker-get-dir)
+	export IMAGE=$$reg/$(NAME)$(shell [ -n "$(EXAMPLE)" ] && echo -example)
+	export VERSION=$$(make docker-image-get-version)
+	make -s file-replace-variables FILE=$$dir/Dockerfile.effective
 	docker build --rm \
-		--build-arg IMAGE=$$reg/$(NAME)$(shell [ -n "$(EXAMPLE)" ] && echo -example) \
-		--build-arg VERSION=$$(make docker-image-get-version) \
+		--build-arg IMAGE=$$IMAGE \
+		--build-arg VERSION=$$VERSION \
 		--build-arg BUILD_ID=$(BUILD_ID) \
 		--build-arg BUILD_DATE=$(BUILD_DATE) \
 		--build-arg BUILD_REPO=$(BUILD_REPO) \
 		--build-arg BUILD_BRANCH=$(BUILD_BRANCH) \
 		--build-arg BUILD_COMMIT_HASH=$(BUILD_COMMIT_HASH) \
 		--build-arg BUILD_COMMIT_DATE=$(BUILD_COMMIT_DATE) \
+		--label name=$$IMAGE \
+		--label version=$$VERSION \
+		--label build-id=$(BUILD_ID) \
+		--label build-date=$(BUILD_DATE) \
+		--label build-repo=$(BUILD_REPO) \
+		--label build-branch=$(BUILD_BRANCH) \
+		--label build-commit-hash=$(BUILD_COMMIT_HASH) \
+		--label build-commit-date=$(BUILD_COMMIT_DATE) \
 		$(BUILD_OPTS) $$cache_from \
 		--file $$dir/Dockerfile.effective \
 		--tag $$reg/$(NAME)$(shell [ -n "$(EXAMPLE)" ] && echo -example):$$(make docker-image-get-version) \
@@ -119,14 +133,14 @@ docker-test: ### Test image - mandatory: NAME; optional: ARGS,CMD,GOSS_OPTS,EXAM
 		$(CMD)
 
 docker-login: ### Log into the Docker registry - optional: DOCKER_USERNAME,DOCKER_PASSWORD
-	if [ -n "$(DOCKER_USERNAME)" ] && [ -n "$(DOCKER_PASSWORD)" ]; then
+	if [ -n "$(DOCKER_USERNAME)" ] && [ -n "$$(make _docker-get-login-password)" ]; then
 		make _docker-get-login-password | docker login --username "$(DOCKER_USERNAME)" --password-stdin
 	else
 		make aws-ecr-get-login-password | docker login --username AWS --password-stdin $(AWS_ECR)
 	fi
 
-docker-create-repository: ### Create Docker repository to store an image - mandatory: NAME
-	make aws-ecr-create-repository NAME=$(NAME)
+docker-create-repository: ### Create Docker repository to store an image - mandatory: NAME; optional: POLICY_FILE=[policy file]
+	make aws-ecr-create-repository NAME=$(NAME) POLICY_FILE=$(POLICY_FILE)
 
 docker-push: ### Push Docker image - mandatory: NAME; optional: VERSION|TAG
 	make docker-login
@@ -192,25 +206,30 @@ docker-create-dockerfile: ### Create effective Dockerfile - mandatory: NAME; op
 	cd $$(make _docker-get-dir)
 	cat $(or $(FILE), Dockerfile) $(DOCKER_LIB_DIR)/image/Dockerfile.metadata > Dockerfile.effective
 	sed -i " \
-		s#FROM $(DOCKER_LIBRARY_REGISTRY)/elasticsearch:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/elasticsearch:${DOCKER_LIBRARY_ELASTICSEARCH_VERSION}#g; \
-		s#FROM $(DOCKER_LIBRARY_REGISTRY)/nginx:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/nginx:${DOCKER_LIBRARY_NGINX_VERSION}#g; \
-		s#FROM $(DOCKER_LIBRARY_REGISTRY)/node:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/node:${DOCKER_LIBRARY_NODE_VERSION}#g; \
-		s#FROM $(DOCKER_LIBRARY_REGISTRY)/postgres:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/postgres:${DOCKER_LIBRARY_POSTGRES_VERSION}#g; \
-		s#FROM $(DOCKER_LIBRARY_REGISTRY)/python:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/python:${DOCKER_LIBRARY_PYTHON_VERSION}#g; \
-		s#FROM $(DOCKER_LIBRARY_REGISTRY)/python-app:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/python-app:${DOCKER_LIBRARY_PYTHON_APP_VERSION}#g; \
-		s#FROM $(DOCKER_LIBRARY_REGISTRY)/tools:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/tools:${DOCKER_LIBRARY_TOOLS_VERSION}#g; \
-		s#FROM alpine:latest#FROM alpine:${DOCKER_ALPINE_VERSION}#g; \
-		s#FROM bitnami/elasticsearch:latest#FROM bitnami/elasticsearch:${DOCKER_ELASTICSEARCH_VERSION}#g; \
-		s#FROM gradle:latest#FROM gradle:${DOCKER_GRADLE_VERSION}#g; \
-		s#FROM maven:latest#FROM maven:${DOCKER_MAVEN_VERSION}#g; \
-		s#FROM mcr.microsoft.com/dotnet/core/sdk:latest#FROM mcr.microsoft.com/dotnet/core/sdk:${DOCKER_DOTNET_VERSION}#g; \
-		s#FROM nginx:latest#FROM nginx:${DOCKER_NGINX_VERSION}#g; \
-		s#FROM node:latest#FROM node:${DOCKER_NODE_VERSION}#g; \
-		s#FROM openjdk:latest#FROM openjdk:${DOCKER_OPENJDK_VERSION}#g; \
-		s#FROM postgres:latest#FROM postgres:${DOCKER_POSTGRES_VERSION}#g; \
-		s#FROM postman/newman:latest#FROM postman/newman:${DOCKER_POSTMAN_NEWMAN_VERSION}#g; \
-		s#FROM python:latest#FROM python:${DOCKER_PYTHON_VERSION}#g; \
-		s#FROM rodolpheche/wiremock:latest#FROM rodolpheche/wiremock:${DOCKER_WIREMOCK_VERSION}#g; \
+		s#DOCKER_REGISTRY#$(DOCKER_REGISTRY)#g; \
+		s#AWS_ECR#$(AWS_ECR)#g; \
+		s#AWS_ACCOUNT_ID_MGMT#$(AWS_ACCOUNT_ID_MGMT)#g; \
+		s#FROM $(DOCKER_LIBRARY_REGISTRY)/elasticsearch:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/elasticsearch:$(DOCKER_LIBRARY_ELASTICSEARCH_VERSION)#g; \
+		s#FROM $(DOCKER_LIBRARY_REGISTRY)/nginx:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/nginx:$(DOCKER_LIBRARY_NGINX_VERSION)#g; \
+		s#FROM $(DOCKER_LIBRARY_REGISTRY)/node:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/node:$(DOCKER_LIBRARY_NODE_VERSION)#g; \
+		s#FROM $(DOCKER_LIBRARY_REGISTRY)/pipeline:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/pipeline:$(DOCKER_LIBRARY_PIPELINE_VERSION)#g; \
+		s#FROM $(DOCKER_LIBRARY_REGISTRY)/postgres:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/postgres:$(DOCKER_LIBRARY_POSTGRES_VERSION)#g; \
+		s#FROM $(DOCKER_LIBRARY_REGISTRY)/python-app:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/python-app:$(DOCKER_LIBRARY_PYTHON_APP_VERSION)#g; \
+		s#FROM $(DOCKER_LIBRARY_REGISTRY)/python:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/python:$(DOCKER_LIBRARY_PYTHON_VERSION)#g; \
+		s#FROM $(DOCKER_LIBRARY_REGISTRY)/tools:latest#FROM $(DOCKER_LIBRARY_REGISTRY)/tools:$(DOCKER_LIBRARY_TOOLS_VERSION)#g; \
+		s#FROM alpine:latest#FROM alpine:$(DOCKER_ALPINE_VERSION)#g; \
+		s#FROM bitnami/elasticsearch:latest#FROM bitnami/elasticsearch:$(DOCKER_ELASTICSEARCH_VERSION)#g; \
+		s#FROM docker:latest#FROM docker:$(DOCKER_DIND_VERSION)#g; \
+		s#FROM gradle:latest#FROM gradle:$(DOCKER_GRADLE_VERSION)#g; \
+		s#FROM maven:latest#FROM maven:$(DOCKER_MAVEN_VERSION)#g; \
+		s#FROM mcr.microsoft.com/dotnet/core/sdk:latest#FROM mcr.microsoft.com/dotnet/core/sdk:$(DOCKER_DOTNET_VERSION)#g; \
+		s#FROM nginx:latest#FROM nginx:$(DOCKER_NGINX_VERSION)#g; \
+		s#FROM node:latest#FROM node:$(DOCKER_NODE_VERSION)#g; \
+		s#FROM openjdk:latest#FROM openjdk:$(DOCKER_OPENJDK_VERSION)#g; \
+		s#FROM postgres:latest#FROM postgres:$(DOCKER_POSTGRES_VERSION)#g; \
+		s#FROM postman/newman:latest#FROM postman/newman:$(DOCKER_POSTMAN_NEWMAN_VERSION)#g; \
+		s#FROM python:latest#FROM python:$(DOCKER_PYTHON_VERSION)#g; \
+		s#FROM rodolpheche/wiremock:latest#FROM rodolpheche/wiremock:$(DOCKER_WIREMOCK_VERSION)#g; \
 	" Dockerfile.effective
 	cd $$dir
 
@@ -234,6 +253,7 @@ docker-image-set-version: ### Set effective Docker image version - mandatory: NA
 			sed "s/HH/$$(date --date=$(BUILD_DATE) -u +"%H")/g" | \
 			sed "s/MM/$$(date --date=$(BUILD_DATE) -u +"%M")/g" | \
 			sed "s/ss/$$(date --date=$(BUILD_DATE) -u +"%S")/g" | \
+			sed "s/SS/$$(date --date=$(BUILD_DATE) -u +"%S")/g" | \
 			sed "s/hash/$$(git rev-parse --short HEAD)/g" \
 		> $$dir/.version
 	fi
@@ -268,9 +288,9 @@ docker-image-start: ### Start container - mandatory: NAME; optional: CMD,DIR,ARG
 	reg=$$(make _docker-get-reg)
 	docker run --interactive $(_TTY) $$(echo $(ARGS) | grep -- "--attach" > /dev/null 2>&1 && : || echo "--detach") \
 		--name $(NAME)$(shell [ -n "$(EXAMPLE)" ] && echo -example)-$(BUILD_COMMIT_HASH)-$(BUILD_ID) \
-		--env-file <(env | grep -Ei "^(AWS|TX|TEXAS)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^(DB|DATABASE|APP|APPLICATION|UI|API|SERVER|HOST|URL)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+		--env-file <(make _list-variables PATTERN="^(AWS|TX|TEXAS|NHSD|TERRAFORM)") \
+		--env-file <(make _list-variables PATTERN="^(DB|DATABASE|SMTP|APP|APPLICATION|UI|API|SERVER|HOST|URL)") \
+		--env-file <(make _list-variables PATTERN="^(PROFILE|ENVIRONMENT|BUILD|PROGRAMME|ORG|SERVICE|PROJECT)") \
 		--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
 		--volume $(PROJECT_DIR):/project \
 		--network $(DOCKER_NETWORK) \
@@ -330,9 +350,9 @@ docker-run: ### Run specified image - mandatory: IMAGE; optional: CMD,SH=true,DI
 		docker run --interactive $(_TTY) --rm \
 			--name $$container \
 			--user $$(id -u):$$(id -g) \
-			--env-file <(env | grep -Ei "^(AWS|TX|TEXAS)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-			--env-file <(env | grep -Ei "^(DB|DATABASE|APP|APPLICATION|UI|API|SERVER|HOST|URL)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-			--env-file <(env | grep -Ei "^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+			--env-file <(make _list-variables PATTERN="^(AWS|TX|TEXAS|NHSD|TERRAFORM)") \
+			--env-file <(make _list-variables PATTERN="^(DB|DATABASE|SMTP|APP|APPLICATION|UI|API|SERVER|HOST|URL)") \
+			--env-file <(make _list-variables PATTERN="^(PROFILE|ENVIRONMENT|BUILD|PROGRAMME|ORG|SERVICE|PROJECT)") \
 			--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
 			--volume $(PROJECT_DIR):/project \
 			--network $(DOCKER_NETWORK) \
@@ -344,9 +364,9 @@ docker-run: ### Run specified image - mandatory: IMAGE; optional: CMD,SH=true,DI
 		docker run --interactive $(_TTY) --rm \
 			--name $$container \
 			--user $$(id -u):$$(id -g) \
-			--env-file <(env | grep -Ei "^(AWS|TX|TEXAS)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-			--env-file <(env | grep -Ei "^(DB|DATABASE|APP|APPLICATION|UI|API|SERVER|HOST|URL)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-			--env-file <(env | grep -Ei "^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+			--env-file <(make _list-variables PATTERN="^(AWS|TX|TEXAS|NHSD|TERRAFORM)") \
+			--env-file <(make _list-variables PATTERN="^(DB|DATABASE|SMTP|APP|APPLICATION|UI|API|SERVER|HOST|URL)") \
+			--env-file <(make _list-variables PATTERN="^(PROFILE|ENVIRONMENT|BUILD|PROGRAMME|ORG|SERVICE|PROJECT)") \
 			--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
 			--volume $(PROJECT_DIR):/project \
 			--network $(DOCKER_NETWORK) \
@@ -358,20 +378,21 @@ docker-run: ### Run specified image - mandatory: IMAGE; optional: CMD,SH=true,DI
 				"
 	fi
 
-docker-run-composer: ### Run composer container - mandatory: CMD; optional: DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
+docker-run-composer: ### Run composer container - mandatory: CMD; optional: DIR,ARGS=[Docker args],LIB_VOLUME_MOUNT=true,VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
 	make docker-config > /dev/null 2>&1
 	mkdir -p $(TMP_DIR)/.composer
+	lib_volume_mount=$$(([ $(BUILD_ID) -eq 0 ] || [ "$(LIB_VOLUME_MOUNT)" == true ]) && echo "--volume $(TMP_DIR)/.composer:/tmp" ||:)
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo composer:$(DOCKER_COMPOSER_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo composer-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
 	docker run --interactive $(_TTY) --rm \
 		--name $$container \
 		--user $$(id -u):$$(id -g) \
-		--env-file <(env | grep -Ei "^(AWS|TX|TEXAS)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^(DB|DATABASE|APP|APPLICATION|UI|API|SERVER|HOST|URL)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+		--env-file <(make _list-variables PATTERN="^(AWS|TX|TEXAS|NHSD|TERRAFORM)") \
+		--env-file <(make _list-variables PATTERN="^(DB|DATABASE|SMTP|APP|APPLICATION|UI|API|SERVER|HOST|URL)") \
+		--env-file <(make _list-variables PATTERN="^(PROFILE|ENVIRONMENT|BUILD|PROGRAMME|ORG|SERVICE|PROJECT)") \
 		--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
 		--volume $(PROJECT_DIR):/project \
-		--volume $(TMP_DIR)/.composer:/tmp \
+		$$lib_volume_mount \
 		--network $(DOCKER_NETWORK) \
 		--workdir /project/$(shell echo $(abspath $(DIR)) | sed "s;$(PROJECT_DIR);;g") \
 		$(ARGS) \
@@ -385,9 +406,9 @@ docker-run-dotnet: ### Run dotnet container - mandatory: CMD; optional: DIR,ARGS
 	docker run --interactive $(_TTY) --rm \
 		--name $$container \
 		--user $$(id -u):$$(id -g) \
-		--env-file <(env | grep -Ei "^(AWS|TX|TEXAS)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^(DB|DATABASE|APP|APPLICATION|UI|API|SERVER|HOST|URL)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+		--env-file <(make _list-variables PATTERN="^(AWS|TX|TEXAS|NHSD|TERRAFORM)") \
+		--env-file <(make _list-variables PATTERN="^(DB|DATABASE|SMTP|APP|APPLICATION|UI|API|SERVER|HOST|URL)") \
+		--env-file <(make _list-variables PATTERN="^(PROFILE|ENVIRONMENT|BUILD|PROGRAMME|ORG|SERVICE|PROJECT)") \
 		--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
 		--volume $(PROJECT_DIR):/project \
 		--network $(DOCKER_NETWORK) \
@@ -396,63 +417,77 @@ docker-run-dotnet: ### Run dotnet container - mandatory: CMD; optional: DIR,ARGS
 		$$image \
 			dotnet $(CMD)
 
-docker-run-gradle: ### Run gradle container - mandatory: CMD; optional: DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
+docker-run-gradle: ### Run gradle container - mandatory: CMD; optional: DIR,ARGS=[Docker args],LIB_VOLUME_MOUNT=true,VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
 	make docker-config > /dev/null 2>&1
 	mkdir -p $(TMP_DIR)/.gradle
+	lib_volume_mount=$$(([ $(BUILD_ID) -eq 0 ] || [ "$(LIB_VOLUME_MOUNT)" == true ]) && echo "--volume $(TMP_DIR)/.gradle:/home/gradle/.gradle" ||:)
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo gradle:$(DOCKER_GRADLE_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo gradle-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
 	docker run --interactive $(_TTY) --rm \
 		--name $$container \
 		--user $$(id -u):$$(id -g) \
-		--env-file <(env | grep -Ei "^(AWS|TX|TEXAS)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^(DB|DATABASE|APP|APPLICATION|UI|API|SERVER|HOST|URL)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+		--env-file <(make _list-variables PATTERN="^(AWS|TX|TEXAS|NHSD|TERRAFORM)") \
+		--env-file <(make _list-variables PATTERN="^(DB|DATABASE|SMTP|APP|APPLICATION|UI|API|SERVER|HOST|URL)") \
+		--env-file <(make _list-variables PATTERN="^(PROFILE|ENVIRONMENT|BUILD|PROGRAMME|ORG|SERVICE|PROJECT)") \
 		--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
 		--env GRADLE_USER_HOME=/home/gradle/.gradle \
 		--volume $(PROJECT_DIR):/project \
-		--volume $(TMP_DIR)/.gradle:/home/gradle/.gradle \
+		$$lib_volume_mount \
 		--network $(DOCKER_NETWORK) \
 		--workdir /project/$(shell echo $(abspath $(DIR)) | sed "s;$(PROJECT_DIR);;g") \
 		$(ARGS) \
 		$$image \
 			$(CMD)
 
-docker-run-mvn: ### Run maven container - mandatory: CMD; optional: DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
+docker-run-mvn: ### Run maven container - mandatory: CMD; optional: DIR,ARGS=[Docker args],LIB_VOLUME_MOUNT=true,VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
 	make docker-config > /dev/null 2>&1
 	mkdir -p $(TMP_DIR)/.m2
+	lib_volume_mount=$$(([ $(BUILD_ID) -eq 0 ] || [ "$(LIB_VOLUME_MOUNT)" == true ]) && echo "--volume $(TMP_DIR)/.m2:/var/maven/.m2" ||:)
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo maven:$(DOCKER_MAVEN_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo mvn-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
+	keystore=
+	if [ -f $(ETC_DIR)/keystore.jks ]; then
+		keystore=" \
+			-Djavax.net.ssl.trustStore=/project/$(ETC_DIR_REL)/keystore.jks \
+			-Djavax.net.ssl.trustStorePassword=changeit \
+		"
+	fi
 	docker run --interactive $(_TTY) --rm \
 		--name $$container \
 		--user $$(id -u):$$(id -g) \
-		--env-file <(env | grep -Ei "^(AWS|TX|TEXAS)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^(DB|DATABASE|APP|APPLICATION|UI|API|SERVER|HOST|URL)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+		--env-file <(make _list-variables PATTERN="^(AWS|TX|TEXAS|NHSD|TERRAFORM)") \
+		--env-file <(make _list-variables PATTERN="^(DB|DATABASE|SMTP|APP|APPLICATION|UI|API|SERVER|HOST|URL)") \
+		--env-file <(make _list-variables PATTERN="^(PROFILE|ENVIRONMENT|BUILD|PROGRAMME|ORG|SERVICE|PROJECT)") \
 		--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
 		--env MAVEN_CONFIG=/var/maven/.m2 \
 		--volume $(PROJECT_DIR):/project \
-		--volume $(TMP_DIR)/.m2:/var/maven/.m2 \
+		$$lib_volume_mount \
 		--network $(DOCKER_NETWORK) \
 		--workdir /project/$(shell echo $(abspath $(DIR)) | sed "s;$(PROJECT_DIR);;g") \
 		$(ARGS) \
 		$$image \
 			/bin/sh -c " \
-				mvn -Duser.home=/var/maven $(CMD) \
+				mvn -Duser.home=/var/maven $$keystore $(CMD) \
 			"
 
-docker-run-node: ### Run node container - mandatory: CMD; optional: DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
+docker-run-node: ### Run node container - mandatory: CMD; optional: DIR,ARGS=[Docker args],LIB_VOLUME_MOUNT=true,VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
 	make docker-config > /dev/null 2>&1
 	mkdir -p $(TMP_DIR)/.cache
+	touch $(TMP_DIR)/.npmrc
+	touch $(TMP_DIR)/.yarnrc
+	lib_volume_mount=$$(([ $(BUILD_ID) -eq 0 ] || [ "$(LIB_VOLUME_MOUNT)" == true ]) && echo "--volume $(TMP_DIR)/.cache:/home/default/.cache" ||:)
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo node:$(DOCKER_NODE_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo node-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
 	docker run --interactive $(_TTY) --rm \
 		--name $$container \
-		--env-file <(env | grep -Ei "^(AWS|TX|TEXAS)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^(DB|DATABASE|APP|APPLICATION|UI|API|SERVER|HOST|URL)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+		--env-file <(make _list-variables PATTERN="^(AWS|TX|TEXAS|NHSD|TERRAFORM)") \
+		--env-file <(make _list-variables PATTERN="^(DB|DATABASE|SMTP|APP|APPLICATION|UI|API|SERVER|HOST|URL)") \
+		--env-file <(make _list-variables PATTERN="^(PROFILE|ENVIRONMENT|BUILD|PROGRAMME|ORG|SERVICE|PROJECT)") \
 		--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
 		--volume $(PROJECT_DIR):/project \
-		--volume $(TMP_DIR)/.cache:/home/default/.cache \
+		--volume $(TMP_DIR)/.npmrc:/home/default/.npmrc \
+		--volume $(TMP_DIR)/.yarnrc:/home/default/.yarnrc \
+		$$lib_volume_mount \
 		--network $(DOCKER_NETWORK) \
 		--workdir /project/$(shell echo $(abspath $(DIR)) | sed "s;$(PROJECT_DIR);;g") \
 		$(ARGS) \
@@ -471,46 +506,25 @@ docker-run-postman: ### Run postman (newman) container - mandatory: DIR,CMD
 		DIR="$(DIR)" \
 		CMD="$(CMD)"
 
-docker-run-pulumi: ### Run pulumi container - mandatory: CMD; optional: DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
-	make docker-config > /dev/null 2>&1
-	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo pulumi/pulumi:$(DOCKER_PULUMI_VERSION))
-	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo pulumi-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
-	docker run --interactive $(_TTY) --rm \
-		--name $$container \
-		--user $$(id -u):$$(id -g) \
-		--env-file <(env | grep -Ei "^(AWS|TX|TEXAS)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^(DB|DATABASE|APP|APPLICATION|UI|API|SERVER|HOST|URL)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^TF_VAR_" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^PULUMI_" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
-		--volume $(PROJECT_DIR):/project \
-		--network $(DOCKER_NETWORK) \
-		--workdir /project/$(shell echo $(abspath $(DIR)) | sed "s;$(PROJECT_DIR);;g") \
-		--entrypoint /bin/bash \
-		$(ARGS) \
-		$$image \
-			-c "$(CMD)"
-
-docker-run-python: ### Run python container - mandatory: CMD; optional: SH=true,DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
+docker-run-python: ### Run python container - mandatory: CMD; optional: SH=true,DIR,ARGS=[Docker args],LIB_VOLUME_MOUNT=true,VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
 	make docker-config > /dev/null 2>&1
 	mkdir -p $(TMP_DIR)/.python/pip/{cache,packages}
+	lib_volume_mount=$$(([ $(BUILD_ID) -eq 0 ] || [ "$(LIB_VOLUME_MOUNT)" == true ]) && echo "--volume $(TMP_DIR)/.python/pip/cache:/tmp/.cache/pip --volume $(TMP_DIR)/.python/pip/packages:/tmp/.packages" ||:)
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo python:$(DOCKER_PYTHON_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo python-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
 	if [[ ! "$(SH)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then
 		docker run --interactive $(_TTY) --rm \
 			--name $$container \
 			--user $$(id -u):$$(id -g) \
-			--env-file <(env | grep -Ei "^(AWS|TX|TEXAS)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-			--env-file <(env | grep -Ei "^(DB|DATABASE|APP|APPLICATION|UI|API|SERVER|HOST|URL)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-			--env-file <(env | grep -Ei "^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+			--env-file <(make _list-variables PATTERN="^(AWS|TX|TEXAS|NHSD|TERRAFORM)") \
+			--env-file <(make _list-variables PATTERN="^(DB|DATABASE|SMTP|APP|APPLICATION|UI|API|SERVER|HOST|URL)") \
+			--env-file <(make _list-variables PATTERN="^(PROFILE|ENVIRONMENT|BUILD|PROGRAMME|ORG|SERVICE|PROJECT)") \
 			--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
 			--env PIP_TARGET=/tmp/.packages \
 			--env PYTHONPATH=/tmp/.packages \
 			--env XDG_CACHE_HOME=/tmp/.cache \
 			--volume $(PROJECT_DIR):/project \
-			--volume $(TMP_DIR)/.python/pip/cache:/tmp/.cache/pip \
-			--volume $(TMP_DIR)/.python/pip/packages:/tmp/.packages \
+			$$lib_volume_mount \
 			--network $(DOCKER_NETWORK) \
 			--workdir /project/$(shell echo $(abspath $(DIR)) | sed "s;$(PROJECT_DIR);;g") \
 			$(ARGS) \
@@ -520,16 +534,15 @@ docker-run-python: ### Run python container - mandatory: CMD; optional: SH=true,
 		docker run --interactive $(_TTY) --rm \
 			--name $$container \
 			--user $$(id -u):$$(id -g) \
-			--env-file <(env | grep -Ei "^(AWS|TX|TEXAS)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-			--env-file <(env | grep -Ei "^(DB|DATABASE|APP|APPLICATION|UI|API|SERVER|HOST|URL)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-			--env-file <(env | grep -Ei "^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+			--env-file <(make _list-variables PATTERN="^(AWS|TX|TEXAS|NHSD|TERRAFORM)") \
+			--env-file <(make _list-variables PATTERN="^(DB|DATABASE|SMTP|APP|APPLICATION|UI|API|SERVER|HOST|URL)") \
+			--env-file <(make _list-variables PATTERN="^(PROFILE|ENVIRONMENT|BUILD|PROGRAMME|ORG|SERVICE|PROJECT)") \
 			--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
 			--env PIP_TARGET=/tmp/.packages \
 			--env PYTHONPATH=/tmp/.packages \
 			--env XDG_CACHE_HOME=/tmp/.cache \
 			--volume $(PROJECT_DIR):/project \
-			--volume $(TMP_DIR)/.python/pip/cache:/tmp/.cache/pip \
-			--volume $(TMP_DIR)/.python/pip/packages:/tmp/.packages \
+			$$lib_volume_mount \
 			--network $(DOCKER_NETWORK) \
 			--workdir /project/$(shell echo $(abspath $(DIR)) | sed "s;$(PROJECT_DIR);;g") \
 			$(ARGS) \
@@ -546,9 +559,9 @@ docker-run-terraform: ### Run terraform container - mandatory: CMD; optional: DI
 	docker run --interactive $(_TTY) --rm \
 		--name $$container \
 		--user $$(id -u):$$(id -g) \
-		--env-file <(env | grep -Ei "^(AWS|TX|TEXAS)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^(DB|DATABASE|APP|APPLICATION|UI|API|SERVER|HOST|URL)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+		--env-file <(make _list-variables PATTERN="^(AWS|TX|TEXAS|NHSD|TERRAFORM)") \
+		--env-file <(make _list-variables PATTERN="^(DB|DATABASE|SMTP|APP|APPLICATION|UI|API|SERVER|HOST|URL)") \
+		--env-file <(make _list-variables PATTERN="^(PROFILE|ENVIRONMENT|BUILD|PROGRAMME|ORG|SERVICE|PROJECT)") \
 		--env-file <(env | grep -Ei "^TF_VAR_" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
 		--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
 		--volume $(PROJECT_DIR):/project \
@@ -568,9 +581,9 @@ docker-run-postgres: ### Run postgres container - mandatory: CMD; optional: DIR,
 	docker run --interactive $(_TTY) --rm \
 		--name $$container \
 		--user $$(id -u):$$(id -g) \
-		--env-file <(env | grep -Ei "^(AWS|TX|TEXAS)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^(DB|DATABASE|APP|APPLICATION|UI|API|SERVER|HOST|URL)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-		--env-file <(env | grep -Ei "^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+		--env-file <(make _list-variables PATTERN="^(AWS|TX|TEXAS|NHSD|TERRAFORM)") \
+		--env-file <(make _list-variables PATTERN="^(DB|DATABASE|SMTP|APP|APPLICATION|UI|API|SERVER|HOST|URL)") \
+		--env-file <(make _list-variables PATTERN="^(PROFILE|ENVIRONMENT|BUILD|PROGRAMME|ORG|SERVICE|PROJECT)") \
 		--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
 		--volume $(PROJECT_DIR):/project \
 		--network $(DOCKER_NETWORK) \
@@ -579,10 +592,11 @@ docker-run-postgres: ### Run postgres container - mandatory: CMD; optional: DIR,
 		$$image \
 			$(CMD)
 
-docker-run-tools: ### Run tools (Python) container - mandatory: CMD; optional: SH=true,DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
+docker-run-tools: ### Run tools (Python) container - mandatory: CMD; optional: SH=true,DIR,ARGS=[Docker args],LIB_VOLUME_MOUNT=true,VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
 	make docker-config > /dev/null 2>&1
 	mkdir -p $(TMP_DIR)/.python/pip/{cache,packages}
 	mkdir -p $(HOME)/.aws
+	lib_volume_mount=$$(([ $(BUILD_ID) -eq 0 ] || [ "$(LIB_VOLUME_MOUNT)" == true ]) && echo "--volume $(TMP_DIR)/.python/pip/cache:/tmp/.cache/pip --volume $(TMP_DIR)/.python/pip/packages:/tmp/.packages" ||:)
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo $(DOCKER_LIBRARY_REGISTRY)/tools:$(DOCKER_LIBRARY_TOOLS_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo tools-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(echo '$(CMD)$(DIR)' | md5sum | cut -c1-7))
 	make docker-image-pull-or-build NAME=tools VERSION=$(DOCKER_LIBRARY_TOOLS_VERSION) >&2
@@ -590,21 +604,20 @@ docker-run-tools: ### Run tools (Python) container - mandatory: CMD; optional: S
 		docker run --interactive $(_TTY) --rm \
 			--name $$container \
 			--user $$(id -u):$$(id -g) \
-			--env-file <(env | grep -Ei "^(AWS|TX|TEXAS)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-			--env-file <(env | grep -Ei "^(DB|DATABASE|APP|APPLICATION|UI|API|SERVER|HOST|URL)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-			--env-file <(env | grep -Ei "^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+			--env-file <(make _list-variables PATTERN="^(AWS|TX|TEXAS|NHSD|TERRAFORM)") \
+			--env-file <(make _list-variables PATTERN="^(DB|DATABASE|SMTP|APP|APPLICATION|UI|API|SERVER|HOST|URL)") \
+			--env-file <(make _list-variables PATTERN="^(PROFILE|ENVIRONMENT|BUILD|PROGRAMME|ORG|SERVICE|PROJECT)") \
 			--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
 			--env HOME=/tmp \
 			--env PIP_TARGET=/tmp/.packages \
 			--env PYTHONPATH=/tmp/.packages \
 			--env XDG_CACHE_HOME=/tmp/.cache \
 			--volume $(PROJECT_DIR):/project \
-			--volume $(TMP_DIR)/.python/pip/cache:/tmp/.cache/pip \
-			--volume $(TMP_DIR)/.python/pip/packages:/tmp/.packages \
 			--volume $(HOME)/.aws:/tmp/.aws \
 			--volume $(HOME)/bin:/tmp/bin \
 			--volume $(HOME)/etc:/tmp/etc \
 			--volume $(HOME)/usr:/tmp/usr \
+			$$lib_volume_mount \
 			--network $(DOCKER_NETWORK) \
 			--workdir /project/$(shell echo $(abspath $(DIR)) | sed "s;$(PROJECT_DIR);;g") \
 			$(ARGS) \
@@ -614,21 +627,20 @@ docker-run-tools: ### Run tools (Python) container - mandatory: CMD; optional: S
 		docker run --interactive $(_TTY) --rm \
 			--name $$container \
 			--user $$(id -u):$$(id -g) \
-			--env-file <(env | grep -Ei "^(AWS|TX|TEXAS)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-			--env-file <(env | grep -Ei "^(DB|DATABASE|APP|APPLICATION|UI|API|SERVER|HOST|URL)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
-			--env-file <(env | grep -Ei "^(PROFILE|BUILD|PROGRAMME|SERVICE|PROJECT)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '[A-Za-z0-9_]+=$$') \
+			--env-file <(make _list-variables PATTERN="^(AWS|TX|TEXAS|NHSD|TERRAFORM)") \
+			--env-file <(make _list-variables PATTERN="^(DB|DATABASE|SMTP|APP|APPLICATION|UI|API|SERVER|HOST|URL)") \
+			--env-file <(make _list-variables PATTERN="^(PROFILE|ENVIRONMENT|BUILD|PROGRAMME|ORG|SERVICE|PROJECT)") \
 			--env-file <(make _docker-get-variables-from-file VARS_FILE=$(VARS_FILE)) \
 			--env HOME=/tmp \
 			--env PIP_TARGET=/tmp/.packages \
 			--env PYTHONPATH=/tmp/.packages \
 			--env XDG_CACHE_HOME=/tmp/.cache \
 			--volume $(PROJECT_DIR):/project \
-			--volume $(TMP_DIR)/.python/pip/cache:/tmp/.cache/pip \
-			--volume $(TMP_DIR)/.python/pip/packages:/tmp/.packages \
 			--volume $(HOME)/.aws:/tmp/.aws \
 			--volume $(HOME)/bin:/tmp/bin \
 			--volume $(HOME)/etc:/tmp/etc \
 			--volume $(HOME)/usr:/tmp/usr \
+			$$lib_volume_mount \
 			--network $(DOCKER_NETWORK) \
 			--workdir /project/$(shell echo $(abspath $(DIR)) | sed "s;$(PROJECT_DIR);;g") \
 			$(ARGS) \
@@ -713,6 +725,9 @@ _docker-get-docker-compose-yml:
 _docker-is-lib-image:
 	([ -n "$(NAME)" ] && [ -d $(DOCKER_LIB_IMAGE_DIR)/$(NAME) ]) && echo true || echo false
 
+_list-variables: ### List environment variables that match the pattern - mandatory: PATTERN="^AWS_"; return: [variables list]
+	env | grep -Ei "$(PATTERN)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '^[A-Za-z0-9_]+=$$' | sort | grep -v '[[:space:]]'
+
 # ==============================================================================
 
 docker-image-get-digest: ### Get image digest by matching tag pattern - mandatory: NAME=[image name],VERSION|TAG=[string to match version/tag of an image]
@@ -721,13 +736,20 @@ docker-image-get-digest: ### Get image digest by matching tag pattern - mandato
 		REPO=$$(make _docker-get-reg)/$(NAME) \
 		TAG=$(or $(VERSION), $(TAG))
 
-docker-image-find-and-tag-as: ### Find image based on commit and tag it - mandatory: TAG,IMAGE=[image name]; optional: COMMIT=[git commit hash, defaults to HEAD]
+docker-image-find-and-version-as: ### Find image based on git commit hash and tag it - mandatory: VERSION|TAG=[new version/tag],NAME=[image name]; optional: COMMIT=[git commit hash, defaults to HEAD]
 	commit=$(or $(COMMIT), master)
 	hash=$$(make git-commit-get-hash COMMIT=$$commit)
-	digest=$$(make docker-image-get-digest NAME=$(IMAGE) TAG=$$hash)
-	make docker-pull NAME=$(IMAGE) DIGEST=$$digest
-	make docker-tag NAME=$(IMAGE) DIGEST=$$digest TAG=$(TAG)
-	make docker-push NAME=$(IMAGE) TAG=$(TAG)
+	digest=$$(make docker-image-get-digest NAME=$(NAME) TAG=$$hash)
+	make docker-pull NAME=$(NAME) DIGEST=$$digest
+	make docker-tag NAME=$(NAME) DIGEST=$$digest TAG=$(or $(VERSION), $(TAG)
+	make docker-push NAME=$(NAME) TAG=$(or $(VERSION), $(TAG)
+
+docker-repo-list-tags: ### List repository tags - mandatory: REPO=[repository name]
+	(
+		curl "https://registry.hub.docker.com/api/content/v1/repositories/public/library/$(REPO)/tags?page=1&page_size=100" 2>/dev/null | jq -r '.results[].name';
+		curl "https://registry.hub.docker.com/api/content/v1/repositories/public/library/$(REPO)/tags?page=2&page_size=100" 2>/dev/null | jq -r '.results[].name'
+		curl "https://registry.hub.docker.com/api/content/v1/repositories/public/library/$(REPO)/tags?page=3&page_size=100" 2>/dev/null | jq -r '.results[].name'
+	) | sort
 
 # ==============================================================================
 
@@ -738,6 +760,9 @@ docker-image-find-and-tag-as: ### Find image based on commit and tag it - mandat
 	_docker-get-reg \
 	_docker-get-variables-from-file \
 	_docker-is-lib-image \
+	_list-variables \
 	docker-image-get-digest \
 	docker-image-get-version \
-	docker-image-set-version
+	docker-image-set-version \
+	docker-login \
+	docker-repo-list-tags

@@ -72,9 +72,14 @@ RUN set -eux && \
     update-ms-fonts && \
     \
     # Install aws-iam-authenticator
-    curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.17.9/2020-08-04/bin/linux/amd64/aws-iam-authenticator && \
+    curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.18.9/2020-11-02/bin/linux/amd64/aws-iam-authenticator && \
     chmod +x ./aws-iam-authenticator && \
     mv ./aws-iam-authenticator /usr/local/bin/aws-iam-authenticator && \
+    \
+    # Install ecs-cli
+    curl -LO https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-v1.21.0 && \
+    chmod +x ./ecs-cli-linux-amd64-v1.21.0 && \
+    mv ./ecs-cli-linux-amd64-v1.21.0 /usr/local/bin/ecs-cli && \
     \
     # Install jq
     curl -LO https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && \
@@ -82,12 +87,12 @@ RUN set -eux && \
     mv ./jq-linux64 /usr/local/bin/jq && \
     \
     # Install yq
-    curl -LO https://github.com/mikefarah/yq/releases/download/3.3.2/yq_linux_amd64 && \
+    curl -LO https://github.com/mikefarah/yq/releases/download/v4.2.0/yq_linux_amd64 && \
     chmod +x ./yq_linux_amd64 && \
     mv ./yq_linux_amd64 /usr/local/bin/yq && \
     \
     # Install kubectl
-    curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl && \
+    curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.20.0/bin/linux/amd64/kubectl && \
     chmod +x ./kubectl && \
     mv ./kubectl /usr/local/bin/kubectl && \
     \

@@ -3,9 +3,9 @@ include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 
 # ==============================================================================
 
-build: _generate-ssl-certificate
+build: project-config _copy-ssl-certificate
 	[ -n "$(FORCE)" ] && target=docker-build || target="docker-image-pull-or-build VERSION=$(DOCKER_LIBRARY_PYTHON_APP_VERSION) LATEST=true"
-	make $$target NAME=python-app
+	make -s $$target NAME=python-app
 
 test:
 	make docker-test NAME=python-app CMD="bash"
@@ -19,7 +19,7 @@ clean:
 # ==============================================================================
 
 build-example:
-	make docker-build NAME=python-app EXAMPLE=true
+	make docker-build NAME=python-app EXAMPLE=true FORCE=true
 
 test-example:
 	make docker-test NAME=python-app EXAMPLE=true \
@@ -36,9 +36,5 @@ run-example:
 
 # ==============================================================================
 
-_generate-ssl-certificate:
-	if [ ! -f $(DOCKER_LIB_IMAGE_DIR)/python-app/assets/certificate/certificate.pem ]; then
-		make ssl-generate-certificate-project \
-			DIR=$(DOCKER_LIB_IMAGE_DIR)/python-app/assets/certificate \
-			DOMAINS=python-app.$(PROJECT_NAME_SHORT)-$(PROJECT_GROUP_SHORT).local
-	fi
+_copy-ssl-certificate:
+	make ssl-copy-certificate-project DIR=$(DOCKER_LIB_IMAGE_DIR)/python-app/assets/certificate

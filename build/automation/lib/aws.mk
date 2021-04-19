@@ -2,8 +2,8 @@ aws-session-fail-if-invalid: ### Fail if the session variables are not set
 	([ -z "$$AWS_ACCESS_KEY_ID" ] || [ -z "$$AWS_SECRET_ACCESS_KEY" ] || [ -z "$$AWS_SESSION_TOKEN" ]) \
 		&& exit 1 ||:
 
-aws-assume-role-export-variables: ### Get assume role export for the Jenkins user - optional: PROFILE=[profile name to load relevant platform configuration file]
-	if [ $(AWS_ROLE) == $(AWS_ROLE_JENKINS) ]; then
+aws-assume-role-export-variables: ### Get assume role export for the pipline user - optional: AWS_ACCOUNT_ID|PROFILE=[profile name to load relevant platform configuration file]
+	if [ "$(AWS_ROLE)" == $(AWS_ROLE_PIPELINE) ]; then
 		if [ $(AWS_ACCOUNT_ID) == "$$(make aws-account-get-id)" ]; then
 			echo "Already assumed arn:aws:iam::$(AWS_ACCOUNT_ID):role/$(AWS_ROLE)" >&2
 			exit
@@ -22,6 +22,13 @@ aws-assume-role-export-variables: ### Get assume role export for the Jenkins use
 		echo "export AWS_SECRET_ACCESS_KEY=$${array[1]}"
 		echo "export AWS_SESSION_TOKEN=$${array[2]}"
 	fi
+
+aws-user-get-role:
+	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) sts get-caller-identity \
+		--query 'Arn' \
+		--output text \
+	" | grep -Eo 'assumed-role/.*/' | sed 's;assumed-role/;;g' | sed 's;/;;g' | tr -d '\r' | tr -d '\n'
 
 aws-account-check-id: ### Check if user has MFA'd into the account - mandatory: ID=[AWS account number]; return: true|false
 	if [ $(ID) == "$$(make aws-account-get-id)" ] && [ "$$TEXAS_SESSION_EXPIRY_TIME" -gt $$(date -u +"%Y%m%d%H%M%S") ]; then
@@ -43,6 +50,7 @@ aws-secret-create: ### Create a new secret and save the value - mandatory: NAME=
 			$(AWSCLI) secretsmanager create-secret \
 				--name $(NAME) \
 				--region $(AWS_REGION) \
+				--tags Key=Programme,Value=$(PROGRAMME) Key=Service,Value=$(SERVICE_TAG) Key=Environment,Value=$(ENVIRONMENT) Key=Profile,Value=$(PROFILE) \
 				--output text \
 		"
 	else
@@ -54,7 +62,7 @@ aws-secret-create: ### Create a new secret and save the value - mandatory: NAME=
 
 aws-secret-put: ### Put secret value in the specified secret - mandatory: NAME=[secret name],VALUE=[string or file://file.json]; optional: AWS_REGION=[AWS region]
 	file=$$(echo $(VALUE) | grep -E "^file://" > /dev/null 2>&1 && echo $(VALUE) | sed 's;file://;;g' ||:)
-	[ -n "$$file" ] && volume="--volume $$file:$$file" || mount=
+	[ -n "$$file" ] && volume="--volume $$file:$$file" || volume=
 	make -s docker-run-tools ARGS="$$volume $$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 		$(AWSCLI) secretsmanager put-secret-value \
 			--secret-id $(NAME) \
@@ -106,7 +114,7 @@ aws-iam-policy-exists: ### Check if IAM policy exists - mandatory: NAME=[policy 
 aws-iam-role-create: ### Create IAM role - mandatory: NAME=[role name],DESCRIPTION=[role description],FILE=[path to json file]
 	file=$(TMP_DIR_REL)/$(@)_$(BUILD_ID)
 	make file-copy-and-replace SRC=$(FILE) DEST=$$file && trap "rm -f $$file" EXIT
-	tags='[{"Key":"Programme","Value":"$(PROGRAMME)"},{"Key":"Service","Value":"$(SERVICE_TAG)"},{"Key":"Environment","Value":"$(PROFILE)"}]'
+	tags='[{"Key":"Programme","Value":"$(PROGRAMME)"},{"Key":"Service","Value":"$(SERVICE_TAG)"},{"Key":"Environment","Value":"$(ENVIRONMENT)"},{"Key":"Profile","Value":"$(PROFILE)"}]'
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 		$(AWSCLI) iam create-role \
 			--role-name $(NAME) \
@@ -152,7 +160,7 @@ aws-s3-create: ### Create secure bucket - mandatory: NAME=[bucket name]
 			--bucket $(NAME) \
 			--versioning-configuration "Status=Enabled" \
 	"
-	tags='TagSet=[{Key=Programme,Value=$(PROGRAMME)},{Key=Service,Value=$(SERVICE_TAG)},{Key=Environment,Value=$(PROFILE)}]'
+	tags='TagSet=[{Key=Programme,Value=$(PROGRAMME)},{Key=Service,Value=$(SERVICE_TAG)},{Key=Environment,Value=$(ENVIRONMENT)},{Key=Profile,Value=$(PROFILE)}]'
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 		$(AWSCLI) s3api put-bucket-tagging \
 			--bucket $(NAME) \
@@ -181,6 +189,47 @@ aws-s3-exists: ### Check if bucket exists - mandatory: NAME=[bucket name]
 			s3://$(NAME) \
 		2>&1 | grep -q NoSuchBucket \
 	" > /dev/null 2>&1 && echo false || echo true
+
+aws-dynamodb-create: ### Create DynamoDB table - mandatory: NAME=[table name],ATTRIBUTE_DEFINITIONS,KEY_SCHEMA; optional: PROVISIONED_THROUGHPUT
+	default_throughput="ReadCapacityUnits=1,WriteCapacityUnits=1"
+	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) dynamodb create-table \
+			--table-name $(NAME) \
+			--attribute-definitions $(ATTRIBUTE_DEFINITIONS) \
+			--key-schema $(KEY_SCHEMA) \
+			--provisioned-throughput $(or $(PROVISIONED_THROUGHPUT), $$default_throughput) \
+			--tags Key=Programme,Value=$(PROGRAMME) Key=Service,Value=$(SERVICE_TAG) Key=Environment,Value=$(ENVIRONMENT) Key=Profile,Value=$(PROFILE) \
+	"
+
+aws-dynamodb-put-item: ### Create DynamoDB item - mandatory: NAME=[table name],ITEM=[json or file://file.json]
+	file=$$(echo '$(ITEM)' | grep -E "^file://" > /dev/null 2>&1 && echo $(ITEM) | sed 's;file://;;g' ||:)
+	[ -n "$$file" ] && volume="--volume $$file:$$file" || volume=
+	json='$(ITEM)'
+	make -s docker-run-tools ARGS="$$volume $$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) dynamodb put-item \
+			--table-name $(NAME) \
+			--item '$$json' \
+			--return-consumed-capacity TOTAL \
+			--return-item-collection-metrics SIZE \
+	"
+
+aws-dynamodb-query: ### Query DynamoDB table - mandatory: NAME=[table name],CONDITION_EXPRESSION,EXPRESSION_ATTRIBUTES=[json or file://file.json]
+	file=$$(echo '$(EXPRESSION_ATTRIBUTES)' | grep -E "^file://" > /dev/null 2>&1 && echo $(EXPRESSION_ATTRIBUTES) | sed 's;file://;;g' ||:)
+	[ -n "$$file" ] && volume="--volume $$file:$$file" || volume=
+	json='$(EXPRESSION_ATTRIBUTES)'
+	make -s docker-run-tools ARGS="$$volume $$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) dynamodb query \
+			--table-name $(NAME) \
+			--key-condition-expression "$(CONDITION_EXPRESSION)" \
+			--expression-attribute-values '$$json' \
+	"
+
+aws-dynamodb-exists: ### Check if DynamoDB table exists - mandatory: NAME=[table name]
+	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) dynamodb describe-table \
+			--table-name $(NAME) \
+			2>&1 | grep -q '\"TableName\": \"$(NAME)\"' \
+	" > /dev/null 2>&1 && echo true || echo false
 
 aws-rds-describe-instance: ### Describe RDS instance - mandatory: DB_INSTANCE
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
@@ -215,7 +264,7 @@ aws-rds-wait-for-snapshot: ### Wait for RDS snapshot to become available - manda
 			exit 0
 		fi
 		sleep 1s
-		((count++))
+		((count++)) ||:
 	done
 	echo "ERROR: The snapshot has not become available"
 	exit 1
@@ -252,25 +301,26 @@ aws-ecr-get-login-password: ### Get ECR user login password
 		$(AWSCLI) ecr get-login-password --region $(AWS_REGION) \
 	"
 
-aws-ecr-create-repository: ### Create ECR repository to store an image - mandatory: NAME
-	file=$(TMP_DIR_REL)/$(@)_$(BUILD_ID)
-	make file-copy-and-replace SRC=$(LIB_DIR_REL)/aws/aws-ecr-create-repository-policy.json DEST=$$file && trap "rm -f $$file" EXIT
+aws-ecr-create-repository: ### Create ECR repository to store an image - mandatory: NAME; optional: POLICY_FILE=[policy file]
+	policy_file=$(or $(POLICY_FILE), $(LIB_DIR_REL)/aws/aws-ecr-create-repository-policy.json)
+	effective_policy_file=$(TMP_DIR_REL)/$(@)_$(BUILD_ID)
+	make file-copy-and-replace SRC=$$policy_file DEST=$$effective_policy_file && trap "rm -f $$effective_policy_file" EXIT
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 		$(AWSCLI) ecr create-repository \
 			--repository-name $(PROJECT_GROUP_SHORT)/$(PROJECT_NAME_SHORT)/$(NAME) \
-			--tags Key=Service,Value=$(SERVICE_TAG) \
+			--tags Key=Programme,Value=$(PROGRAMME) Key=Service,Value=$(SERVICE_TAG) \
 	"
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 		$(AWSCLI) ecr set-repository-policy \
 			--repository-name $(PROJECT_GROUP_SHORT)/$(PROJECT_NAME_SHORT)/$(NAME) \
-			--policy-text file://$$file \
+			--policy-text file://$$effective_policy_file \
 	"
 
 aws-ecr-get-image-digest: ### Get ECR image digest by matching tag pattern - mandatory: REPO=[repository name],TAG=[string to match tag of an image]
 	file=$(TMP_DIR_REL)/$(@)_$(BUILD_ID)
 	make file-copy-and-replace SRC=$(JQ_DIR_REL)/aws-ecr-get-image-digest.jq DEST=$$file >&2 && trap "rm -f $$file" EXIT
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
-		aws ecr list-images \
+		$(AWSCLI) ecr list-images \
 			--repository-name $(shell echo $(REPO) | sed "s;$(AWS_ECR)/;;g") \
 	" | make -s docker-run-tools CMD="jq -rf $$file" | head -n 1
 
@@ -278,8 +328,65 @@ aws-ses-verify-email-identity: ### Verify SES email address - mandatory: NAME
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 		$(AWSCLI) ses verify-email-identity \
 			--email-address $(NAME) \
-			--region $(AWS_SES_REGION) \
+			--region $(AWS_ALTERNATIVE_REGION) \
 	"
+
+aws-codeartifact-crate-domain: ### Create CodeArtifact domain - optional: DOMAIN_NAME=[domain name]
+	domain_name=$(or $(DOMAIN_NAME), $(ORG_NAME))
+	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) codeartifact create-domain \
+			--domain $$domain_name \
+			--tags key=Service,value=$(SERVICE_TAG_COMMON) \
+			--region $(AWS_ALTERNATIVE_REGION) \
+	"
+
+aws-codeartifact-create-repository: ### Create CodeArtifact repository - mandatory: REPOSITORY_NAME=[repository name],UPSTREAMS=[]; optional: DOMAIN_NAME=[domain name]
+	domain_name=$(or $(DOMAIN_NAME), $(ORG_NAME))
+	upstreams=$$([ -n "$(UPSTREAMS)" ] && echo --upstreams $(UPSTREAMS) ||:)
+	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) codeartifact create-repository \
+			--domain $$domain_name \
+			--repository $(REPOSITORY_NAME) \
+			$$upstreams \
+			--tags key=Programme,value=$(PROGRAMME) key=Service,value=$(SERVICE_TAG) \
+			--region $(AWS_ALTERNATIVE_REGION) \
+	"
+
+aws-codeartifact-associate-external-repository: ### Create CodeArtifact external repository association - mandatory: REPOSITORY_NAME=[repository name],EXTERNAL_NAME=[external repository name]; optional: DOMAIN_NAME=[domain name]
+	domain_name=$(or $(DOMAIN_NAME), $(ORG_NAME))
+	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) codeartifact associate-external-connection \
+			--domain $$domain_name \
+			--repository $(REPOSITORY_NAME) \
+			--external-connection public:$(EXTERNAL_NAME) \
+			--region $(AWS_ALTERNATIVE_REGION) \
+	"
+
+aws-codeartifact-setup: ### Set up CodeArtifact - mandatory: REPOSITORY_NAME=[repository name]; optional: DOMAIN_NAME=[domain name]
+	repository_name=$(or $(REPOSITORY_NAME), $(PROJECT_ID))
+	make aws-codeartifact-crate-domain ||:
+	# public:npmjs
+	make aws-codeartifact-create-repository REPOSITORY_NAME=$${repository_name}-npmjs-upstream ||:
+	make aws-codeartifact-associate-external-repository REPOSITORY_NAME=$${repository_name}-npmjs-upstream EXTERNAL_NAME=npmjs ||:
+	# public:pypi
+	make aws-codeartifact-create-repository REPOSITORY_NAME=$${repository_name}-pypi-upstream ||:
+	make aws-codeartifact-associate-external-repository REPOSITORY_NAME=$${repository_name}-pypi-upstream EXTERNAL_NAME=pypi ||:
+	# public:maven-central
+	make aws-codeartifact-create-repository REPOSITORY_NAME=$${repository_name}-maven-central-upstream ||:
+	make aws-codeartifact-associate-external-repository REPOSITORY_NAME=$${repository_name}-maven-central-upstream EXTERNAL_NAME=maven-central ||:
+	# project
+	make aws-codeartifact-create-repository \
+		REPOSITORY_NAME=$$repository_name \
+		UPSTREAMS="repositoryName=$${repository_name}-npmjs-upstream repositoryName=$${repository_name}-pypi-upstream repositoryName=$${repository_name}-maven-central-upstream"
+
+aws-codeartifact-config-npm: ### Configure npm client to use CodeArtifact - mandatory: REPOSITORY_NAME=[repository name]; optional: DOMAIN_NAME=[domain name]
+	domain_name=$(or $(DOMAIN_NAME), $(ORG_NAME))
+	token=$$(make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) codeartifact get-authorization-token --domain $$domain_name --domain-owner $(AWS_ACCOUNT_ID_MGMT) --region $(AWS_ALTERNATIVE_REGION) --query authorizationToken --output text \
+	")
+	echo registry=https://$$domain_name-$(AWS_ACCOUNT_ID_MGMT).d.codeartifact.$(AWS_ALTERNATIVE_REGION).amazonaws.com/npm/$(REPOSITORY_NAME)/ > $(TMP_DIR)/.npmrc
+	echo //$$domain_name-$(AWS_ACCOUNT_ID_MGMT).d.codeartifact.$(AWS_ALTERNATIVE_REGION).amazonaws.com/npm/$(REPOSITORY_NAME)/:always-auth=true >> $(TMP_DIR)/.npmrc
+	echo //$$domain_name-$(AWS_ACCOUNT_ID_MGMT).d.codeartifact.$(AWS_ALTERNATIVE_REGION).amazonaws.com/npm/$(REPOSITORY_NAME)/:_authToken=$$token >> $(TMP_DIR)/.npmrc
 
 # ==============================================================================
 
@@ -290,18 +397,18 @@ aws-ses-verify-email-identity: ### Verify SES email address - mandatory: NAME
 # make aws-elasticsearch-create-snapshot DOMAIN=sf1-nonprod BUCKET=uec-tools-make-devops-jenkins-workspace IAM_ROLE=dan-role
 
 aws-elasticsearch-create-snapshot: ### Create an Elasticsearch snapshot - mandatory: DOMAIN=[Elasticsearch domain name],SNAPSHOT_NAME
-	endpoint=$$(make _aws-elasticsearch-get-endpoint DOMAIN=$(DOMAIN))
+	endpoint=$$(make aws-elasticsearch-get-endpoint DOMAIN=$(DOMAIN))
 	make _aws-elasticsearch-register-snapshot-repository ENDPOINT="$$endpoint"
 	#curl -XPUT "https://$$endpoint/_snapshot/snapshot-repository-$(DOMAIN)/$(SNAPSHOT_NAME)"
 
-_aws-elasticsearch-get-endpoint: ### Get Elasticsearch endpoint - mandatory: DOMAIN=[Elasticsearch domain name]
+aws-elasticsearch-get-endpoint: ### Get Elasticsearch endpoint - mandatory: DOMAIN=[Elasticsearch domain name]
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 		$(AWSCLI) es describe-elasticsearch-domain \
 			--domain-name $(DOMAIN) \
 			--region $(AWS_REGION) \
 			--query 'DomainStatus.Endpoints.vpc' \
 			--output text \
-	"
+	" | tr -d '\r' | tr -d '\n'
 
 _aws-elasticsearch-register-snapshot-repository: ### Register Elasticsearch snapshot repository - mandatory: ENDPOINT,BUCKET,IAM_ROLE
 	json='{"type":"s3","settings":{"bucket":"$(BUCKET)","region":"$(AWS_REGION)","role_arn":"arn:aws:iam::$(AWS_ACCOUNT_ID):role/$(IAM_ROLE)"}}'
@@ -321,15 +428,17 @@ _aws-elasticsearch-register-snapshot-repository: ### Register Elasticsearch snap
 # ==============================================================================
 
 .SILENT: \
-	_aws-elasticsearch-get-endpoint \
 	aws-account-check-id \
 	aws-account-get-id \
 	aws-assume-role-export-variables \
 	aws-cognito-get-client-id \
 	aws-cognito-get-client-secret \
 	aws-cognito-get-userpool-id \
+	aws-dynamodb-exists \
+	aws-dynamodb-query \
 	aws-ecr-get-image-digest \
 	aws-ecr-get-login-password \
+	aws-elasticsearch-get-endpoint \
 	aws-iam-policy-exists \
 	aws-iam-role-exists \
 	aws-rds-describe-instance \
@@ -339,4 +448,5 @@ _aws-elasticsearch-register-snapshot-repository: ### Register Elasticsearch snap
 	aws-secret-exists \
 	aws-secret-get \
 	aws-secret-get-and-format \
-	aws-secret-put
+	aws-secret-put \
+	aws-user-get-role

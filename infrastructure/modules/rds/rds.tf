@@ -34,7 +34,7 @@ resource "aws_db_instance" "db_instance" {
   multi_az                  = var.multi_az
   parameter_group_name      = aws_db_parameter_group.parameter_group.name
   # TODO agree on where SGs for other AWS resources are created with regards to egress / ingress (e.g. out from worker / in on rds)
-  vpc_security_group_ids     = ["${aws_security_group.rds-postgres-sg.id}"]
+  vpc_security_group_ids     = [aws_security_group.rds-postgres-sg.id]
   port                       = var.db_port                       #TODO check this is needed not in SF setup
   auto_minor_version_upgrade = var.db_auto_minor_version_upgrade #TODO check this is needed not in SF setup
 

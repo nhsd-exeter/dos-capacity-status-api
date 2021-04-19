@@ -83,9 +83,8 @@ test-unit-only: # Run only unit test suite
 
 push: # Push project artefacts to the registry
 	make docker-login
-	# TODO: Do we still need the `VERSION` argument?
-	make docker-push NAME=api VERSION=0.0.1
-	make docker-push NAME=proxy VERSION=0.0.1
+	make docker-push NAME=api
+	make docker-push NAME=proxy
 
 # ==============================================================================
 # Project targets: Ops workflow
@@ -100,8 +99,6 @@ deploy: # Deploy project - mandatory: PROFILE=[name], API_IMAGE_TAG=[docker tag]
 	eval "$$(make aws-assume-role-export-variables)"
 	eval "$$(make project-populate-secret-variables)"
 	make k8s-deploy STACK=service
-	# TODO: What's the URL?
-	echo "The URL is $(UI_URL)"
 
 deploy-job: # Deploy project - mandatory: PROFILE=[name], STACK=[stack]
 	[ local == $(PROFILE) ] && exit 1
@@ -123,10 +120,8 @@ api-build:
 		api \
 		manage.py \
 		requirements.txt
-	cp -f \
-		$(SSL_CERTIFICATE_DIR)/certificate.* \
-		$(DOCKER_DIR)/api/assets/certificate
 	cd $(PROJECT_DIR)
+	make ssl-copy-certificate-project DIR=$(PROJECT_DIR)/build/docker/api/assets/certificate
 	make docker-image NAME=api
 
 api-clean:
@@ -141,9 +136,7 @@ proxy-build:
 		DIR=application \
 		IMAGE=$(DOCKER_REGISTRY)/api:latest \
 		CMD="pip install --upgrade pip && pip install -r requirements.txt && python manage.py collectstatic --noinput" SH=true
-	cp -f \
-		$(SSL_CERTIFICATE_DIR)/certificate.* \
-		$(DOCKER_DIR)/proxy/assets/certificate
+	make ssl-copy-certificate-project DIR=$(PROJECT_DIR)/build/docker/proxy/assets/certificate
 	cp -rf \
 		$(PROJECT_DIR)/application/static \
 		$(DOCKER_DIR)/proxy/assets/application
@@ -161,12 +154,6 @@ project-populate-secret-variables:
 	make secret-fetch-and-export-variables NAME=uec-dos-api-capacity-status-$(PROFILE)
 
 # ---
-
-# TODO: Do we really need this target?
-project-clean-deploy: project-clean project-build project-push-images project-deploy
-
-# TODO: Do we really need this target?
-project-clean-build: project-clean project-build
 
 # TODO: Do we really need this target?
 api-start:
@@ -231,11 +218,6 @@ dev-smoke-test:
 
 url:
 	echo https://$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(PROFILE)-$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-proxy-ingress.$(TEXAS_HOSTED_ZONE)/api/v0.0.1/capacity/apidoc/
-
-slack-it:
-	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"
-	eval "$$(make secret-fetch-and-export-variables NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)/deployment)"
-	make slack-send-standard-notification NAME=jenkins-pipeline SLACK_EXTRA_DETAILS="Git Tag: $(GIT_TAG)"
 
 backup-data:
 	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"

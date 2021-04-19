@@ -238,7 +238,7 @@ Deploy newly build images to the development environment
     make PROFILE=dev \
       clean \
       build \
-      push-images \
+      push \
       deploy
 
 The `PROFILE` variable can be set to other environments.

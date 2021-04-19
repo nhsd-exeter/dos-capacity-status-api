@@ -34,56 +34,45 @@ git-secrets-scan-history: ### Scan git histroy for any secrets
 
 # ==============================================================================
 
-git-commit-has-changed-directory: ### Determin if any file changed in directory - mandatory: DIR=[directory]; return: true|false
-	git diff --name-only --diff-filter=AMDR --cached HEAD^ | grep --quiet '$(DIR)' && echo true || echo false
+git-commit-has-changed-directory: ### Determin if any file changed in directory - mandatory: DIR=[directory]; optional: PRECOMMIT=true; return: true|false
+	if [ "$(PRECOMMIT)" == true ]; then
+		git diff --name-only --cached HEAD --diff-filter=ACDMRT | grep --quiet '^$(DIR)' && echo true || echo false
+	else
+		git diff --name-only --cached HEAD^ --diff-filter=ACDMRT | grep --quiet '^$(DIR)' && echo true || echo false
+	fi
 
-git-commit-get-hash: ### Get short commit hash - optional: COMMIT=[commit, defaults to HEAD]
+git-commit-get-hash git-hash: ### Get short commit hash - optional: COMMIT=[commit, defaults to HEAD]
 	git rev-parse --short $(or $(COMMIT), HEAD) 2> /dev/null || echo unknown
 
-git-commit-get-timestamp: ### Get commit timestamp - optional: COMMIT=[commit, defaults to HEAD]
+git-commit-get-timestamp git-ts: ### Get commit timestamp - optional: COMMIT=[commit, defaults to HEAD]
 	TZ=UTC git show -s --format=%cd --date=format-local:%Y%m%d%H%M%S $(or $(COMMIT), HEAD) | cat 2> /dev/null || echo unknown
+
+git-commit-get-message git-msg: ### Get commit message - optional: COMMIT=[commit, defaults to HEAD]
+	git log --format=%B -n 1 $(or $(COMMIT), HEAD)
 
 # ==============================================================================
 
-git-tag-is-release-candidate: ### Check if a commit is tagged as release candidate - optional: COMMIT=[commit, defaults to master]; return: true|false
-	commit=$(or $(COMMIT), master)
-	(git show-ref --tags -d | grep $$(git rev-parse $$commit) | sed -e 's;.* refs/tags/;;' -e 's;\^{};;' | grep -- -rc$$) > /dev/null 2>&1 && echo true || echo false
-
 git-tag-is-environment-deployment: ### Check if a commit is tagged as environment deployment - mandatory: PROFILE=[profile name]; optional: COMMIT=[commit, defaults to master]; return: true|false
 	commit=$(or $(COMMIT), master)
-	(git show-ref --tags -d | grep $$(git rev-parse $$commit) | sed -e 's;.* refs/tags/;;' -e 's;\^{};;' | grep -- -$(PROFILE)$$) > /dev/null 2>&1 && echo true || echo false
+	(git show-ref --tags -d | grep $$(git rev-parse $$commit) | sed -e 's;.* refs/tags/;;' -e 's;\^{};;' | grep -- -$(ENVIRONMENT)$$) > /dev/null 2>&1 && echo true || echo false
 
 git-tag-create: ### Tag a commit - mandatory: TAG=[tag name]; optional: COMMIT=[commit, defaults to master]
 	commit=$(or $(COMMIT), master)
 	git tag $(TAG) $$commit
 	git push origin $(TAG)
 
-git-tag-create-release-candidate: ### Tag release candidate as `[YYYYmmddHHMMSS]-rc` - optional: COMMIT=[commit, defaults to master]
-	commit=$(or $(COMMIT), master)
-	tag=$(BUILD_TIMESTAMP)-rc
-	make git-tag-create TAG=$$tag COMMIT=$$commit
-
 git-tag-create-environment-deployment: ### Tag environment deployment as `[YYYYmmddHHMMSS]-[env]` - mandatory: PROFILE=[profile name]; optional: COMMIT=[release candidate tag name, defaults to master]
-	[ $(PROFILE) = local ] && (echo "ERROR: Please, specify the PROFILE"; exit 1)
+	[ $(PROFILE) == local ] && (echo "ERROR: Please, specify the PROFILE"; exit 1)
 	commit=$(or $(COMMIT), master)
-	if [ $$(make git-tag-is-release-candidate COMMIT=$$commit) = true ]; then
-		tag=$(BUILD_TIMESTAMP)-$(PROFILE)
-		make git-tag-create TAG=$$tag COMMIT=$$commit
-	fi
-
-git-tag-get-release-candidate: ### Get the latest release candidate tag for the whole repository or just the specified commit - optional: COMMIT=[commit]
-	if [ -z "$(COMMIT)" ]; then
-		git show-ref --tags -d | sed -e 's;.* refs/tags/;;' -e 's;\^{};;' | grep -- -rc$$ | sort -r | head -n 1
-	else
-		git show-ref --tags -d | grep ^$$(git rev-parse --short $(COMMIT)) | sed -e 's;.* refs/tags/;;' -e 's;\^{};;' | grep -- -rc$$ | sort -r | head -n 1
-	fi
+	tag=$(BUILD_TIMESTAMP)-$(ENVIRONMENT)
+	make git-tag-create TAG=$$tag COMMIT=$$commit
 
 git-tag-get-environment-deployment: ### Get the latest environment deployment tag for the whole repository or just the specified commit - mandatory: PROFILE=[profile name]; optional: COMMIT=[commit]
 	[ $(PROFILE) = local ] && (echo "ERROR: Please, specify the PROFILE"; exit 1)
 	if [ -z "$(COMMIT)" ]; then
-		git show-ref --tags -d | grep ^$(COMMIT) | sed -e 's;.* refs/tags/;;' -e 's;\^{};;' | grep -- -$(PROFILE)$$ | sort -r | head -n 1
+		git show-ref --tags -d | grep ^$(COMMIT) | sed -e 's;.* refs/tags/;;' -e 's;\^{};;' | grep -- -$(ENVIRONMENT)$$ | sort -r | head -n 1
 	else
-		git show-ref --tags -d | grep ^$$(git rev-parse --short $(COMMIT)) | sed -e 's;.* refs/tags/;;' -e 's;\^{};;' | grep -- -$(PROFILE)$$ | sort -r | head -n 1
+		git show-ref --tags -d | grep ^$$(git rev-parse --short $(COMMIT)) | sed -e 's;.* refs/tags/;;' -e 's;\^{};;' | grep -- -$(ENVIRONMENT)$$ | sort -r | head -n 1
 	fi
 
 git-tag-get-latest: ### Get the latest tag on the current branch - return [YYYYmmddHHMMSS]-[*]
@@ -92,7 +81,7 @@ git-tag-get-latest: ### Get the latest tag on the current branch - return [YYYYm
 git-tag-list: ### List tags of a commit - optional: COMMIT=[commit, defaults to master],PROFILE=[profile name]
 	commit=$(or $(COMMIT), master)
 	tags=$$(git show-ref --tags -d | grep $$(git rev-parse $$commit) | sed -e 's;.* refs/tags/;;' -e 's;\^{};;' | grep -Eo ^[0-9]*-[a-z]*$$ ||:)
-	[ $(PROFILE) != local ] && tags=$$(echo "$$tags" | grep -- -$(PROFILE)$$)
+	[ $(PROFILE) != local ] && tags=$$(echo "$$tags" | grep -- -$(ENVIRONMENT)$$)
 	echo "$$tags"
 
 git-tag-clear: ### Remove tags from the specified commit - optional: COMMIT=[commit, defaults to master]
@@ -105,12 +94,11 @@ git-tag-clear: ### Remove tags from the specified commit - optional: COMMIT=[co
 # ==============================================================================
 
 .SILENT: \
-	git-commit-get-hash \
-	git-commit-get-timestamp \
+	git-commit-get-hash git-hash \
+	git-commit-get-message git-msg \
+	git-commit-get-timestamp git-ts \
 	git-commit-has-changed-directory \
 	git-tag-get-environment-deployment \
 	git-tag-get-latest \
-	git-tag-get-release-candidate \
 	git-tag-is-environment-deployment \
-	git-tag-is-release-candidate \
 	git-tag-list

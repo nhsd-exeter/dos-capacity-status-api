@@ -6,6 +6,8 @@ test-ssl:
 		test-ssl-generate-certificate-single-domain \
 		test-ssl-generate-certificate-multiple-domains \
 		test-ssl-generate-certificate-project \
+		test-ssl-print-certificate-info-project \
+		test-ssl-copy-certificate-project \
 		test-ssl-trust-certificate-project \
 		test-ssl-trust-certificate \
 	)
@@ -39,7 +41,7 @@ test-ssl-generate-certificate-single-domain:
 	make ssl-generate-certificate \
 		DIR=$(TMP_DIR) \
 		NAME=$(TEST_CERT) \
-		DOMAINS=single-$(TEST_CERT)
+		SSL_DOMAINS=single-$(TEST_CERT)
 	# assert
 	mk_test "-f $(TMP_DIR)/$(TEST_CERT).pem"
 
@@ -48,23 +50,36 @@ test-ssl-generate-certificate-multiple-domains:
 	make ssl-generate-certificate \
 		DIR=$(TMP_DIR) \
 		NAME=multi-$(TEST_CERT) \
-		DOMAINS=multi-$(TEST_CERT),DNS:*.multi-$(TEST_CERT),DNS:platform.com,DNS:*.platform.com
+		SSL_DOMAINS=multi-$(TEST_CERT),DNS:*.multi-$(TEST_CERT),DNS:platform.com,DNS:*.platform.com
 	# assert
 	mk_test "-f $(TMP_DIR)/multi-$(TEST_CERT).pem"
 
 test-ssl-generate-certificate-project:
 	# act
-	make ssl-generate-certificate-project \
-		NAME=certificate \
-		DOMAINS=platform.com,*.platform.com NAME=certificate
+	make ssl-generate-certificate-project SSL_DOMAINS=platform.com,*.platform.com
 	# assert
 	mk_test "-f $(SSL_CERTIFICATE_DIR)/certificate.pem"
+
+test-ssl-print-certificate-info-project:
+	# arrange
+	make ssl-generate-certificate-project SSL_DOMAINS=platform.com,*.platform.com
+	# act
+	output=$$(make ssl-print-certificate-info-project | grep -Eo "DNS:platform.com" | wc -l)
+	# assert
+	mk_test "1 -eq $$output"
+
+test-ssl-copy-certificate-project:
+	# arrange
+	rm -f $(TMP_DIR)/certificate.*
+	# act
+	make ssl-copy-certificate-project DIR=$(TMP_DIR)
+	# assert
+	mk_test "-f $(TMP_DIR)/certificate.pem"
 
 test-ssl-trust-certificate-project:
 	mk_test_skip_if_not_macos $(@) && exit ||:
 	# arrange
-	make ssl-generate-certificate-project \
-		NAME=certificate
+	make ssl-generate-certificate-project
 	# act
 	make ssl-trust-certificate \
 		FILE=$(TMP_DIR)/$(TEST_CERT).pem
@@ -79,7 +94,7 @@ test-ssl-trust-certificate:
 	make ssl-generate-certificate \
 		DIR=$(TMP_DIR) \
 		NAME=$(TEST_CERT) \
-		DOMAINS=$(TEST_CERT),DNS:*.$(TEST_CERT),DNS:other-domain.com,DNS:*.other-domain.com
+		SSL_DOMAINS=$(TEST_CERT),DNS:*.$(TEST_CERT),DNS:other-domain.com,DNS:*.other-domain.com
 	# act
 	make ssl-trust-certificate \
 		FILE=$(TMP_DIR)/$(TEST_CERT).pem
