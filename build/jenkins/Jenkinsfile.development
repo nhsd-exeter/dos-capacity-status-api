@@ -17,7 +17,7 @@ pipeline {
   stages {
     stage('Show Configuration') {
       steps {
-        script { sh 'make show-configurations' }
+        script { sh 'make show-configuration' }
       }
     }
     stage('Start Test DB') {
@@ -44,7 +44,7 @@ pipeline {
     }
     stage('Provision Infrastructure') {
       steps {
-        script { sh "make terraform-apply-auto-approve STACKS=service PROFILE=${PROFILE} | tee /tmp/terraform_changes.txt" } // TODO: Figure out multi environment deploy for secrets
+        script { sh "make terraform-apply-auto-approve STACKS=service PROFILE=${PROFILE} | tee /tmp/terraform_changes.txt" }
       }
     }
     stage('Deploy') {
