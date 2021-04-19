@@ -6,6 +6,5 @@ metadata:
   annotations:
     alb.ingress.kubernetes.io/waf-acl-id: ff530a4e-689d-4d90-b3ab-ac2160b5863d
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:AWS_ACCOUNT_ID_PROD_TO_REPLACE:certificate/6efa379d-0924-4b1e-bc44-39dc71254ac0
-    alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/inbound-cidrs: 0.0.0.0./0

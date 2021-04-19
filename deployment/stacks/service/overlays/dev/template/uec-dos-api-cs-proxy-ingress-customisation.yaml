@@ -7,3 +7,4 @@ metadata:
     alb.ingress.kubernetes.io/waf-acl-id: dfae6ec3-aa05-428f-a022-5fd85f646009
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:AWS_ACCOUNT_ID_NONPROD_TO_REPLACE:certificate/c0718115-4e22-4f48-a4aa-8c16ea86c5e6
     alb.ingress.kubernetes.io/inbound-cidrs: 10.105.0.0/16
+    alb.ingress.kubernetes.io/security-groups: VPN_SG_TO_REPLACE
