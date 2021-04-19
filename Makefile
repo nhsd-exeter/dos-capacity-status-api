@@ -153,9 +153,9 @@ proxy-clean:
 populate-secret-variables:
 	if [ "$(PROFILE)" !=  "local" ]; then
 		eval "$$(make aws-assume-role-export-variables)"
-		echo "export API_DB_PASSWORD=$$(make -s secret-get-existing-value NAME=$(API_DB_PASSWORD_STORE)"
-		echo "export API_ADMIN_PASSWORD=$$(make -s secret-get-existing-value NAME=$(API_PASSWORD_STORE)"
-		echo "export DJANGO_SECRET_KEY=$$(make -s secret-get-existing-value NAME=$(DJANGO_SECRET_STORE)"
+		echo "export API_DB_PASSWORD=$$(make -s secret-get-existing-value NAME=$(API_DB_PASSWORD_STORE))"
+		echo "export API_ADMIN_PASSWORD=$$(make -s secret-get-existing-value NAME=$(API_PASSWORD_STORE))"
+		echo "export DJANGO_SECRET_KEY=$$(make -s secret-get-existing-value NAME=$(DJANGO_SECRET_STORE))"
 		echo "export API_DB_HOST=$(TF_VAR_db_dns_name)"
 		make secret-fetch-and-export-variables NAME=$(DEPLOYMENT_SECRETS)
 	fi
