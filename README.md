@@ -1,16 +1,14 @@
-# Capacity Status API
+# DoS Capacity Status API
 
 ## Table of Contents
 
-- [Capacity Status API](#capacity-status-api)
+- [DoS Capacity Status API](#dos-capacity-status-api)
   - [Table of Contents](#table-of-contents)
   - [Quick Start](#quick-start)
-    - [Prepare Development Environment](#prepare-development-environment)
-      - [Minimum setup](#minimum-setup)
-      - [Full setup](#full-setup)
-    - [Recommendations](#recommendations)
-    - [Run the Project](#run-the-project)
-    - [Ops Routine](#ops-routine)
+    - [Development Requirements](#development-requirements)
+    - [Local Environment Configuration](#local-environment-configuration)
+    - [Local Project Setup](#local-project-setup)
+  - [To Be Refactored...](#to-be-refactored)
     - [Dev Routine](#dev-routine)
       - [Pre-requisites](#pre-requisites)
       - [Configuring the development environment](#configuring-the-development-environment)
@@ -29,36 +27,40 @@
 
 ## Quick Start
 
-### Prepare Development Environment
+### Development Requirements
 
-#### Minimum setup
+- macOS operating system provisioned with the `curl -L bit.ly/make-devops-macos | bash` command
+- `iTerm2` command-line terminal and `Visual Studio Code` source code editor, which will be installed automatically for you in the next steps
+- Before starting any work, please read [CONTRIBUTING.md](build/automation/lib/project/template/CONTRIBUTING.md)
 
-    brew install make
-    export PATH=/usr/local/opt/make/libexec/gnubin:$PATH
-    cd capacity-status-api
-    make macos-install-essential
+### Local Environment Configuration
 
-#### Full setup
+Clone the repository
 
-    cd capacity-status-api
+    git clone https://github.com/nhsd-exeter/dos-capacity-status-api.git
+    cd ./dos-capacity-status-api
+
+This is an equivalent to the `curl -L bit.ly/make-devops-macos | bash` command
+
     make macos-setup
 
-### Recommendations
+Please, ask one of your colleagues for the AWS account numbers used by the project. The next command will prompt you to provide them. This information can be sourced from a properly set up project by running `make show-configuration | grep ^AWS_ACCOUNT_ID_`
 
-- Use iTerm2 and Visual Studio Code for development
-- Before starting any work, please read [CONTRIBUTING.md](CONTRIBUTING.md)
+    make devops-setup-aws-accounts
 
-### Run the Project
+Generate and trust a self-signed certificate that will be used locally to enable encryption in transit
 
-### Ops Routine
+    make trust-certificate
 
-    cd dos-capacity-status-api
-    make project-trust-certificate
+### Local Project Setup
+
     make build
     make start log # Press Ctrl-C to exit
     open https://cs.local:443/api/v0.0.1/capacity/apidoc/
-    open https://cs.local:443/api/v0.0.1/capacity/admin/login/
+    open https://cs.local:443/api/v0.0.1/capacity/admin/login/ # admin/admin
     make stop
+
+## To Be Refactored...
 
 ### Dev Routine
 

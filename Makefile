@@ -180,7 +180,7 @@ api-start:
 
 project-generate-development-certificate: ssl-generate-certificate-project
 
-project-trust-certificate: ssl-trust-certificate-project
+trust-certificate: ssl-trust-certificate-project ## Trust the SSL development certificate
 
 create-artefact-repository: ## Create Docker repositories to store artefacts
 	make docker-create-repository NAME=api
