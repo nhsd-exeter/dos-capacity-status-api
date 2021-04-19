@@ -263,7 +263,7 @@ set-profile-for-deployment: ### Returns the profile based on the git tag on the 
 		echo dev
 	fi
 
-deployment-summary: # Returns a deployment summary
+deployment-summary: ### Returns a deployment summary
 	echo Terraform Changes
 	cat /tmp/terraform_changes.txt | grep -E 'Apply...'
 	echo Is deployment running?
@@ -272,7 +272,7 @@ deployment-summary: # Returns a deployment summary
 
 pipeline-send-notification:
 	eval "$$(make aws-assume-role-export-variables)"
-	eval "$$(make secret-fetch-and-export-variables NAME=DEPLOYMENT_SECRETS)"
+	eval "$$(make secret-fetch-and-export-variables NAME=$(DEPLOYMENT_SECRETS))"
 	make slack-it
 
 # ==============================================================================
