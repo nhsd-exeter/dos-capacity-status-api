@@ -159,7 +159,7 @@ populate-secret-variables:
 		echo "export API_DB_HOST=$(TF_VAR_db_dns_name)"
 		make secret-fetch-and-export-variables NAME=$(DEPLOYMENT_SECRETS)
 	fi
-	if [ "$(PROFILE)" == "dev ]; then
+	if [ "$(PROFILE)" == "dev" ]; then
 		echo "export DB_DOS_HOST=$(TF_VAR_db_dns_name)"
 	fi
 	if [ "$(PROFILE)" == "demo"] || [ "$(PROFILE)" == "live" ]; then
