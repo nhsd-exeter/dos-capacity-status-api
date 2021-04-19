@@ -162,7 +162,7 @@ populate-secret-variables:
 	if [ "$(PROFILE)" == "dev" ]; then
 		echo "export DB_DOS_HOST=$(TF_VAR_db_dns_name)"
 	fi
-	if [ "$(PROFILE)" == "demo"] || [ "$(PROFILE)" == "live" ]; then
+	if [ "$(PROFILE)" == "demo" ] || [ "$(PROFILE)" == "live" ]; then
 		echo "export DB_DOS_HOST=$$(make -s secret-get-existing-value NAME=$(DOS_SECRET_STORE) KEY=$(DOS_HOST_KEY))"
 		echo "export DB_DOS_PASSWORD=$$(make -s secret-get-existing-value NAME=$(DOS_SECRET_STORE) KEY=$(DOS_PASSWORD_KEY))"
 	fi
