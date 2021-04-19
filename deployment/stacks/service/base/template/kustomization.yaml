@@ -13,6 +13,7 @@ configMapGenerator:
   - name: uec-dos-api-cs-configmap
     literals:
       - PROFILE=PROFILE_TO_REPLACE
+      - ENVIRONMENT=ENVIRONMENT_TO_REPLACE
       - PIP_TARGET=/tmp/.packages
       - PYTHONPATH=/tmp/.packages
       - XDG_CACHE_HOME=/tmp/.cache

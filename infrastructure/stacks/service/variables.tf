@@ -26,12 +26,16 @@ variable "profile" {
 ############################
 # TERRAFORM COMMON
 ############################
-variable "terraform_platform_state_s3_bucket" {
+variable "terraform_platform_state_store" {
   description = "Name of the S3 bucket used to store the Terraform state"
 }
 
 variable "vpc_terraform_state_key" {
   description = "The VPC key in the terraform state bucket"
+}
+
+variable "route53_terraform_state_key" {
+  description = "The Route 53 key in the terraform state bucket"
 }
 
 ####################################################################################
@@ -48,7 +52,7 @@ variable "environment_tag" {
 variable "service_prefix" {
   description = "Prefix used for naming resources"
 }
-variable "security-groups-k8s_terraform_state_key" {
+variable "security_groups_k8s_terraform_state_key" {
   description = "The security-groups-k8s key in the terraform state bucket"
 }
 variable "nhs_programme_name" {
@@ -74,6 +78,7 @@ variable "db_size" {}
 variable "db_engine_version" {}
 variable "db_engine" {}
 variable "db_storage" {}
+variable "db_dns_name" {}
 
 variable "db_port" {}
 variable "db_allocated_storage" {}

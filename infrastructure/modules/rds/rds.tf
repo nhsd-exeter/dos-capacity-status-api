@@ -2,7 +2,7 @@ resource "aws_db_subnet_group" "db_subnet_group" {
   name       = var.db_subnet_group_name
   subnet_ids = var.private_subnets_ids
   tags = {
-    Name        = "${var.service_prefix}-${var.profile}"
+    Name        = var.service_prefix
     BillingCode = var.billing_code_tag
     Environment = var.environment_tag
     Version     = var.version_tag
@@ -23,9 +23,9 @@ resource "aws_db_instance" "db_instance" {
   engine                    = var.db_engine
   engine_version            = var.db_engine_version
   instance_class            = var.db_size
-  identifier                = "${var.service_prefix}-${var.profile}"
+  identifier                = var.service_prefix
   name                      = var.db_name
-  final_snapshot_identifier = "${var.service_prefix}-${var.profile}-final-snapshot"
+  final_snapshot_identifier = "${var.service_prefix}-final-snapshot"
   skip_final_snapshot       = var.skip_final_snapshot #TODO check : added based off looking at SF
   copy_tags_to_snapshot     = true
   username                  = var.db_master_username
@@ -34,12 +34,12 @@ resource "aws_db_instance" "db_instance" {
   multi_az                  = var.multi_az
   parameter_group_name      = aws_db_parameter_group.parameter_group.name
   # TODO agree on where SGs for other AWS resources are created with regards to egress / ingress (e.g. out from worker / in on rds)
-  vpc_security_group_ids     = [aws_security_group.rds-postgres-sg.id]
+  vpc_security_group_ids     = [aws_security_group.rds_postgres_sg.id]
   port                       = var.db_port                       #TODO check this is needed not in SF setup
   auto_minor_version_upgrade = var.db_auto_minor_version_upgrade #TODO check this is needed not in SF setup
 
   tags = {
-    Name        = "${var.service_prefix}-${var.profile}"
+    Name        = var.service_prefix
     BillingCode = var.billing_code_tag
     Environment = var.environment_tag
     Version     = var.version_tag

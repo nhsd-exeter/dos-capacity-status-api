@@ -1,5 +1,5 @@
 resource "aws_secretsmanager_secret" "capacity_status_db_password" {
-  name                    = "${var.service_prefix}-${var.profile}-capacity_status_db_password"
+  name                    = "${var.service_prefix}-db-password"
   description             = "Password for the master Postgres DB user"
   recovery_window_in_days = 0
 }
@@ -16,4 +16,3 @@ resource "random_password" "capacity_status_db_password" {
   min_numeric = 2
   special     = false
 }
-

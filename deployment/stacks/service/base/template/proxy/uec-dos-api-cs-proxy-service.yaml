@@ -8,7 +8,7 @@ metadata:
   annotations:
     alb.ingress.kubernetes.io/healthcheck-path: /
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     - name: https
       protocol: TCP

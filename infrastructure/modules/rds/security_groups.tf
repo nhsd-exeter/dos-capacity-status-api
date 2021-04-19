@@ -2,7 +2,7 @@ data "terraform_remote_state" "vpc" {
   backend = "s3"
 
   config = {
-    bucket = var.terraform_platform_state_s3_bucket
+    bucket = var.terraform_platform_state_store
     key    = var.vpc_terraform_state_key
     region = var.aws_region
   }
@@ -12,14 +12,14 @@ data "terraform_remote_state" "security-groups-k8s" {
   backend = "s3"
 
   config = {
-    bucket = var.terraform_platform_state_s3_bucket
-    key    = var.security-groups-k8s_terraform_state_key
+    bucket = var.terraform_platform_state_store
+    key    = var.security_groups_k8s_terraform_state_key
     region = var.aws_region
   }
 }
 
-resource "aws_security_group" "rds-postgres-sg" {
-  name        = "${var.service_prefix}-${var.profile}-sg"
+resource "aws_security_group" "rds_postgres_sg" {
+  name        = "${var.service_prefix}-sg"
   description = "Allow connection by appointed rds postgres clients"
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
 
@@ -41,7 +41,7 @@ resource "aws_security_group_rule" "rds_postgres_ingress_from_eks_worker" {
   from_port                = var.db_port
   to_port                  = var.db_port
   protocol                 = "tcp"
-  security_group_id        = aws_security_group.rds-postgres-sg.id
+  security_group_id        = aws_security_group.rds_postgres_sg.id
   source_security_group_id = data.terraform_remote_state.security-groups-k8s.outputs.eks_worker_additional_sg_id
   description              = "Allow access in from Eks-worker to rds postgres"
 }

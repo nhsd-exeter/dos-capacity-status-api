@@ -97,12 +97,12 @@ plan: # Show the creation instance plan - mandatory: PROFILE=[profile name]
 deploy: # Deploy project - mandatory: PROFILE=[name], API_IMAGE_TAG=[docker tag], PROXY_IMAGE_TAG[docker-tag]
 	[ local == $(PROFILE) ] && exit 1
 	eval "$$(make aws-assume-role-export-variables)"
-	eval "$$(make project-populate-secret-variables)"
+	eval "$$(make populate-secret-variables)"
 	make k8s-deploy STACK=service
 
 deploy-job: # Deploy project - mandatory: PROFILE=[name], STACK=[stack]
 	[ local == $(PROFILE) ] && exit 1
-	eval "$$(make project-populate-secret-variables)"
+	eval "$$(make populate-secret-variables)"
 	make k8s-deploy-job STACK=$(STACK)
 
 # ==============================================================================
@@ -150,8 +150,22 @@ proxy-clean:
 
 # ---
 
-project-populate-secret-variables:
-	make secret-fetch-and-export-variables NAME=uec-dos-api-capacity-status-$(PROFILE)
+populate-secret-variables:
+	if [ "$(PROFILE)" !=  "local" ]; then
+		eval "$$(make aws-assume-role-export-variables)"
+		echo "export API_DB_PASSWORD=$$(make -s secret-get-existing-value NAME=$(API_DB_PASSWORD_STORE)"
+		echo "export API_ADMIN_PASSWORD=$$(make -s secret-get-existing-value NAME=$(API_PASSWORD_STORE)"
+		echo "export DJANGO_SECRET_KEY=$$(make -s secret-get-existing-value NAME=$(DJANGO_SECRET_STORE)"
+		echo "export API_DB_HOST=$(TF_VAR_db_dns_name)"
+		make secret-fetch-and-export-variables NAME=$(DEPLOYMENT_SECRETS)
+	fi
+	if [ "$(PROFILE)" == "dev ]; then
+		echo "export DB_DOS_HOST=$(TF_VAR_db_dns_name)"
+	fi
+	if [ "$(PROFILE)" == "demo"] || [ "$(PROFILE)" == "live" ]; then
+		echo "export DB_DOS_HOST=$$(make -s secret-get-existing-value NAME=$(DOS_SECRET_STORE) KEY=$(DOS_HOST_KEY))"
+		echo "export DB_DOS_PASSWORD=$$(make -s secret-get-existing-value NAME=$(DOS_SECRET_STORE) KEY=$(DOS_PASSWORD_KEY))"
+	fi
 
 # ---
 
@@ -217,24 +231,15 @@ dev-smoke-test:
 	curl -H "Authorization: Token $$token" http://localhost:8080/api/v0.0.1/capacity/services/$$service_id/capacitystatus/
 
 url:
-	echo https://$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(PROFILE)-$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-proxy-ingress.$(TEXAS_HOSTED_ZONE)/api/v0.0.1/capacity/apidoc/
+	echo https://$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(ENVIRONMENT)-proxy-ingress.$(TEXAS_HOSTED_ZONE)/api/v0.0.1/capacity/apidoc/
 
 backup-data:
 	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"
-	make aws-rds-create-snapshot DB_INSTANCE=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(PROFILE) SNAPSHOT_NAME=$(GIT_TAG)
+	make aws-rds-create-snapshot DB_INSTANCE=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(ENVIRONMENT) SNAPSHOT_NAME=$(GIT_TAG)
 	make aws-rds-wait-for-snapshot SNAPSHOT_NAME=$(GIT_TAG)
 
 # ==============================================================================
 # Refactor
-
-# TODO: Remove it in favour of `secret-copy-value-from` once updated to the latest Make DevOps autoamtion scripts
-secret-update-db-password: ### Update DB password for K8s deployment with new DB password
-	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"
-	pw=$$(make secret-fetch NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(PROFILE)-capacity_status_db_password)
-	secrets=$$(make secret-fetch NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME)-$(PROFILE) | jq -rc --arg pw "$$pw" '.API_DB_PASSWORD = $$pw')
-	echo $$secrets > $(TMP_DIR)/secrets-update.json
-	file=$(TMP_DIR)/secrets-update.json
-	make aws-secret-put NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME)-$(PROFILE) VALUE=file://$$file
 
 git-create-tag: ### Tag PR to master for auto pipeline
 	timestamp=$$(date --date=$(BUILD_DATE) -u +"%Y%m%d%H%M%S")
@@ -258,21 +263,24 @@ set-profile-for-deployment: ### Returns the profile based on the git tag on the 
 		echo dev
 	fi
 
-deployment-summary: ### Returns a deployment summary
+deployment-summary: # Returns a deployment summary
 	echo Terraform Changes
 	cat /tmp/terraform_changes.txt | grep -E 'Apply...'
 	echo Is deployment running?
 	cat /tmp/deployment_stats.txt | grep -E 'Display namespaces' --after-context=100
-	echo URL
-	make url
+	echo "Service URL Address: $$(make url)"
+
+pipeline-send-notification:
+	eval "$$(make aws-assume-role-export-variables)"
+	eval "$$(make secret-fetch-and-export-variables NAME=DEPLOYMENT_SECRETS)"
+	make slack-it
 
 # ==============================================================================
 
 .SILENT: \
 	dev-create-user \
 	dev-smoke-test \
-	project-populate-application-variables \
-	project-populate-db-pu-job-variables \
+	populate-secret-variables \
 	git-tag-is-present-on-branch \
 	git-create-tag \
 	set-profile-for-deployment

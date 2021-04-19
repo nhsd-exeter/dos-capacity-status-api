@@ -1,9 +1,9 @@
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: uec-dos-api-cs-proxy-ingress
+  name: proxy-ingress
   namespace: K8S_APP_NAMESPACE_TO_REPLACE
   annotations:
     alb.ingress.kubernetes.io/waf-acl-id: dfae6ec3-aa05-428f-a022-5fd85f646009
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:AWS_ACCOUNT_ID_NONPROD_TO_REPLACE:certificate/c0718115-4e22-4f48-a4aa-8c16ea86c5e6
-    alb.ingress.kubernetes.io/inbound-cidrs: 194.101.83.23/24, 51.140.225.142/24, 81.155.242.0/24, 82.28.50.0/24, 86.132.34.95/24
+    alb.ingress.kubernetes.io/inbound-cidrs: 10.105.0.0/16

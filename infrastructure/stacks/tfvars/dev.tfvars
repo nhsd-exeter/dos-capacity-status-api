@@ -5,7 +5,7 @@
 ####################################################################################
 # TERRAFORM PLATFORM INFRASTRUCTURE COMMON
 ####################################################################################
-terraform_platform_state_s3_bucket = "nhsd-texasplatform-terraform-state-store-live-lk8s-nonprod"
+terraform_platform_state_store = "nhsd-texasplatform-terraform-state-store-live-lk8s-nonprod"
 
 ####################################################################################
 # AWS COMMON
@@ -62,4 +62,3 @@ deletion_protection           = false
 db_auto_minor_version_upgrade = false
 multi_az                      = false
 skip_final_snapshot           = false
-
