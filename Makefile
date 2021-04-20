@@ -241,7 +241,7 @@ backup-data:
 # ==============================================================================
 # Refactor
 
-tag-images-for-production: # Matches artefacts with Git Tag and triggers production pipeline - Mandatory: PROFILE=[demo|live], COMMIT=[git commit to progress], ARTEFACTS=[comma separated list of images]
+tag-images-for-production: ### Matches artefacts with Git Tag and triggers production pipeline - Mandatory: PROFILE=[demo|live], COMMIT=[git commit to progress], ARTEFACTS=[comma separated list of images]
 	tag=$(BUILD_TIMESTAMP)-$(PROFILE)
 	for image in $$(echo $(or $(ARTEFACTS), $(ARTEFACT)) | tr "," "\n"); do
 		make docker-image-find-and-version-as \
@@ -253,7 +253,7 @@ tag-images-for-production: # Matches artefacts with Git Tag and triggers product
 project-get-production-tag: ### Return production tag = Mandatory: PROFILE[demo|live]
 	echo $(BUILD_TIMESTAMP)-$(PROFILE)
 
-parse-profile-from-tag: # Return profile based off of git tag - Mandatory GIT_TAG=[git tag]
+parse-profile-from-tag: ### Return profile based off of git tag - Mandatory GIT_TAG=[git tag]
 	echo $(GIT_TAG) | cut -d "-" -f2
 
 deployment-summary: ### Returns a deployment summary
@@ -276,4 +276,5 @@ pipeline-send-notification:
 	populate-secret-variables \
 	git-tag-is-present-on-branch \
 	git-create-tag \
-	parse-profile-from-tag
+	parse-profile-from-tag \
+	project-get-production-tag
