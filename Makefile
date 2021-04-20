@@ -241,27 +241,20 @@ backup-data:
 # ==============================================================================
 # Refactor
 
-git-create-tag: ### Tag PR to master for auto pipeline
-	timestamp=$$(date --date=$(BUILD_DATE) -u +"%Y%m%d%H%M%S")
-	commit=$$(make git-commit-get-hash)
-	echo $$timestamp-$$commit
+tag-images-for-production: # Matches artefacts with Git Tag and triggers production pipeline - Mandatory: PROFILE=[demo|live], COMMIT=[git commit to progress], ARTEFACTS=[comma separated list of images]
+	tag=$(BUILD_TIMESTAMP)-$(PROFILE)
+	for image in $$(echo $(or $(ARTEFACTS), $(ARTEFACT)) | tr "," "\n"); do
+		make docker-image-find-and-version-as \
+			TAG=$$tag \
+			NAME=$$image \
+			COMMIT=$(COMMIT)
+	done
 
-git-tag-is-present-on-branch: ### Returns true if the given branch contains the given tag else it returns false - mandatory: BRANCH=[branch name] TAG=[tag name]
-	if [ $$(git branch --contains tags/$(TAG) | grep -ow $(BRANCH)) ]; then
-		echo true
-	else
-		echo false
-	fi
+project-get-production-tag: ### Return production tag = Mandatory: PROFILE[demo|live]
+	echo $(BUILD_TIMESTAMP)-$(PROFILE)
 
-set-profile-for-deployment: ### Returns the profile based on the git tag on the commit - mandatory: TAG=[tag name]
-	profile=$${$(TAG)}
-	if [ $$profile == live ]; then
-		echo live
-	elif [ $$profile == demo ]; then
-		echo demo
-	else
-		echo dev
-	fi
+parse-profile-from-tag: # Return profile based off of git tag - Mandatory GIT_TAG=[git tag]
+	echo $(GIT_TAG) | cut -d "-" -f2
 
 deployment-summary: ### Returns a deployment summary
 	echo Terraform Changes
@@ -283,4 +276,4 @@ pipeline-send-notification:
 	populate-secret-variables \
 	git-tag-is-present-on-branch \
 	git-create-tag \
-	set-profile-for-deployment
+	parse-profile-from-tag
