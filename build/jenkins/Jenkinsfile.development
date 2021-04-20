@@ -1,0 +1,82 @@
+pipeline {
+  /*
+    Description: TODO:
+  */
+  agent { label 'jenkins-slave' }
+  options {
+    buildDiscarder(logRotator(daysToKeepStr: '7', numToKeepStr: '13'))
+    disableConcurrentBuilds()
+    parallelsAlwaysFailFast()
+    timeout(time: 180, unit: 'MINUTES')
+  }
+  environment {
+    BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
+    PROFILE = 'dev'
+  }
+  triggers { pollSCM('* * * * *') }
+  stages {
+    stage('Show Configuration') {
+      steps {
+        script { sh 'make show-configuration' }
+      }
+    }
+    stage('Start Test DB') {
+      steps {
+        script { sh 'make test-db-start' }
+      }
+    }
+    stage('Build Images') {
+      steps {
+        script { sh 'make build' }
+      }
+    }
+    stage('Run Unit Tests') {
+      steps {
+        script { sh 'make migrate PROFILE=local' }
+        script { sh 'make test-unit-only PROFILE=local' }
+        script { sh 'make test-regression-only PROFILE=local' }
+      }
+    }
+    stage('Push Images') {
+      steps {
+        script { sh 'make push' }
+      }
+    }
+    stage('Provision Infrastructure') {
+      steps {
+        script { sh "make terraform-apply-auto-approve STACKS=service PROFILE=${PROFILE} | tee /tmp/terraform_changes.txt" }
+      }
+    }
+    stage('Deploy') {
+      environment {
+        TAG = sh(returnStdout: true, script: "make project-get-tag BUILD_DATE=$BUILD_DATE").trim()
+      }
+      steps {
+        script { sh "make deploy PROFILE=${PROFILE} API_IMAGE_TAG=${TAG} PROXY_IMAGE_TAG=${TAG} | tee /tmp/deployment_stats.txt" }
+      }
+    }
+    stage('Load Test Data') {
+      when { expression { this.PROFILE == 'dev' } }
+      steps {
+        script {
+          sh "make deploy-job PROFILE=${PROFILE} STACK=data || :"
+        }
+      }
+    }
+    stage('Deployment Summary') {
+      steps {
+        script { sh 'make deployment-summary' }
+      }
+    }
+  }
+  post {
+    success {
+      script {
+        if ( env.BRANCH_NAME == 'master' ) {
+          sh "make pipeline-send-notification PIPELINE_NAME='DoS Capacity API (Development)' BUILD_STATUS=${currentBuild.currentResult}"
+        }
+      }
+    }
+    failure { sh "make pipeline-send-notification PIPELINE_NAME='DoS Capacity API (Development)' BUILD_STATUS=${currentBuild.currentResult}" }
+  }
+}

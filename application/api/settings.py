@@ -21,6 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Note that the key is obtained from AWS Secrets in the production environment.
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "=tapo65h_g^cf4sxjawp-tl&z@1@5*&)p5gn2kax!^udtvs27c")
+ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # TODO: get that from the make profile rather than hardcoding
@@ -31,7 +32,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "cs.local",
     "uec-dos-api-cs-demo-uec-dos-api-cs-proxy-ingress.k8s-prod.texasplatform.uk",
-    "uec-dos-api-cs-dev-uec-dos-api-cs-proxy-ingress.k8s-nonprod.texasplatform.uk",
+    "uec-dos-api-cs-{}-proxy-ingress.k8s-nonprod.texasplatform.uk".format(ENVIRONMENT),
     "cs.api.directoryofservices.nhs.uk",
 ]
 

@@ -5,7 +5,7 @@
 ####################################################################################
 # TERRAFORM PLATFORM INFRASTRUCTURE COMMON
 ####################################################################################
-terraform_platform_state_s3_bucket = "nhsd-texasplatform-terraform-state-store-lk8s-prod"
+terraform_platform_state_store = "nhsd-texasplatform-terraform-state-store-lk8s-prod"
 
 ####################################################################################
 # AWS COMMON

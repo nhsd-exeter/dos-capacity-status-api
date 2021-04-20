@@ -31,10 +31,10 @@ module "rds" {
   service_name       = var.service_name
 
   db_max_connections                      = var.db_max_connections
-  security-groups-k8s_terraform_state_key = var.security-groups-k8s_terraform_state_key
+  security_groups_k8s_terraform_state_key = var.security_groups_k8s_terraform_state_key
   db_subnet_group_name                    = var.db_subnet_group_name
 
-  terraform_platform_state_s3_bucket = var.terraform_platform_state_s3_bucket
-  vpc_terraform_state_key            = var.vpc_terraform_state_key
-  aws_region                         = var.aws_region
+  terraform_platform_state_store = var.terraform_platform_state_store
+  vpc_terraform_state_key        = var.vpc_terraform_state_key
+  aws_region                     = var.aws_region
 }

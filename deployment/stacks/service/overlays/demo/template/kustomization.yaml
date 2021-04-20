@@ -19,4 +19,4 @@ configMapGenerator:
       - RESET_STATUS_IN_MAX_MINS=SERVICE_RESET_STATUS_IN_MAX_MINS_TO_REPLACE
 
 commonLabels:
-  env: demo
+  env: ENVIRONMENT_TO_REPLACE
