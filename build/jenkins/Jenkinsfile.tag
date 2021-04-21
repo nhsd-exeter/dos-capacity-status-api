@@ -30,7 +30,7 @@ pipeline {
     stage('Tag Commit') {
       environment { TAG = sh(returnStdout: true, script: "make project-get-production-tag PROFILE=${params.PROFILE} BUILD_TIMESTAMP=${BUILD_TIMESTAMP}").trim() }
       steps {
-        withCredentials([usernamePassword(credentialsId: ‘Eyvoll 2’, passwordVariable: ‘GIT_PASSWORD’, usernameVariable: ‘GIT_USERNAME)]) {
+        withCredentials([usernamePassword(credentialsId: ‘dehe1’, passwordVariable: ‘GIT_PASSWORD’, usernameVariable: ‘GIT_USERNAME)]) {
           script { sh "make git-tag-create TAG=${TAG} COMMIT=${COMMIT}" }
         }
       }
