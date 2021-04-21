@@ -11,9 +11,10 @@ pipeline {
     timeout(time: 45, unit: 'MINUTES')
   }
   environment {
-    PROFILE = "${params.PROFILE}"
+    PROFILE = 'dev'
     COMMIT = "${params.COMMIT}"
     ARTEFACTS = 'proxy,api'
+    BUILD_TIMESTAMP = "${BUILD_TIMESTAMP}"
   }
   stages {
     stage('Show Configuration') {
@@ -23,13 +24,15 @@ pipeline {
     }
     stage('Tag Artefacts') {
       steps {
-        script { sh "make tag-images-for-production PROFILE=${PROFILE} COMMIT=${COMMIT} ARTEFACTS=${ARTEFACTS}" }
+        script { sh "make tag-images-for-production PROFILE=${params.PROFILE} COMMIT=${COMMIT} ARTEFACTS=${ARTEFACTS} BUILD_TIMESTAMP=${BUILD_TIMESTAMP}" }
       }
     }
     stage('Tag Commit') {
-      environment { TAG = sh(returnStdout: true, script: "make project-get-production-tag PROFILE=${PROFILE}").trim() }
+      environment { TAG = sh(returnStdout: true, script: "make project-get-production-tag PROFILE=${params.PROFILE} BUILD_TIMESTAMP=${BUILD_TIMESTAMP}").trim() }
       steps {
-        script { sh "make git-tag-create TAG=${TAG} COMMIT=${COMMIT}" }
+        withCredentials([usernamePassword(credentialsId: ‘Eyvoll 2’, passwordVariable: ‘GIT_PASSWORD’, usernameVariable: ‘GIT_USERNAME)]) {
+          script { sh "make git-tag-create TAG=${TAG} COMMIT=${COMMIT}" }
+        }
       }
     }
   }
