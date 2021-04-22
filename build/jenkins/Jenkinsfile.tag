@@ -34,7 +34,7 @@ pipeline {
       steps {
         withCredentials([string(credentialsId: 'hub1', variable: 'GIT_TOKEN')]) {
           sh "git tag ${TAG} ${COMMIT}"
-          sh "git push https://${GIT_TOKEN}@github.com/nhsd-ddce/dos-capacity-status-api.git ${TAG}"
+          sh "git push https://${GIT_TOKEN}@github.com/nhsd-exeter/dos-capacity-status-api.git ${TAG}"
         }
       }
     }

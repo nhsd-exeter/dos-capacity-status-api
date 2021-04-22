@@ -61,11 +61,10 @@ git-tag-create: ### Tag a commit - mandatory: TAG=[tag name]; optional: COMMIT=[
 	git tag $(TAG) $$commit
 	git push origin $(TAG)
 
-# TODO: Change back to ENVIRONMENT after task branch work
 git-tag-create-environment-deployment: ### Tag environment deployment as `[YYYYmmddHHMMSS]-[env]` - mandatory: PROFILE=[profile name]; optional: COMMIT=[release candidate tag name, defaults to master]
 	[ $(PROFILE) == local ] && (echo "ERROR: Please, specify the PROFILE"; exit 1)
 	commit=$(or $(COMMIT), master)
-	tag=$(BUILD_TIMESTAMP)-$(PROFILE)
+	tag=$(BUILD_TIMESTAMP)-$(ENVIRONMENT)
 	make git-tag-create TAG=$$tag COMMIT=$$commit
 
 git-tag-get-environment-deployment: ### Get the latest environment deployment tag for the whole repository or just the specified commit - mandatory: PROFILE=[profile name]; optional: COMMIT=[commit]
