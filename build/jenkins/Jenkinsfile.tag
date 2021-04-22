@@ -29,12 +29,10 @@ pipeline {
       }
     }
     stage('Tag Commit') {
-      environment { TAG = sh(returnStdout: true, script: "make project-get-production-tag PROFILE=${params.PROFILE} BUILD_DATE=${BUILD_DATE}").trim() }
+      agent { label 'host' }
       steps {
-        withCredentials([usernamePassword(credentialsId: dehe1, passwordVariable: ‘GIT_PASSWORD’, usernameVariable: ‘GIT_USERNAME)]) {
-          sh "git tag ${TAG} ${COMMIT}"
-          sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/nhsd-exeter/dos-capacity-status-api"
-        }
+        checkout scm
+        sh "make git-tag-create-environment-deployment PROFILE${params.PROFILE} COMMIT=${COMMIT} BUILD_DATE=${BUILD_DATE}"
       }
     }
   }
@@ -43,4 +41,7 @@ pipeline {
     failure { sh "make pipeline-send-notification PIPELINE_NAME='DoS Capacity API (Tag)' BUILD_STATUS=${currentBuild.currentResult}" }
     cleanup { sh 'make clean' }
   }
+}
+node {
+
 }
