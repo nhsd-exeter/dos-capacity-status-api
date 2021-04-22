@@ -31,8 +31,9 @@ pipeline {
     stage('Tag Commit') {
       environment { TAG = sh(returnStdout: true, script: "make project-get-production-tag PROFILE=${params.PROFILE} BUILD_DATE=${BUILD_DATE}").trim() }
       steps {
-        withCredentials([usernamePassword(credentialsId: ‘dehe1’, passwordVariable: ‘GIT_PASSWORD’, usernameVariable: ‘GIT_USERNAME)]) {
-          script { sh "make git-tag-create TAG=${TAG} COMMIT=${COMMIT}" }
+        withCredentials([usernamePassword(credentialsId: dehe1, passwordVariable: ‘GIT_PASSWORD’, usernameVariable: ‘GIT_USERNAME)]) {
+          sh "git tag ${TAG} ${COMMIT}"
+          sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/nhsd-exeter/dos-capacity-status-api"
         }
       }
     }
