@@ -32,10 +32,8 @@ pipeline {
       agent { label 'host' }
       environment { TAG = sh(returnStdout: true, script: "make project-get-production-tag PROFILE=${params.PROFILE} BUILD_DATE=${BUILD_DATE}").trim() }
       steps {
-        withCredentials([usernamePassword(credentialsId: 'dehe1', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-          sh "git tag ${TAG}"
-          sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/nhsd-ddce/dos-capacity-status-api.git ${TAG}"
-        }
+        script { sh "git tag ${TAG} ${COMMIT}" }
+        script { sh "GIT_ASKPASS=true  git push origin ${TAG}" }
       }
     }
   }
