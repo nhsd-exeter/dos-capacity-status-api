@@ -32,7 +32,7 @@ pipeline {
       agent { label 'host' }
       environment { TAG = sh(returnStdout: true, script: "make project-get-production-tag PROFILE=${params.PROFILE} BUILD_DATE=${BUILD_DATE}").trim() }
       steps {
-        withCredentials([token(credentialsId: 'hub1', variable: 'GIT_TOKEN')]) {
+        withCredentials([apiToken(credentialsId: 'hub1', variable: 'GIT_TOKEN')]) {
           sh "git tag ${TAG} ${COMMIT}"
           sh "git push https://${GIT_TOKEN}@github.com/nhsd-ddce/dos-capacity-status-api.git ${TAG}"
         }
