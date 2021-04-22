@@ -6,7 +6,7 @@
 PROJECT_IMAGE_TAG :=
 ENV := demo
 SERVICE_PREFIX := $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(PROFILE)
-DEPLOYMENT_SECRETS := $(PROJECT_ID)/deployment
+DEPLOYMENT_SECRETS := $(SERVICE_PREFIX)/deployment
 
 K8S_TTL :=
 API_HOST := uec-dos-api-cs
@@ -31,9 +31,8 @@ DB_DOS_PORT = 5432
 DB_DOS_USERNAME = release_manager # capacity_status_api
 
 # TODO: set secret store and key values for demo
-DOS_SECRET_STORE :=
-DOS_HOST_KEY :=
-DOS_PASSWORD_KEY :=
+DOS_SECRET_STORE := core-dos-uet/deployment
+DOS_PASSWORD_KEY := DB_UET_RELEASE_USER_PASSWORD
 #DB_DOS_PASSWORD = [secret]
 
 # TODO: What is this variable for? We always should be using https

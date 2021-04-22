@@ -8,3 +8,4 @@ metadata:
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:AWS_ACCOUNT_ID_PROD_TO_REPLACE:certificate/6efa379d-0924-4b1e-bc44-39dc71254ac0
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/inbound-cidrs: 0.0.0.0./0
+    alb.ingress.kubernetes.io/security-groups: DOS_API_SG_TO_REPLACE

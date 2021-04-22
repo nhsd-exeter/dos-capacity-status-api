@@ -163,7 +163,6 @@ populate-secret-variables:
 		echo "export DB_DOS_HOST=$(TF_VAR_db_dns_name)"
 	fi
 	if [ "$(PROFILE)" == "demo" ] || [ "$(PROFILE)" == "live" ]; then
-		echo "export DB_DOS_HOST=$$(make -s secret-get-existing-value NAME=$(DOS_SECRET_STORE) KEY=$(DOS_HOST_KEY))"
 		echo "export DB_DOS_PASSWORD=$$(make -s secret-get-existing-value NAME=$(DOS_SECRET_STORE) KEY=$(DOS_PASSWORD_KEY))"
 	fi
 
@@ -250,9 +249,6 @@ tag-images-for-production: ### Matches artefacts with Git Tag and triggers produ
 			COMMIT=$(COMMIT)
 	done
 
-project-get-production-tag: ### Return production tag = Mandatory: PROFILE[demo|live]
-	echo $(BUILD_TIMESTAMP)-$(PROFILE)
-
 parse-profile-from-tag: ### Return profile based off of git tag - Mandatory GIT_TAG=[git tag]
 	echo $(GIT_TAG) | cut -d "-" -f2
 
@@ -274,7 +270,4 @@ pipeline-send-notification:
 	dev-create-user \
 	dev-smoke-test \
 	populate-secret-variables \
-	git-tag-is-present-on-branch \
-	git-create-tag \
-	parse-profile-from-tag \
-	project-get-production-tag
+	parse-profile-from-tag
