@@ -249,6 +249,9 @@ tag-images-for-production: ### Matches artefacts with Git Tag and triggers produ
 			COMMIT=$(COMMIT)
 	done
 
+project-get-production-tag:
+	echo $(BUILD_TIMESTAMP)-$(PROFILE)
+
 parse-profile-from-tag: ### Return profile based off of git tag - Mandatory GIT_TAG=[git tag]
 	echo $(GIT_TAG) | cut -d "-" -f2
 
@@ -270,4 +273,5 @@ pipeline-send-notification:
 	dev-create-user \
 	dev-smoke-test \
 	populate-secret-variables \
-	parse-profile-from-tag
+	parse-profile-from-tag \
+	project-get-production-tag

@@ -249,7 +249,7 @@ The `PROFILE` variable can be set to other environments.
 
 To provision the infrastructure use the following command:
 
-    make terraform-apply STACKS=service PROFILE=${PROFILE} OPTS='--var-file=../tfvars/${PROFILE}.tfvars
+    make terraform-apply STACKS=service PROFILE=${PROFILE}
 
 Where `${PROFILE}` is the the environment your looking to deploy to e.g. `dev`, `demo`, or `prod`
 
