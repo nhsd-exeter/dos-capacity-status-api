@@ -59,7 +59,7 @@ git-tag-is-environment-deployment: ### Check if a commit is tagged as environmen
 git-tag-create: ### Tag a commit - mandatory: TAG=[tag name]; optional: COMMIT=[commit, defaults to master]
 	commit=$(or $(COMMIT), master)
 	git tag $(TAG) $$commit
-	git push origin $(TAG)
+	git push $(BUILD_REPO) origin $(TAG)
 
 git-tag-create-environment-deployment: ### Tag environment deployment as `[YYYYmmddHHMMSS]-[env]` - mandatory: PROFILE=[profile name]; optional: COMMIT=[release candidate tag name, defaults to master]
 	[ $(PROFILE) == local ] && (echo "ERROR: Please, specify the PROFILE"; exit 1)

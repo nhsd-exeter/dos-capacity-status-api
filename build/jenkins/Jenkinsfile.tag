@@ -31,8 +31,7 @@ pipeline {
     stage('Tag Commit') {
       agent { label 'host' }
       steps {
-        checkout scm
-        sh "make git-tag-create-environment-deployment PROFILE${params.PROFILE} COMMIT=${COMMIT} BUILD_DATE=${BUILD_DATE}"
+        sh "make git-tag-create-environment-deployment PROFILE=${params.PROFILE} COMMIT=${COMMIT} BUILD_DATE=${BUILD_DATE}"
       }
     }
   }
@@ -41,7 +40,4 @@ pipeline {
     failure { sh "make pipeline-send-notification PIPELINE_NAME='DoS Capacity API (Tag)' BUILD_STATUS=${currentBuild.currentResult}" }
     cleanup { sh 'make clean' }
   }
-}
-node {
-
 }
