@@ -14,7 +14,7 @@ pipeline {
     PROFILE = 'dev'
     COMMIT = "${params.COMMIT}"
     ARTEFACTS = 'proxy,api'
-    BUILD_TIMESTAMP = "${BUILD_TIMESTAMP}"
+    BUILD_TIMESTAMP = "${env.BUILD_TIMESTAMP}"
   }
   stages {
     stage('Show Configuration') {
