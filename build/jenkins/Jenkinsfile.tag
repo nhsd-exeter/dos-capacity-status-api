@@ -40,8 +40,8 @@ pipeline {
     }
   }
   post {
-    success { sh "make pipeline-send-notification PIPELINE_NAME='DoS Capacity API (Tag)' BUILD_STATUS=${currentBuild.currentResult}" }
-    failure { sh "make pipeline-send-notification PIPELINE_NAME='DoS Capacity API (Tag)' BUILD_STATUS=${currentBuild.currentResult}" }
+    success { sh "make pipeline-send-notification PIPELINE_NAME='DoS Capacity Status API (Tag)' BUILD_STATUS=${currentBuild.currentResult}" }
+    failure { sh "make pipeline-send-notification PIPELINE_NAME='DoS Capacity Status API (Tag)' BUILD_STATUS=${currentBuild.currentResult}" }
     cleanup { sh 'make clean' }
   }
 }
