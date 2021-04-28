@@ -1,0 +1,44 @@
+pipeline {
+  agent { label 'jenkins-slave' }
+  options {
+    buildDiscarder(logRotator(daysToKeepStr: '7', numToKeepStr: '3'))
+    disableConcurrentBuilds()
+    parallelsAlwaysFailFast()
+    timeout(time: 90, unit: 'MINUTES')
+  }
+  environment {
+    GIT_TAG = "${env.BRANCH_NAME}"
+    PROFILE = sh(returnStdout: true, script: "make parse-profile-from-tag GIT_TAG=$GIT_TAG").trim()
+  }
+  triggers { pollSCM(env.BRANCH_NAME == 'master' ? '* * * * *' : '') }
+  stages {
+    stage('Show Configuration') {
+      steps {
+        script { sh 'make show-configuration' }
+      }
+    }
+    stage('Provision Infrastructure') {
+      when { expression { env.PROFILE == 'demo' || env.PROFILE == 'live' } }
+      steps {
+        script { sh "make terraform-apply-auto-approve STACKS=service PROFILE=${PROFILE} | tee /tmp/terraform_changes.txt" }
+      }
+    }
+    stage('Deploy') {
+      when { expression { env.PROFILE == 'demo' || env.PROFILE == 'live' } }
+      steps {
+        script { sh "make deploy PROFILE=${PROFILE} API_IMAGE_TAG=${GIT_TAG} PROXY_IMAGE_TAG=${GIT_TAG} | tee /tmp/deployment_stats.txt" }
+      }
+    }
+    stage('Deployment Summary') {
+      when { expression { env.PROFILE == 'demo' || env.PROFILE == 'live' } }
+      steps {
+        script { sh 'make deployment-summary' }
+      }
+    }
+  }
+  post {
+    success { sh "make pipeline-send-notification PIPELINE_NAME='DoS Capacity Status API (Production)' BUILD_STATUS=${currentBuild.currentResult}" }
+    failure { sh "make pipeline-send-notification PIPELINE_NAME='DoS Capacity Status API (Production)' BUILD_STATUS=${currentBuild.currentResult}" }
+    cleanup { sh 'make clean' }
+  }
+}

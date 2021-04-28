@@ -73,10 +73,10 @@ pipeline {
     success {
       script {
         if ( env.BRANCH_NAME == 'master' ) {
-          sh "make pipeline-send-notification PIPELINE_NAME='DoS Capacity API (Development)' BUILD_STATUS=${currentBuild.currentResult}"
+          sh "make pipeline-send-notification PIPELINE_NAME='DoS Capacity Status API (Development)' BUILD_STATUS=${currentBuild.currentResult}"
         }
       }
     }
-    failure { sh "make pipeline-send-notification PIPELINE_NAME='DoS Capacity API (Development)' BUILD_STATUS=${currentBuild.currentResult}" }
+    failure { sh "make pipeline-send-notification PIPELINE_NAME='DoS Capacity Status API (Development)' BUILD_STATUS=${currentBuild.currentResult}" }
   }
 }
