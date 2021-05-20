@@ -98,7 +98,7 @@ project-branch-test: ### Check if development branch can be tested automatically
 	keywords=$(or $(KEYWORDS) || test,func-test,perf-test,sec-test)
 	[[ $(BUILD_BRANCH) =~ $(GIT_BRANCH_PATTERN_MAIN) ]] && echo true && exit 0
 	[[ $(BUILD_BRANCH) =~ $(GIT_BRANCH_PATTERN_PREFIX)/$(GIT_BRANCH_PATTERN_SUFFIX) ]] && \
-	[ $$(make project-message-contains KEYWORD=$$keywords) == true ] && echo true && exit 0
+		[ $$(make project-message-contains KEYWORD=$$keywords) == true ] && echo true && exit 0
 	echo false
 
 project-branch-func-test: ### Check if development branch can be tested (functional) automatically - return: true|false
@@ -122,10 +122,10 @@ project-branch-sec-test: ### Check if development branch can be tested (security
 			echo true && exit 0
 	echo false
 
-project-message-contains: ### Check if git commit message contains any give keyword - mandatory KEYWORD=[comma-separated keywords]
-	msg=$$(make git-msg)
+project-message-contains: ### Check if git commit message contains any give keyword, format: '[ci keyword-one,keyword-two,...]' - mandatory KEYWORD=[comma-separated keywords]
+	msg=$$(make git-commit-get-message)
 	for str in $$(echo $(KEYWORD) | sed "s/,/ /g"); do
-		echo "$$msg" | grep -E '[ci .*]' | grep -Eoq "\[ci.*[^-]$${str}[^-].*" && echo true && exit 0
+		echo "$$msg" | grep -E '\[ci .*\]' | grep -Eoq "\[ci .*[^-]$${str}[^-].*" && echo true && exit 0
 	done
 	echo false
 
