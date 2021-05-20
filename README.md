@@ -167,9 +167,14 @@ https://localhost:8443/api/v0.0.1/capacity/admin
 
 Credentials for the administrator user in the development environment are admin/admin.
 
-When creating an API user, there will be a field to link this user with a DoS User. The development
-environment is pre-configured with a DoS user that can be used as the API user. The DoS User is 'EditCapacity'.
-Once an API user has been created, you can go ahead and generate a Token for the user. This token will
+When creating an API user, there will be a field to link this user to a pre-configured DoS User. The development
+environment is pre-configured with the following three DoS Users:
+
+- ViewUser - An API user associated with this DoS User will have permissions to view the capacity status of any service in the database.
+- EditUser - An API user associated with this DoS User will have permissions to view the capacity status of any service AND update the capacity status of a select number of services. One such service where the capacity status can be updated for this user is the service with the UID of 153455.
+- InActiveTestUser - An API user associated with this DoS User is considered inactive, and, as such will not be able to view or update the capacity status of any services.
+
+Once the API user has been created, you can go ahead and generate a Token for the user. This token will
 need to be provided in the 'Authorization' section of all request headers.
 
 Authorization header format:
