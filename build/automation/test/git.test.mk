@@ -2,12 +2,13 @@ test-git:
 	make test-git-setup
 	tests=( \
 		test-git-config \
-		test-git-branch-is-name-correct \
+		test-git-check-if-branch-name-is-correct \
+		test-git-secrets-load \
 		test-git-secrets-add-banned \
 		test-git-secrets-add-allowed \
 		test-git-secrets-scan-repo-history \
 		test-git-secrets-scan-repo-files \
-		test-git-commit-has-changed-directory \
+		test-git-check-if-commit-changed-directory \
 		test-git-commit-get-hash \
 		test-git-commit-get-timestamp \
 		test-git-commit-get-message \
@@ -54,7 +55,10 @@ test-git-config:
 	mk_test "secrets.providers git secrets --aws-provider" "0 -lt $$(git-secrets --list | grep 'secrets.providers git secrets --aws-provider' | wc -l)"
 	mk_test_complete
 
-test-git-branch-is-name-correct:
+test-git-check-if-branch-name-is-correct:
+	mk_test_skip
+
+test-git-secrets-load:
 	mk_test_skip
 
 test-git-secrets-add-banned:
@@ -75,9 +79,9 @@ test-git-secrets-scan-repo-files:
 	# assert
 	mk_test "0 -eq $$?"
 
-test-git-commit-has-changed-directory:
+test-git-check-if-commit-changed-directory:
 	# act
-	output=$$(make git-commit-has-changed-directory DIR=build/automation/tmp)
+	output=$$(make git-check-if-commit-changed-directory DIR=build/automation/tmp)
 	# assert
 	mk_test "false == $$output"
 
