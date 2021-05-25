@@ -4,6 +4,7 @@
 
 - API ORM Migration
 - Documentation
+  - Move the documentation content away from the `application/api/service/documentation.py` file
   - Generate API Documentation automatically (CSAPI-9)
 - Testing
   - Implement smoke test suite
@@ -33,10 +34,8 @@
   - Deploy to production (CSAPI-65, CSAPI-66)
   - Tagging upon deployment (CSAPI-65, CSAPI-66)
 - Amend Pipelines
-
   - Commit Pipeline - Create a Git User for Jenkins so that it can Tag the Git Commits at the end of the pipeline (Card 150)
   - Deploy Pipeline - Add Assurance and load testing when they have been written (Card 145)
-
 - API ORM Migration
   The ORM migration strategy is to have a step in the deployment pipeline that runs a make target
   which in turn runs the Django migration tool. The migration tool will then act on any migration

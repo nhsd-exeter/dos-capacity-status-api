@@ -4,5 +4,6 @@
 
 if [ $(make git-check-if-commit-changed-directory DIR=application PRECOMMIT=true) == true ]; then
   make -s python-code-format python-code-check \
-    FILES=application
+    FILES=application \
+    EXCLUDE=application/api/service/documentation.py
 fi

@@ -92,7 +92,7 @@ class TestDosInterfaceReporting(TestCase):
             META = {
                 "HTTP_X_REQUEST_RECEIVED": datetime.now().isoformat(),
                 "HTTP_X_REQUEST_ID": "dummy_id",
-                "HTTP_X_CLIENT_IP": "0.0.0.1",
+                "HTTP_X_CLIENT_IP": "127.0.0.1",
             }
 
         request = Request()
@@ -125,7 +125,7 @@ class TestDosInterfaceReporting(TestCase):
             META = {
                 "HTTP_X_REQUEST_RECEIVED": datetime.now().isoformat(),
                 "HTTP_X_REQUEST_ID": "dummy_id",
-                "HTTP_X_CLIENT_IP": "0.0.0.1",
+                "HTTP_X_CLIENT_IP": "127.0.0.1",
             }
 
         service_uid = "000000"
