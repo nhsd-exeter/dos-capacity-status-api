@@ -20,6 +20,7 @@ API_DB_USERNAME = postgres
 #API_DB_PASSWORD = [secret]
 API_DEBUG = True
 API_LOG_LEVEL = INFO
+SPLUNK_INDEX = eks_logs_uec_dos_api_cs_nonprod
 
 API_DB_PASSWORD_STORE := $(SERVICE_PREFIX)-db-password
 API_PASSWORD_STORE := $(SERVICE_PREFIX)-api-admin-password
