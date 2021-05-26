@@ -128,7 +128,7 @@ devops-copy: ### Copy the DevOps automation toolchain scripts to given destinati
 	mkdir -p $(DIR)/build
 	sync && version
 
-devops-update devops-synchronise: ### Update/upgrade the DevOps automation toolchain scripts used by this project - optional: LATEST=true
+devops-update devops-synchronise: ### Update/upgrade the DevOps automation toolchain scripts used by this project - optional: LATEST=true, NO_COMMIT=true
 	function download() {
 		cd $(PROJECT_DIR)
 		rm -rf \
@@ -192,6 +192,7 @@ devops-update devops-synchronise: ### Update/upgrade the DevOps automation toolc
 			.gitmodules
 		git reset -- .gitmodules
 		git reset -- build/automation/tmp/$(DEVOPS_PROJECT_NAME)
+		rm -f .gitmodules
 	}
 	function commit() {
 		cd $(PROJECT_DIR)
@@ -199,7 +200,7 @@ devops-update devops-synchronise: ### Update/upgrade the DevOps automation toolc
 		cd $(PARENT_PROJECT_DIR)
 		if [ 0 -lt $$(git status -s | wc -l) ]; then
 			git add .
-			git commit -S -m "Update the DevOps automation toolchain scripts to $$version"
+			[ "$(NO_COMMIT)" != true ] && git commit -S -m "Update the DevOps automation toolchain scripts to $$version" || echo "Please, check and commit the changes with the following message: \"Update the DevOps automation toolchain scripts to $$version\""
 		fi
 	}
 	if [ -z "$(__DEVOPS_SYNCHRONISE)" ]; then
@@ -502,7 +503,7 @@ JQ_DIR_REL := $(shell echo $(abspath $(LIB_DIR)/jq) | sed "s;$(PROJECT_DIR);;g")
 
 GIT_BRANCH_PATTERN_MAIN := ^(master|develop)$$
 GIT_BRANCH_PATTERN_PREFIX := ^(task|spike|bugfix|hotfix|fix|test|release|migration)
-GIT_BRANCH_PATTERN_SUFFIX := [A-Za-z]{2,5}-[0-9]{1,5}_[A-Za-z0-9_]{4,64}$$
+GIT_BRANCH_PATTERN_SUFFIX := [A-Za-z]{2,5}-([0-9]{1,5}|X{1,5})_[A-Za-z0-9_]{4,64}$$
 GIT_BRANCH_PATTERN_ADDITIONAL := ^task/Update_automation_scripts$$|^task/Update_versions$$|^task/Refactor$$
 GIT_BRANCH_PATTERN := $(GIT_BRANCH_PATTERN_MAIN)|$(GIT_BRANCH_PATTERN_PREFIX)/$(GIT_BRANCH_PATTERN_SUFFIX)|$(GIT_BRANCH_PATTERN_ADDITIONAL)
 GIT_TAG_PATTERN := [0-9]{12,14}-[a-z]{3,10}
@@ -612,6 +613,10 @@ $(error PROJECT_TAG is not set in build/automation/var/project.mk)
 endif
 ifndef ROLE_PREFIX
 $(error ROLE_PREFIX is not set in build/automation/var/project.mk)
+endif
+
+ifndef PROJECT_TECH_STACK_LIST
+$(error PROJECT_TECH_STACK_LIST is not set in build/automation/var/project.mk)
 endif
 
 ifeq (true, $(shell [ -z "$(AWS_ACCOUNT_ID_LIVE_PARENT)" ] && [ -z "$(AWS_ACCOUNT_ID_TOOLS)" ] && echo true))
