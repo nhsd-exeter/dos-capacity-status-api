@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: uec-dos-api-cs-proxy
+  namespace: K8S_APP_NAMESPACE_TO_REPLACE
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:eu-west-2:AWS_ACCOUNT_ID_NONPROD_TO_REPLACE:certificate/c0718115-4e22-4f48-a4aa-8c16ea86c5e6
