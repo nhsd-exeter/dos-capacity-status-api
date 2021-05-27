@@ -8,12 +8,12 @@ ENV := dev
 SERVICE_PREFIX := $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(ENVIRONMENT)
 DEPLOYMENT_SECRETS := $(PROJECT_ID)/deployment
 
-K8S_TTL :=
+K8S_TTL_LENGTH := 2 days
 API_HOST = uec-dos-api-cs
 #API_ADMIN_ALLOWED_HOSTS = [secret]
 #API_ADMIN_PASSWORD = [secret]
 
-#API_DB_HOST = [secret]
+API_DB_HOST := $(SERVICE_PREFIX).db.$(TF_VAR_platform_zone)
 API_DB_NAME = postgres
 API_DB_PORT = 5432
 API_DB_USERNAME = postgres
