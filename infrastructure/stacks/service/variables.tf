@@ -52,6 +52,9 @@ variable "environment_tag" {
 variable "service_prefix" {
   description = "Prefix used for naming resources"
 }
+variable "security_groups_terraform_state_key" {
+  description = "The security-groups key in the terraform state bucket"
+}
 variable "security_groups_k8s_terraform_state_key" {
   description = "The security-groups-k8s key in the terraform state bucket"
 }

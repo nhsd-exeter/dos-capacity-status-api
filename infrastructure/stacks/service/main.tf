@@ -31,6 +31,7 @@ module "rds" {
   service_name       = var.service_name
 
   db_max_connections                      = var.db_max_connections
+  security_groups_terraform_state_key     = var.security_groups_terraform_state_key
   security_groups_k8s_terraform_state_key = var.security_groups_k8s_terraform_state_key
   db_subnet_group_name                    = var.db_subnet_group_name
 

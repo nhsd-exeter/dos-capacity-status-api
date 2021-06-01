@@ -18,6 +18,16 @@ data "terraform_remote_state" "security-groups-k8s" {
   }
 }
 
+data "terraform_remote_state" "security-groups" {
+  backend = "s3"
+
+  config = {
+    bucket = var.terraform_platform_state_store
+    key    = var.security_groups_terraform_state_key
+    region = var.aws_region
+  }
+}
+
 resource "aws_security_group" "rds_postgres_sg" {
   name        = "${var.service_prefix}-sg"
   description = "Allow connection by appointed rds postgres clients"
@@ -44,4 +54,17 @@ resource "aws_security_group_rule" "rds_postgres_ingress_from_eks_worker" {
   security_group_id        = aws_security_group.rds_postgres_sg.id
   source_security_group_id = data.terraform_remote_state.security-groups-k8s.outputs.eks_worker_additional_sg_id
   description              = "Allow access in from Eks-worker to rds postgres"
+}
+
+# INGRESS TO RDS FROM VPN only if allowed (for nonprod)
+resource "aws_security_group_rule" "allow_in_from_vpn" {
+  count = var.cloud_env_type == "nonprod" ? 1 : 0
+
+  type                     = "ingress"
+  from_port                = var.db_port
+  to_port                  = var.db_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.rds_postgres_sg.id
+  source_security_group_id = data.terraform_remote_state.security-groups.outputs.vpn_main_sg_id
+  description              = "Allow access in from VPN to rds postgres"
 }
