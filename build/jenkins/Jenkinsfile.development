@@ -11,7 +11,7 @@ pipeline {
   }
   environment {
     BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
-    TAG = sh(returnStdout: true, script: "make project-get-tag BUILD_DATE=$BUILD_DATE").trim()
+    TAG = sh(returnStdout: true, script: "make project-get-tag BUILD_DATE=${BUILD_DATE}").trim()
     PROFILE = 'dev'
   }
   triggers { pollSCM('* * * * *') }
