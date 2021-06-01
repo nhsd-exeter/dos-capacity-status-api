@@ -10,6 +10,7 @@ metadata:
     alb.ingress.kubernetes.io/backend-protocol: HTTPS
     alb.ingress.kubernetes.io/healthcheck-protocol: HTTPS
     alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-2017-01
+    alb.ingress.kubernetes.io/waf-acl-id: WAF_ACL_ID_TO_REPLACE
     alb.ingress.kubernetes.io/tags: Service=SERVICE_TAG_TO_REPLACE
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443},{"HTTP":80}]'
 spec:

@@ -4,6 +4,5 @@ metadata:
   name: proxy-ingress
   namespace: K8S_APP_NAMESPACE_TO_REPLACE
   annotations:
-    alb.ingress.kubernetes.io/waf-acl-id: ff530a4e-689d-4d90-b3ab-ac2160b5863d
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:AWS_ACCOUNT_ID_PROD_TO_REPLACE:certificate/8d65eee4-cf92-4a00-84de-7a9f544ba724
     alb.ingress.kubernetes.io/security-groups: DOS_API_SG_TO_REPLACE
