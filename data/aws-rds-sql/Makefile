@@ -3,10 +3,13 @@ include $(abspath $(lastword $(MAKEFILE_LIST))/../../../build/automation/init.mk
 
 # ==============================================================================
 
-build:
+build: #PROFILE
 	cp -fv \
 		$(DATA_DIR)/aws-rds-sql/*.sql \
 		$(DOCKER_DIR)/data/assets/data
+	eval "$$(make aws-assume-role-export-variables)"
+	eval "$$(make secret-fetch-and-export-variables NAME=$(DEPLOYMENT_SECRETS))"
+	make file-replace-variables-in-dir DIR=$(DOCKER_DIR)/data/assets/data
 	make docker-build NAME=data
 
 run:

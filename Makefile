@@ -6,10 +6,11 @@ OMIT := */tests/*,*/migrations/*,*apps.py,*asgi.py,*wsgi.py,*manage.py,*api/sett
 # ==============================================================================
 # Project targets: Dev workflow
 
-build: project-config # Build project
+build: project-config # Build project - mandatory: PROFILE=[profile name]
 	make \
 		api-build \
-		proxy-build
+		proxy-build \
+		data-build
 
 restart: stop start # Restart project
 
@@ -85,6 +86,7 @@ push: # Push project artefacts to the registry
 	make docker-login
 	make docker-push NAME=api
 	make docker-push NAME=proxy
+	make docker-push NAME=data
 
 # ==============================================================================
 # Project targets: Ops workflow
@@ -100,7 +102,7 @@ deploy: # Deploy project - mandatory: PROFILE=[name], API_IMAGE_TAG=[docker tag]
 	eval "$$(make populate-secret-variables)"
 	make k8s-deploy STACK=service
 
-deploy-job: # Deploy project - mandatory: PROFILE=[name], STACK=[stack]
+deploy-job: # Deploy project - mandatory: PROFILE=[name], STACK=[stack], DATA_IMAGE_TAG=[docker tag]
 	[ local == $(PROFILE) ] && exit 1
 	eval "$$(make populate-secret-variables)"
 	make k8s-deploy-job STACK=$(STACK)
@@ -111,7 +113,8 @@ deploy-job: # Deploy project - mandatory: PROFILE=[name], STACK=[stack]
 clean: # Clean up project
 	make \
 		api-clean \
-		proxy-clean
+		proxy-clean \
+		data-clean
 	rm -rfv $(HOME)/.python/pip
 
 api-build:
@@ -147,6 +150,19 @@ proxy-clean:
 	rm -rfv \
 		$(DOCKER_DIR)/proxy/assets/application/static \
 		$(DOCKER_DIR)/proxy/assets/certificate/certificate.*
+
+data-build: #PROFILE
+	cp -fv \
+		$(DATA_DIR)/aws-rds-sql/*.sql \
+		$(DOCKER_DIR)/data/assets/data
+	eval "$$(make aws-assume-role-export-variables)"
+	eval "$$(make secret-fetch-and-export-variables NAME=$(DEPLOYMENT_SECRETS))"
+	make file-replace-variables-in-dir DIR=$(DOCKER_DIR)/data/assets/data
+	make docker-build NAME=data
+
+data-clean:
+	rm -rf $(DOCKER_DIR)/data/assets/data/*.sql
+	make docker-image-clean NAME=data
 
 # ---
 
@@ -186,6 +202,7 @@ trust-certificate: ssl-trust-certificate-project ## Trust the SSL development ce
 create-artefact-repository: ## Create Docker repositories to store artefacts
 	make docker-create-repository NAME=api
 	make docker-create-repository NAME=proxy
+	make docker-create-repository NAME=data
 
 # ---
 

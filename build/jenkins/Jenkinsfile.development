@@ -11,6 +11,7 @@ pipeline {
   }
   environment {
     BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
+    TAG = sh(returnStdout: true, script: "make project-get-tag BUILD_DATE=$BUILD_DATE").trim()
     PROFILE = 'dev'
   }
   triggers { pollSCM('* * * * *') }
@@ -27,7 +28,7 @@ pipeline {
     }
     stage('Build Images') {
       steps {
-        script { sh 'make build' }
+        script { sh 'make build PROFILE=${PROFILE}' }
       }
     }
     stage('Run Unit Tests') {
@@ -48,9 +49,6 @@ pipeline {
       }
     }
     stage('Deploy') {
-      environment {
-        TAG = sh(returnStdout: true, script: "make project-get-build-tag BUILD_DATE=$BUILD_DATE").trim()
-      }
       steps {
         script { sh "make deploy PROFILE=${PROFILE} API_IMAGE_TAG=${TAG} PROXY_IMAGE_TAG=${TAG} | tee /tmp/deployment_stats.txt" }
       }
@@ -59,7 +57,7 @@ pipeline {
       when { expression { this.PROFILE == 'dev' } }
       steps {
         script {
-          sh "make deploy-job PROFILE=${PROFILE} STACK=data || :"
+          sh "make deploy-job PROFILE=${PROFILE} STACK=data DATA_IMAGE_TAG=${TAG} || :"
         }
       }
     }
