@@ -26,7 +26,6 @@ pipeline {
         script { sh 'make test-db-start' }
       }
     }
-    /*
     stage('Build Images') {
       steps {
         script { sh 'make build VERSION=${TAG}' }
@@ -54,7 +53,6 @@ pipeline {
         script { sh "make deploy PROFILE=${PROFILE} API_IMAGE_TAG=${TAG} PROXY_IMAGE_TAG=${TAG} | tee /tmp/deployment_stats.txt" }
       }
     }
-    */
     stage('Load Test Data') {
       when { expression { this.PROFILE == 'dev' } }
       steps {
