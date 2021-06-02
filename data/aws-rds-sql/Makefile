@@ -3,14 +3,16 @@ include $(abspath $(lastword $(MAKEFILE_LIST))/../../../build/automation/init.mk
 
 # ==============================================================================
 
-build: #PROFILE
+build:
 	cp -fv \
 		$(DATA_DIR)/aws-rds-sql/*.sql \
 		$(DOCKER_DIR)/data/assets/data
-	eval "$$(make aws-assume-role-export-variables)"
-	eval "$$(make secret-fetch-and-export-variables NAME=$(DEPLOYMENT_SECRETS))"
+	if [ "$(PROFILE)" != "local" ]; then
+		eval "$$(make aws-assume-role-export-variables)"
+		eval "$$(make secret-fetch-and-export-variables NAME=$(DEPLOYMENT_SECRETS))"
+	fi
 	make file-replace-variables-in-dir DIR=$(DOCKER_DIR)/data/assets/data
-	make docker-build NAME=data
+	make docker-build NAME=data VERSION=$(VERSION)
 
 run:
 	make docker-image-start NAME=data	CMD="scripts /data" \
