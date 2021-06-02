@@ -4,4 +4,4 @@ metadata:
   name: proxy-ingress
   namespace: K8S_APP_NAMESPACE_TO_REPLACE
   annotations:
-    alb.ingress.kubernetes.io/security-groups: DOS_API_SG_TO_REPLACE
+    # alb.ingress.kubernetes.io/security-groups: DOS_API_SG_TO_REPLACE
