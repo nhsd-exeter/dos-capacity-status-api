@@ -18,6 +18,7 @@ pipeline {
   stages {
     stage('Show Configuration') {
       steps {
+        script{ sh echo ${TAG} }
         script { sh 'make show-configuration' }
       }
     }
