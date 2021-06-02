@@ -10,7 +10,6 @@ build: project-config # Build project
 	make \
 		api-build \
 		proxy-build \
-		data-build
 
 restart: stop start # Restart project
 
@@ -86,7 +85,6 @@ push: # Push project artefacts to the registry
 	make docker-login
 	make docker-push NAME=api
 	make docker-push NAME=proxy
-	make docker-push NAME=data
 
 # ==============================================================================
 # Project targets: Ops workflow
@@ -152,7 +150,6 @@ proxy-clean:
 		$(DOCKER_DIR)/proxy/assets/certificate/certificate.*
 
 data-build:
-	echo $(PROFILE)
 	cp -fv \
 		$(DATA_DIR)/aws-rds-sql/*.sql \
 		$(DOCKER_DIR)/data/assets/data
