@@ -18,7 +18,6 @@ pipeline {
   stages {
     stage('Show Configuration') {
       steps {
-        script{ sh 'echo ${TAG}' }
         script { sh 'make show-configuration' }
       }
     }
@@ -29,7 +28,7 @@ pipeline {
     }
     stage('Build Images') {
       steps {
-        script { sh 'make build PROFILE=${PROFILE}' }
+        script { sh 'make build' }
       }
     }
     stage('Run Unit Tests') {

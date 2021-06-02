@@ -6,7 +6,7 @@ OMIT := */tests/*,*/migrations/*,*apps.py,*asgi.py,*wsgi.py,*manage.py,*api/sett
 # ==============================================================================
 # Project targets: Dev workflow
 
-build: project-config # Build project - mandatory: PROFILE=[profile name]
+build: project-config # Build project
 	make \
 		api-build \
 		proxy-build \
@@ -151,12 +151,15 @@ proxy-clean:
 		$(DOCKER_DIR)/proxy/assets/application/static \
 		$(DOCKER_DIR)/proxy/assets/certificate/certificate.*
 
-data-build: #PROFILE
+data-build:
+	echo $(PROFILE)
 	cp -fv \
 		$(DATA_DIR)/aws-rds-sql/*.sql \
 		$(DOCKER_DIR)/data/assets/data
-	eval "$$(make aws-assume-role-export-variables)"
-	eval "$$(make secret-fetch-and-export-variables NAME=$(DEPLOYMENT_SECRETS))"
+	if [ "$(PROFILE)" != "local" ]; then
+		eval "$$(make aws-assume-role-export-variables)"
+		eval "$$(make secret-fetch-and-export-variables NAME=$(DEPLOYMENT_SECRETS))"
+	fi
 	make file-replace-variables-in-dir DIR=$(DOCKER_DIR)/data/assets/data
 	make docker-build NAME=data
 

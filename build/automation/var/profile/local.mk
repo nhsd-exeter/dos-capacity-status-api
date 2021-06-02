@@ -10,8 +10,8 @@ API_ADMIN_PASSWORD = admin
 API_DB_HOST = db.$(PROJECT_NAME_SHORT).local
 API_DB_NAME = capacity_status
 API_DB_PORT = 5432
-API_DB_USERNAME = postgres
-API_DB_PASSWORD = postgres
+API_DB_USERNAME = capacity_status_api
+API_DB_PASSWORD = capacity_status_api
 API_DEBUG = False
 API_LOG_LEVEL = DEBUG
 
