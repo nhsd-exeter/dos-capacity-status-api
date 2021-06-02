@@ -40,7 +40,7 @@ pipeline {
     }
     stage('Push Images') {
       steps {
-        script { sh 'make push' }
+        script { sh "make push VERSION=${TAG}" }
       }
     }
     stage('Provision Infrastructure') {

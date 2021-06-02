@@ -83,8 +83,8 @@ test-unit-only: # Run only unit test suite
 
 push: # Push project artefacts to the registry
 	make docker-login
-	make docker-push NAME=api
-	make docker-push NAME=proxy
+	make docker-push NAME=api VERSION=$(VERSION)
+	make docker-push NAME=proxy VERSION=$(VERSION)
 
 # ==============================================================================
 # Project targets: Ops workflow
