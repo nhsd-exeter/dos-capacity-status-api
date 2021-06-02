@@ -149,7 +149,7 @@ proxy-clean:
 		$(DOCKER_DIR)/proxy/assets/application/static \
 		$(DOCKER_DIR)/proxy/assets/certificate/certificate.*
 
-data-build:
+build-data-job:
 	cp -fv \
 		$(DATA_DIR)/aws-rds-sql/*.sql \
 		$(DOCKER_DIR)/data/assets/data
@@ -160,7 +160,7 @@ data-build:
 	make file-replace-variables-in-dir DIR=$(DOCKER_DIR)/data/assets/data
 	make docker-build NAME=data VERSION=$(VERSION)
 
-data-clean:
+clean-data-job:
 	rm -rf $(DOCKER_DIR)/data/assets/data/*.sql
 	make docker-image-clean NAME=data
 
