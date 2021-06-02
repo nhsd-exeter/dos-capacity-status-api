@@ -18,8 +18,8 @@ API_LOG_LEVEL = DEBUG
 DB_DOS_HOST = db.$(PROJECT_NAME_SHORT).local
 DB_DOS_NAME = postgres
 DB_DOS_PORT = 5432
-DB_DOS_USERNAME = capacity_status_api
-DB_DOS_PASSWORD = capacity_status_api
+DB_DOS_USERNAME = API_DB_USERNAME
+DB_DOS_PASSWORD = API_DB_PASSWORD
 
 
 # TODO: What is this variable for? We always should be using https
