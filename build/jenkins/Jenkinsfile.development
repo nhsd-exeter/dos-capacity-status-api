@@ -59,7 +59,6 @@ pipeline {
         script { sh "make build-data-job PROFILE=${PROFILE}" }
         script { sh "make docker-push NAME=data" }
         script { sh "make deploy-job PROFILE=${PROFILE} STACK=data DATA_IMAGE_TAG=${TAG} || :" }
-        }
       }
     }
     stage('Deployment Summary') {
