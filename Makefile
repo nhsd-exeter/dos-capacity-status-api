@@ -8,8 +8,8 @@ OMIT := */tests/*,*/migrations/*,*apps.py,*asgi.py,*wsgi.py,*manage.py,*api/sett
 
 build: project-config # Build project
 	make \
-		api-build \
-		proxy-build \
+		api-build VERSION=$(VERSION)\
+		proxy-build VERSION=$(VERSION)\
 
 restart: stop start # Restart project
 
@@ -123,7 +123,7 @@ api-build:
 		requirements.txt
 	cd $(PROJECT_DIR)
 	make ssl-copy-certificate-project DIR=$(PROJECT_DIR)/build/docker/api/assets/certificate
-	make docker-image NAME=api
+	make docker-image NAME=api VERSION=$(VERSION)
 
 api-clean:
 	make docker-image-clean NAME=api
@@ -141,7 +141,7 @@ proxy-build:
 	cp -rf \
 		$(PROJECT_DIR)/application/static \
 		$(DOCKER_DIR)/proxy/assets/application
-	make docker-image NAME=proxy
+	make docker-image NAME=proxy VERSION=$(VERSION)
 
 proxy-clean:
 	make docker-image-clean NAME=proxy
@@ -158,7 +158,7 @@ data-build:
 		eval "$$(make secret-fetch-and-export-variables NAME=$(DEPLOYMENT_SECRETS))"
 	fi
 	make file-replace-variables-in-dir DIR=$(DOCKER_DIR)/data/assets/data
-	make docker-build NAME=data
+	make docker-build NAME=data VERSION=$(VERSION)
 
 data-clean:
 	rm -rf $(DOCKER_DIR)/data/assets/data/*.sql

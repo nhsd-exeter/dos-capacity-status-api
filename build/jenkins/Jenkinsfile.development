@@ -57,7 +57,7 @@ pipeline {
       when { expression { this.PROFILE == 'dev' } }
       steps {
         script { sh "make build-data-job PROFILE=${PROFILE}" }
-        script { sh "make docker-push NAME=data" }
+        script { sh "make docker-push NAME=data VERSION=${TAG}" }
         script { sh "make deploy-job PROFILE=${PROFILE} STACK=data DATA_IMAGE_TAG=${TAG} || :" }
       }
     }
