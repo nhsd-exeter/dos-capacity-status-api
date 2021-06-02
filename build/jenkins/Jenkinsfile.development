@@ -28,7 +28,7 @@ pipeline {
     }
     stage('Build Images') {
       steps {
-        script { sh 'make build' }
+        script { sh 'make build VERSION=${TAG}' }
       }
     }
     stage('Run Unit Tests') {
