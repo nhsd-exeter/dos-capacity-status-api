@@ -16,6 +16,9 @@ variable "aws_region" {
 variable "aws_profile" {
   description = "The AWS profile"
 }
+variable "aws_account_id" {
+  description = "The identifier of the AWS Account"
+}
 variable "cloud_env_type" {
   description = "The cloud enviroment type e.g. nonprod, prod"
 }
@@ -36,6 +39,10 @@ variable "vpc_terraform_state_key" {
 
 variable "route53_terraform_state_key" {
   description = "The Route 53 key in the terraform state bucket"
+}
+
+variable "eks_mgmt_terraform_state_key" {
+  description = "The EKS management terraform state key"
 }
 
 ####################################################################################
@@ -106,3 +113,14 @@ variable "deletion_protection" {
 }
 
 variable "skip_final_snapshot" {}
+
+
+############################
+# IAM Service Account Role
+############################
+variable "service_account_role" {
+  description = "The name of the service account IAM role."
+}
+variable "service_account_name" {
+  description = "The name of the K8s service account that the service IAM Role will be associated with."
+}

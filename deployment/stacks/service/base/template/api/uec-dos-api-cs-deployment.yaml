@@ -24,7 +24,7 @@ spec:
       labels:
         app: uec-dos-api-cs
     spec:
-      serviceAccountName: uec-dos-api-cs-iam-sa
+      serviceAccountName: SERVICE_ACCOUNT_NAME_TO_REPLACE
       containers:
         - env:
             - name: INSTANA_AGENT_HOST
