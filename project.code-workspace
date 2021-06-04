@@ -76,7 +76,7 @@
     /*"workbench.colorCustomizations": {
       "editorWhitespace.foreground": "#FF0000",
     },*/
-    "workbench.colorTheme": "Better Solarized Dark Italics",
+    "workbench.colorTheme": "Noctis Azureus",
     "workbench.editor.enablePreview": false,
     "workbench.tree.indent": 24,
     "[dockerfile]": {
