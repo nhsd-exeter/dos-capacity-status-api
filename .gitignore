@@ -6,4 +6,4 @@
 .python-version
 .scannerwork
 *.code-workspace
-!./project.code-workspace
+!project.code-workspace
