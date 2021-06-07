@@ -11,7 +11,7 @@ pipeline {
   }
   environment {
     BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
-    TAG = sh(returnStdout: true, script: "make project-get-build-tag BUILD_DATE=${BUILD_DATE}").trim()
+    BUILD_VERSION = sh(returnStdout: true, script: "make project-get-build-tag BUILD_DATE=${BUILD_DATE}").trim()
     PROFILE = 'dev'
   }
   triggers { pollSCM('* * * * *') }
@@ -19,7 +19,7 @@ pipeline {
     stage('Show Configuration') {
       steps {
         script { sh 'make show-configuration' }
-        script { sh 'echo $TAG' }
+        script { sh 'echo $BUILD_VERSION' }
       }
     }
     stage('Start Test DB') {
@@ -29,7 +29,7 @@ pipeline {
     }
     stage('Build Images') {
       steps {
-        script { sh 'make build VERSION=${TAG}' }
+        script { sh 'make build VERSION=${BUILD_VERSION}' }
       }
     }
     stage('Run Unit Tests') {
@@ -41,7 +41,7 @@ pipeline {
     }
     stage('Push Images') {
       steps {
-        script { sh "make push VERSION=${TAG}" }
+        script { sh "make push VERSION=${BUILD_VERSION}" }
       }
     }
     stage('Provision Infrastructure') {
@@ -51,15 +51,15 @@ pipeline {
     }
     stage('Deploy') {
       steps {
-        script { sh "make deploy PROFILE=${PROFILE} API_IMAGE_TAG=${TAG} PROXY_IMAGE_TAG=${TAG} | tee /tmp/deployment_stats.txt" }
+        script { sh "make deploy PROFILE=${PROFILE} API_IMAGE_TAG=${BUILD_VERSION} PROXY_IMAGE_TAG=${BUILD_VERSION} | tee /tmp/deployment_stats.txt" }
       }
     }
     stage('Load Test Data') {
       when { expression { this.PROFILE == 'dev' } }
       steps {
-        script { sh "make build-data-job PROFILE=${PROFILE} VERSION=${TAG}" }
-        script { sh "make docker-push NAME=data VERSION=${TAG}" }
-        script { sh "make deploy-job PROFILE=${PROFILE} STACK=data DATA_IMAGE_TAG=${TAG} || :" }
+        script { sh "make build-data-job PROFILE=${PROFILE} VERSION=${BUILD_VERSION}" }
+        script { sh "make docker-push NAME=data VERSION=${BUILD_VERSION}" }
+        script { sh "make deploy-job PROFILE=${PROFILE} STACK=data DATA_IMAGE_TAG=${BUILD_VERSION} || :" }
       }
     }
     stage('Deployment Summary') {
