@@ -79,11 +79,13 @@ devops-test-cleanup: ### Clean up adter the tests
 	docker network rm $(DOCKER_NETWORK) 2> /dev/null ||:
 	# TODO: Remove older networks that remained after unsuccessful builds
 
-devops-copy: ### Copy the DevOps automation toolchain scripts to given destination - optional: DIR
+devops-copy: ### Copy the DevOps automation toolchain scripts from this codebase to given destination - mandatory: DIR
 	function sync() {
+		cd $(DIR)
+		is_github=$$(git remote -v | grep -q github.com && echo true || echo false)
 		cd $(PROJECT_DIR)
 		mkdir -p \
-			$(DIR)/.github \
+			$(DIR)/build \
 			$(DIR)/documentation/adr \
 			$(DIR)/documentation/diagrams
 		# Library files
@@ -95,25 +97,41 @@ devops-copy: ### Copy the DevOps automation toolchain scripts to given destinati
 			--exclude=jenkins/Jenkinsfile* \
 			build/* \
 			$(DIR)/build
-		cp -fv .github/CODEOWNERS $(DIR)/.github/CODEOWNERS && sed -i "s;@nhsd-exeter/admins;@nhsd-exeter/maintainers;" $(DIR)/.github/CODEOWNERS
+		[ $$is_github == true ] && (
+			mkdir -p $(DIR)/.github/workflows
+			cp -fv build/automation/lib/project/template/.github/workflows/check-pull-request-title.yml $(DIR)/.github/workflows
+			cp -fv build/automation/lib/project/template/.github/CODEOWNERS $(DIR)/.github
+			cp -fv build/automation/lib/project/template/.gitattributes $(DIR)
+		)
 		cp -fv build/automation/tmp/.gitignore $(DIR)/build/automation/tmp/.gitignore
 		cp -fv LICENSE.md $(DIR)/build/automation/LICENSE.md
-		[ -f $(DIR)/build/automation/etc/certificate/*.pem ] && rm -fv $(DIR)/build/automation/etc/certificate/.gitignore
+		[ -f $(DIR)/docker/docker-compose.yml ] && rm -fv $(DIR)/docker/.gitkeep
 		# Project key files
 		[ ! -f $(DIR)/build/automation/var/project.mk ] && cp -fv build/automation/lib/project/template/build/automation/var/project.mk $(DIR)/build/automation/var/project.mk
 		[ ! -f $(DIR)/Makefile ] && cp -fv build/automation/lib/project/template/Makefile $(DIR)
 		cp -fv build/automation/lib/project/template/.editorconfig $(DIR)
-		cp -fv build/automation/lib/project/template/.gitattributes $(DIR)
 		cp -fv build/automation/lib/project/template/.gitignore $(DIR)
-		cp -fv build/automation/lib/project/template/project.code-workspace $(DIR)
+		(
+			cp -fv $(DIR)/project.code-workspace /tmp/project.code-workspace || cp -fv build/automation/lib/project/template/project.code-workspace /tmp/project.code-workspace
+			which npx && cat /tmp/project.code-workspace | npx strip-json-comments-cli > /tmp/project.code-workspace.tmp && mv -fv /tmp/project.code-workspace.tmp /tmp/project.code-workspace ||:
+			cp -fv build/automation/lib/project/template/project.code-workspace $(DIR)
+			jq --argjson data "$$(cat /tmp/project.code-workspace | jq '.folders')" '.folders = $$data' $(DIR)/project.code-workspace > $(DIR)/project.code-workspace.new
+			mv -fv $(DIR)/project.code-workspace.new $(DIR)/project.code-workspace
+			jq --argjson data "$$(cat /tmp/project.code-workspace | jq '.settings."workbench.colorTheme"')" '.settings."workbench.colorTheme" = $$data' $(DIR)/project.code-workspace > $(DIR)/project.code-workspace.new
+			mv -fv $(DIR)/project.code-workspace.new $(DIR)/project.code-workspace
+			jq --argjson data "$$(cat /tmp/project.code-workspace | jq '.settings."workbench.colorCustomizations"')" '.settings."workbench.colorCustomizations" = $$data' $(DIR)/project.code-workspace > $(DIR)/project.code-workspace.new
+			mv -fv $(DIR)/project.code-workspace.new $(DIR)/project.code-workspace
+			jq --argjson data "$$(cat /tmp/project.code-workspace | jq '.settings."peacock.color"')" '.settings."peacock.color" = $$data' $(DIR)/project.code-workspace > $(DIR)/project.code-workspace.new
+			mv -fv $(DIR)/project.code-workspace.new $(DIR)/project.code-workspace
+			rm -fv /tmp/project.code-workspace
+		)
 		# Project documentation
-		[ -f $(DIR)/TODO.md ] && mv -fv $(DIR)/TODO.md $(DIR)/documentation;
+		[ ! -f $(DIR)/README.md ] && cp -fv build/automation/lib/project/template/README.md $(DIR)
+		[ -f $(DIR)/TODO.md ] && mv -fv $(DIR)/TODO.md $(DIR)/documentation; [ ! -f $(DIR)/documentation/TODO.md ] && cp -fv build/automation/lib/project/template/documentation/TODO.md $(DIR)/documentation
 		cp -fv build/automation/lib/project/template/documentation/adr/README.md $(DIR)/documentation/adr
 		cp -fv build/automation/lib/project/template/documentation/diagrams/DevOps-Pipelines.png $(DIR)/documentation/diagrams
-		[ ! -f $(DIR)/documentation/CONTRIBUTING.md ] && cp -fv build/automation/lib/project/template/CONTRIBUTING.md $(DIR)/documentation
-		[ ! -f $(DIR)/documentation/ONBOARDING.md ] && cp -fv build/automation/lib/project/template/ONBOARDING.md $(DIR)/documentation
-		[ ! -f $(DIR)/documentation/TODO.md ] && cp -fv build/automation/lib/project/template/TODO.md $(DIR)/documentation
-		[ ! -f $(DIR)/README.md ] && cp -fv build/automation/lib/project/template/README.md $(DIR)
+		[ ! -f $(DIR)/documentation/CONTRIBUTING.md ] && cp -fv build/automation/lib/project/template/documentation/CONTRIBUTING.md $(DIR)/documentation
+		[ ! -f $(DIR)/documentation/ONBOARDING.md ] && cp -fv build/automation/lib/project/template/documentation/ONBOARDING.md $(DIR)/documentation
 		# ---
 		make _devops-project-clean DIR=$(DIR)
 		# ---
@@ -125,11 +143,30 @@ devops-copy: ### Copy the DevOps automation toolchain scripts to given destinati
 		hash=$$(git rev-parse --short HEAD)
 		echo "$${tag:1}-$${hash}" > $(DIR)/build/automation/VERSION
 	}
-	mkdir -p $(DIR)/build
 	sync && version
 
 devops-update devops-synchronise: ### Update/upgrade the DevOps automation toolchain scripts used by this project - optional: LATEST=true, NO_COMMIT=true
+	function _print() {
+		(
+			set +x
+			if test -t 1 && [ -n "$$TERM" ] && [ "$$TERM" != "dumb" ]; then
+				[ -n "$$2" ] && tput setaf $$2
+			fi
+			printf "$$1\n"
+			if test -t 1 && [ -n "$$TERM" ] && [ "$$TERM" != "dumb" ]; then
+				tput sgr 0
+			fi
+		)
+	}
+	function branch() {
+		_print " >>> Run: $$FUNCNAME" 21
+		branch=$$(git rev-parse --abbrev-ref HEAD)
+		if [ $$branch != "task/Update_automation_scripts" ]; then
+			git checkout -b task/Update_automation_scripts
+		fi
+	}
 	function download() {
+		_print " >>> Run: $$FUNCNAME" 21
 		cd $(PROJECT_DIR)
 		rm -rf \
 			$(TMP_DIR)/$(DEVOPS_PROJECT_NAME) \
@@ -144,77 +181,104 @@ devops-update devops-synchronise: ### Update/upgrade the DevOps automation toolc
 			git checkout $$tag
 		fi
 	}
+	function execute() {
+		_print " >>> Run: $$FUNCNAME" 21
+		cd $(TMP_DIR)/$(DEVOPS_PROJECT_NAME)
+		make devops-synchronise \
+			PARENT_PROJECT_DIR=$(PROJECT_DIR) \
+			PARENT_PROJECT_NAME=$(PROJECT_NAME) \
+			__DEVOPS_SYNCHRONISE=true
+
+	}
 	function sync() {
+		_print " >>> Run: $$FUNCNAME" 21
+		cd $(PARENT_PROJECT_DIR)
+		is_github=$$(git remote -v | grep -q github.com && echo true || echo false)
 		cd $(PROJECT_DIR)
 		mkdir -p \
-			$(PARENT_PROJECT_DIR)/.github \
+			$(PARENT_PROJECT_DIR)/build \
 			$(PARENT_PROJECT_DIR)/documentation/adr \
 			$(PARENT_PROJECT_DIR)/documentation/diagrams
 		# Library files
 		rsync -rav \
 			--include=build/ \
 			--exclude=automation/etc/certificate/certificate.* \
+			--exclude=automation/tmp/* \
 			--exclude=automation/var/project.mk \
 			--exclude=jenkins/Jenkinsfile* \
 			build/* \
 			$(PARENT_PROJECT_DIR)/build
-		cp -fv .github/CODEOWNERS $(PARENT_PROJECT_DIR)/.github/CODEOWNERS && sed -i "s;@nhsd-exeter/admins;@nhsd-exeter/maintainers;" $(PARENT_PROJECT_DIR)/.github/CODEOWNERS
+		[ $$is_github == true ] && (
+			mkdir -p $(PARENT_PROJECT_DIR)/.github/workflows
+			cp -fv build/automation/lib/project/template/.github/workflows/check-pull-request-title.yml $(PARENT_PROJECT_DIR)/.github/workflows
+			cp -fv build/automation/lib/project/template/.github/CODEOWNERS $(PARENT_PROJECT_DIR)/.github
+			cp -fv build/automation/lib/project/template/.gitattributes $(PARENT_PROJECT_DIR)
+		)
 		cp -fv build/automation/tmp/.gitignore $(PARENT_PROJECT_DIR)/build/automation/tmp/.gitignore
 		cp -fv LICENSE.md $(PARENT_PROJECT_DIR)/build/automation/LICENSE.md
-		[ -f $(PARENT_PROJECT_DIR)/build/automation/etc/certificate/*.pem ] && rm -fv $(PARENT_PROJECT_DIR)/build/automation/etc/certificate/.gitignore
 		[ -f $(PARENT_PROJECT_DIR)/docker/docker-compose.yml ] && rm -fv $(PARENT_PROJECT_DIR)/docker/.gitkeep
 		# Project key files
 		[ ! -f $(PARENT_PROJECT_DIR)/build/automation/var/project.mk ] && cp -fv build/automation/lib/project/template/build/automation/var/project.mk $(PARENT_PROJECT_DIR)/build/automation/var/project.mk
 		[ ! -f $(PARENT_PROJECT_DIR)/Makefile ] && cp -fv build/automation/lib/project/template/Makefile $(PARENT_PROJECT_DIR)
 		cp -fv build/automation/lib/project/template/.editorconfig $(PARENT_PROJECT_DIR)
-		cp -fv build/automation/lib/project/template/.gitattributes $(PARENT_PROJECT_DIR)
 		cp -fv build/automation/lib/project/template/.gitignore $(PARENT_PROJECT_DIR)
-		cp -fv build/automation/lib/project/template/project.code-workspace $(PARENT_PROJECT_DIR)
+		(
+			cp -fv $(PARENT_PROJECT_DIR)/project.code-workspace /tmp/project.code-workspace || cp -fv build/automation/lib/project/template/project.code-workspace /tmp/project.code-workspace
+			which npx && cat /tmp/project.code-workspace | npx strip-json-comments-cli > /tmp/project.code-workspace.tmp && mv -fv /tmp/project.code-workspace.tmp /tmp/project.code-workspace ||:
+			cp -fv build/automation/lib/project/template/project.code-workspace $(PARENT_PROJECT_DIR)
+			jq --argjson data "$$(cat /tmp/project.code-workspace | jq '.folders')" '.folders = $$data' $(PARENT_PROJECT_DIR)/project.code-workspace > $(PARENT_PROJECT_DIR)/project.code-workspace.new
+			mv -fv $(PARENT_PROJECT_DIR)/project.code-workspace.new $(PARENT_PROJECT_DIR)/project.code-workspace
+			jq --argjson data "$$(cat /tmp/project.code-workspace | jq '.settings."workbench.colorTheme"')" '.settings."workbench.colorTheme" = $$data' $(PARENT_PROJECT_DIR)/project.code-workspace > $(PARENT_PROJECT_DIR)/project.code-workspace.new
+			mv -fv $(PARENT_PROJECT_DIR)/project.code-workspace.new $(PARENT_PROJECT_DIR)/project.code-workspace
+			jq --argjson data "$$(cat /tmp/project.code-workspace | jq '.settings."workbench.colorCustomizations"')" '.settings."workbench.colorCustomizations" = $$data' $(PARENT_PROJECT_DIR)/project.code-workspace > $(PARENT_PROJECT_DIR)/project.code-workspace.new
+			mv -fv $(PARENT_PROJECT_DIR)/project.code-workspace.new $(PARENT_PROJECT_DIR)/project.code-workspace
+			jq --argjson data "$$(cat /tmp/project.code-workspace | jq '.settings."peacock.color"')" '.settings."peacock.color" = $$data' $(PARENT_PROJECT_DIR)/project.code-workspace > $(PARENT_PROJECT_DIR)/project.code-workspace.new
+			mv -fv $(PARENT_PROJECT_DIR)/project.code-workspace.new $(PARENT_PROJECT_DIR)/project.code-workspace
+			rm -fv /tmp/project.code-workspace
+		)
 		# Project documentation
 		[ ! -f $(PARENT_PROJECT_DIR)/README.md ] && cp -fv build/automation/lib/project/template/README.md $(PARENT_PROJECT_DIR)
-		[ -f $(PARENT_PROJECT_DIR)/TODO.md ] && mv -fv $(PARENT_PROJECT_DIR)/TODO.md $(PARENT_PROJECT_DIR)/documentation; [ ! -f $(PARENT_PROJECT_DIR)/documentation/TODO.md ] && cp -fv build/automation/lib/project/template/TODO.md $(PARENT_PROJECT_DIR)/documentation
+		[ -f $(PARENT_PROJECT_DIR)/TODO.md ] && mv -fv $(PARENT_PROJECT_DIR)/TODO.md $(PARENT_PROJECT_DIR)/documentation; [ ! -f $(PARENT_PROJECT_DIR)/documentation/TODO.md ] && cp -fv build/automation/lib/project/template/documentation/TODO.md $(PARENT_PROJECT_DIR)/documentation
 		cp -fv build/automation/lib/project/template/documentation/adr/README.md $(PARENT_PROJECT_DIR)/documentation/adr
 		cp -fv build/automation/lib/project/template/documentation/diagrams/DevOps-Pipelines.png $(PARENT_PROJECT_DIR)/documentation/diagrams
+		[ ! -f $(PARENT_PROJECT_DIR)/documentation/CONTRIBUTING.md ] && cp -fv build/automation/lib/project/template/documentation/CONTRIBUTING.md $(PARENT_PROJECT_DIR)/documentation
+		[ ! -f $(PARENT_PROJECT_DIR)/documentation/ONBOARDING.md ] && cp -fv build/automation/lib/project/template/documentation/ONBOARDING.md $(PARENT_PROJECT_DIR)/documentation
 		# ---
 		make _devops-project-clean DIR=$(PARENT_PROJECT_DIR)
 		# ---
 		return 0
 	}
 	function version() {
+		_print " >>> Run: $$FUNCNAME" 21
 		cd $(PROJECT_DIR)
 		make get-variable NAME=DEVOPS_PROJECT_VERSION > $(PARENT_PROJECT_DIR)/build/automation/VERSION
 	}
 	function cleanup() {
-		cd $(PROJECT_DIR)
-		rm -rf \
-			$(TMP_DIR)/$(DEVOPS_PROJECT_NAME) \
+		_print " >>> Run: $$FUNCNAME" 21
+		cd $(PARENT_PROJECT_DIR)
+		cp -fv $(PROJECT_DIR)/build/automation/tmp/.gitignore /tmp/.gitignore
+		rm -rfv \
+			build/automation/tmp/* \
 			.git/modules/build \
 			.gitmodules
 		git reset -- .gitmodules
 		git reset -- build/automation/tmp/$(DEVOPS_PROJECT_NAME)
-		rm -f .gitmodules
+		mv -fv /tmp/.gitignore build/automation/tmp/.gitignore
 	}
 	function commit() {
-		cd $(PROJECT_DIR)
-		version=$$(make get-variable NAME=DEVOPS_PROJECT_VERSION)
+		_print " >>> Run: $$FUNCNAME" 21
 		cd $(PARENT_PROJECT_DIR)
+		version=$$(make get-variable NAME=DEVOPS_PROJECT_VERSION)
 		if [ 0 -lt $$(git status -s | wc -l) ]; then
 			git add .
 			[ "$(NO_COMMIT)" != true ] && git commit -S -m "Update the DevOps automation toolchain scripts to $$version" || echo "Please, check and commit the changes with the following message: \"Update the DevOps automation toolchain scripts to $$version\""
 		fi
 	}
 	if [ -z "$(__DEVOPS_SYNCHRONISE)" ]; then
-		branch=$$(git rev-parse --abbrev-ref HEAD)
-		[ $$branch != "task/Update_automation_scripts" ] && git checkout -b task/Update_automation_scripts
-		download
-		cd $(TMP_DIR)/$(DEVOPS_PROJECT_NAME)
-		make devops-synchronise \
-			PARENT_PROJECT_DIR=$(PROJECT_DIR) \
-			PARENT_PROJECT_NAME=$(PROJECT_NAME) \
-			__DEVOPS_SYNCHRONISE=true
+		branch && download && execute
 	else
 		if [ 0 -lt $$(git status -s | wc -l) ]; then
-			echo "ERROR: Please, commit your changes first"
+			_print "ERROR: Please, commit your changes first" 196
 			exit 1
 		fi
 		sync && version && cleanup && commit
@@ -518,7 +582,7 @@ BUILD_COMMIT_DATE := $(or $(shell TZ=UTC git show -s --format=%cd --date=format-
 BUILD_COMMIT_AUTHOR_NAME := $(shell git show -s --format='%an' HEAD 2> /dev/null ||:)
 BUILD_COMMIT_AUTHOR_EMAIL := $(shell git show -s --format='%ae' HEAD 2> /dev/null ||:)
 BUILD_COMMIT_MESSAGE := $(shell git log -1 --pretty=%B HEAD 2> /dev/null ||:)
-BUILD_TAG := $(or $(BUILD_TAG), $(BUILD_TIMESTAMP)-$(BUILD_COMMIT_HASH))
+BUILD_TAG := $(shell echo "$(BUILD_TAG)" | grep -Eq ^jenkins- && echo $(BUILD_TIMESTAMP)-$(BUILD_COMMIT_HASH) || echo $(or $(BUILD_TAG), $(BUILD_TIMESTAMP)-$(BUILD_COMMIT_HASH)))
 USER_ID := $(shell id -u)
 GROUP_ID := $(shell id -g)
 TTY_ENABLE := $(or $(TTY_ENABLE), $(shell [ $(BUILD_ID) -eq 0 ] && echo true || echo false))
@@ -538,7 +602,7 @@ ENVIRONMENT := $(or $(ENVIRONMENT), $(or $(shell ([ $(PROFILE) = local ] && echo
 .ONESHELL:
 .PHONY: *
 MAKEFLAGS := --no-print-director
-PATH := /usr/local/opt/coreutils/libexec/gnubin:/usr/local/opt/findutils/libexec/gnubin:/usr/local/opt/gnu-sed/libexec/gnubin:/usr/local/opt/gnu-tar/libexec/gnubin:/usr/local/opt/grep/libexec/gnubin:/usr/local/opt/make/libexec/gnubin:$(BIN_DIR):$(PATH)
+PATH := /usr/local/opt/coreutils/libexec/gnubin:/usr/local/opt/findutils/libexec/gnubin:/usr/local/opt/gnu-sed/libexec/gnubin:/usr/local/opt/gnu-tar/libexec/gnubin:/usr/local/opt/grep/libexec/gnubin:/usr/local/opt/make/libexec/gnubin:/opt/homebrew/bin:$(BIN_DIR):$(PATH)
 SHELL := /bin/bash
 ifeq (true, $(shell [[ "$(DEBUG)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]] && echo true))
 	.SHELLFLAGS := -cex
@@ -654,7 +718,9 @@ endif
 # macOS: Homebrew
 ifneq (0, $(shell which brew > /dev/null 2>&1; echo $$?))
 $(info )
-$(info Run $(shell tput setaf 4; echo '/usr/bin/ruby -e "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"'; tput sgr0))
+$(info Run $(shell tput setaf 4; echo '/bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'; tput sgr0))
+$(info )
+$(info or alternatively $(shell tput setaf 4; echo '/usr/bin/ruby -e "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"'; tput sgr0))
 $(info )
 $(error $(shell tput setaf 202; echo "WARNING: Please, before proceeding install the brew package manager. Copy and paste in your terminal the above command and execute it. If it fails to install try setting your DNS server to 8.8.8.8. Then, run the \`curl\` installation command"; tput sgr0))
 endif
