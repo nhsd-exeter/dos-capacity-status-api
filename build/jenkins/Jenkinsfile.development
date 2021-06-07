@@ -19,6 +19,7 @@ pipeline {
     stage('Show Configuration') {
       steps {
         script { sh 'make show-configuration' }
+        script { sh 'echo $TAG' }
       }
     }
     stage('Start Test DB') {
