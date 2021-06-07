@@ -1,10 +1,10 @@
 # Data lookup from eks management terraform state
-data "terraform_remote_state" "eks-mgmt" {
+data "terraform_remote_state" "eks" {
   backend = "s3"
 
   config = {
     bucket = var.terraform_platform_state_store
-    key    = var.eks_mgmt_terraform_state_key
+    key    = var.eks_terraform_state_key
     region = var.aws_region
   }
 }
@@ -21,12 +21,12 @@ resource "aws_iam_role" "iam_service_account_role" {
     {
       "Effect": "Allow",
       "Principal": {
-        "Federated": "arn:aws:iam::${var.aws_account_id}:oidc-provider/${trimprefix(data.terraform_remote_state.eks-mgmt.outputs.eks_oidc_issuer_url, "https://")}"
+        "Federated": "arn:aws:iam::${var.aws_account_id}:oidc-provider/${trimprefix(data.terraform_remote_state.eks.outputs.eks_oidc_issuer_url, "https://")}"
       },
       "Action": "sts:AssumeRoleWithWebIdentity",
       "Condition": {
         "StringEquals": {
-          "${trimprefix(data.terraform_remote_state.eks-mgmt.outputs.eks_oidc_issuer_url, "https://")}:sub": "system.serviceaccount:${var.service_prefix}*:${var.service_account_name}"
+          "${trimprefix(data.terraform_remote_state.eks.outputs.eks_oidc_issuer_url, "https://")}:sub": "system.serviceaccount:${var.service_prefix}*:${var.service_account_name}"
         }
       }
     }

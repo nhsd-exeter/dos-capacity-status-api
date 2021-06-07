@@ -41,8 +41,8 @@ variable "route53_terraform_state_key" {
   description = "The Route 53 key in the terraform state bucket"
 }
 
-variable "eks_mgmt_terraform_state_key" {
-  description = "The EKS management terraform state key"
+variable "eks_terraform_state_key" {
+  description = "The EKS terraform state key"
 }
 
 ####################################################################################
