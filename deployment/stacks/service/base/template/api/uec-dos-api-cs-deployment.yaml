@@ -33,7 +33,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: uec-dos-api-cs-configmap
-          image: DOCKER_REGISTRY_TO_REPLACE/api:API_IMAGE_TAG_TO_REPLACE
+          image: DOCKER_REGISTRY_TO_REPLACE/api:API_VERSION_TO_REPLACE
           imagePullPolicy: Always
           name: uec-dos-api-cs
           ports:

@@ -26,7 +26,7 @@ pipeline {
     stage('Deploy') {
       when { expression { env.PROFILE == 'demo' || env.PROFILE == 'live' } }
       steps {
-        script { sh "make deploy PROFILE=${PROFILE} API_IMAGE_TAG=${GIT_TAG} PROXY_IMAGE_TAG=${GIT_TAG} | tee /tmp/deployment_stats.txt" }
+        script { sh "make deploy PROFILE=${PROFILE} API_VERSION=${GIT_TAG} PROXY_VERSION=${GIT_TAG} | tee /tmp/deployment_stats.txt" }
       }
     }
     stage('Deployment Summary') {

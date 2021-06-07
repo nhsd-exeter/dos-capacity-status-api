@@ -51,7 +51,7 @@ pipeline {
     }
     stage('Deploy') {
       steps {
-        script { sh "make deploy PROFILE=${PROFILE} API_IMAGE_TAG=${BUILD_VERSION} PROXY_IMAGE_TAG=${BUILD_VERSION} | tee /tmp/deployment_stats.txt" }
+        script { sh "make deploy PROFILE=${PROFILE} API_VERSION=${BUILD_VERSION} PROXY_VERSION=${BUILD_VERSION} | tee /tmp/deployment_stats.txt" }
       }
     }
     stage('Load Test Data') {
@@ -59,7 +59,7 @@ pipeline {
       steps {
         script { sh "make build-data-job PROFILE=${PROFILE} VERSION=${BUILD_VERSION}" }
         script { sh "make docker-push NAME=data VERSION=${BUILD_VERSION}" }
-        script { sh "make deploy-job PROFILE=${PROFILE} STACK=data DATA_IMAGE_TAG=${BUILD_VERSION} || :" }
+        script { sh "make deploy-job PROFILE=${PROFILE} STACK=data VERSION=${BUILD_VERSION} || :" }
       }
     }
     stage('Deployment Summary') {

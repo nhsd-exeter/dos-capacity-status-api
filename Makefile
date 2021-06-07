@@ -94,13 +94,13 @@ plan: # Show the creation instance plan - mandatory: PROFILE=[profile name]
 		PROFILE=dev \
 		NAME=$(or $(NAME), test)
 
-deploy: # Deploy project - mandatory: PROFILE=[name], API_IMAGE_TAG=[docker tag], PROXY_IMAGE_TAG[docker-tag]
+deploy: # Deploy project - mandatory: PROFILE=[name], API_VERSION=[docker tag], PROXY_VERSION[docker-tag]
 	[ local == $(PROFILE) ] && exit 1
 	eval "$$(make aws-assume-role-export-variables)"
 	eval "$$(make populate-secret-variables)"
 	make k8s-deploy STACK=service
 
-deploy-job: # Deploy project - mandatory: PROFILE=[name], STACK=[stack], DATA_IMAGE_TAG=[docker tag]
+deploy-job: # Deploy project - mandatory: PROFILE=[name], STACK=[stack], VERSION=[version of the data image to deploy]
 	[ local == $(PROFILE) ] && exit 1
 	eval "$$(make populate-secret-variables)"
 	make k8s-deploy-job STACK=$(STACK)

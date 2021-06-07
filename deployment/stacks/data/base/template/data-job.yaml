@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: set-up
-          image: DOCKER_REGISTRY_TO_REPLACE/data:DATA_IMAGE_TAG_TO_REPLACE
+          image: DOCKER_REGISTRY_TO_REPLACE/data:VERSION_TO_REPLACE
           command: ["/sbin/entrypoint.sh", "scripts", "/data"]
           envFrom:
             - configMapRef:
