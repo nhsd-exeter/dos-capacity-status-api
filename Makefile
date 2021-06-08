@@ -94,7 +94,7 @@ plan: # Show the creation instance plan - mandatory: PROFILE=[profile name]
 		PROFILE=dev \
 		NAME=$(or $(NAME), test)
 
-deploy: # Deploy project - mandatory: PROFILE=[name], API_VERSION=[version of the api image to deploy], PROXY_VERSION[version of the proxy image to deploy]
+deploy: # Deploy project - mandatory: PROFILE=[name], API_VERSION=[version of the api image to deploy], PROXY_VERSION=[version of the proxy image to deploy]
 	[ local == $(PROFILE) ] && exit 1
 	eval "$$(make aws-assume-role-export-variables)"
 	eval "$$(make populate-secret-variables)"
