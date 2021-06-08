@@ -52,7 +52,8 @@ pipeline {
     }
     stage('Deploy') {
       steps {
-        script { sh "make deploy PROFILE=${PROFILE} API_VERSION=${BUILD_VERSION} PROXY_VERSION=${BUILD_VERSION} | tee /tmp/deployment_stats.txt" }
+        script { sh echo ${BUILD_VERSION} }
+        script { sh "make deploy PROFILE=${PROFILE} API_VERSION=20210608091829-db44197 PROXY_VERSION=20210608091829-db44197 | tee /tmp/deployment_stats.txt" }
       }
     }
     stage('Load Test Data') {
