@@ -12,7 +12,7 @@ pipeline {
   environment {
     BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
     // BUILD_VERSION = sh(returnStdout: true, script: "make project-get-build-tag BUILD_DATE=${BUILD_DATE}").trim()
-    BUILD_VERSION = sh(returnStdout: true, script: "make derive-build-tag")
+    BUILD_VERSION = sh(returnStdout: true, script: "make derive-build-tag").trim()
     PROFILE = 'dev'
   }
   triggers { pollSCM('* * * * *') }
@@ -55,7 +55,7 @@ pipeline {
     stage('Deploy') {
       steps {
         script { sh 'echo ${BUILD_VERSION} ab'}
-        script { sh "make deploy PROFILE=${PROFILE} API_VERSION=20210608091829-db44197 PROXY_VERSION=20210608091829-db44197 | tee /tmp/deployment_stats.txt" }
+        script { sh "make deploy PROFILE=${PROFILE} API_VERSION=${BUILD_VERSION} PROXY_VERSION=${BUILD_VERSION} | tee /tmp/deployment_stats.txt" }
       }
     }
     /*
