@@ -23,6 +23,7 @@ pipeline {
         script { sh 'echo $BUILD_VERSION' }
       }
     }
+    /*
     stage('Start Test DB') {
       steps {
         script { sh 'make test-db-start' }
@@ -50,9 +51,10 @@ pipeline {
         script { sh "make terraform-apply-auto-approve STACKS=service PROFILE=${PROFILE} | tee /tmp/terraform_changes.txt" }
       }
     }
+    */
     stage('Deploy') {
       steps {
-        script { sh echo ${BUILD_VERSION} }
+        script { sh "echo ${BUILD_VERSION}"}
         script { sh "make deploy PROFILE=${PROFILE} API_VERSION=20210608091829-db44197 PROXY_VERSION=20210608091829-db44197 | tee /tmp/deployment_stats.txt" }
       }
     }
