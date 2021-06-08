@@ -297,4 +297,5 @@ derive-build-tag:
 	dev-smoke-test \
 	populate-secret-variables \
 	parse-profile-from-tag \
-	project-get-production-tag
+	project-get-production-tag \
+	derive-build-tag
