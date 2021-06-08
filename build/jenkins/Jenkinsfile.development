@@ -11,7 +11,8 @@ pipeline {
   }
   environment {
     BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
-    BUILD_VERSION = sh(returnStdout: true, script: "make project-get-build-tag BUILD_DATE=${BUILD_DATE}").trim()
+    // BUILD_VERSION = sh(returnStdout: true, script: "make project-get-build-tag BUILD_DATE=${BUILD_DATE}").trim()
+    BUILD_VERSION = sh(returnStdout: true, script: "make derive-build-tag")
     PROFILE = 'dev'
   }
   triggers { pollSCM('* * * * *') }

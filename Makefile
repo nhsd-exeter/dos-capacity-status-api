@@ -94,7 +94,7 @@ plan: # Show the creation instance plan - mandatory: PROFILE=[profile name]
 		PROFILE=dev \
 		NAME=$(or $(NAME), test)
 
-deploy: # Deploy project - mandatory: PROFILE=[name], API_VERSION=[docker tag], PROXY_VERSION[docker-tag]
+deploy: # Deploy project - mandatory: PROFILE=[name], API_VERSION=[version of the api image to deploy], PROXY_VERSION[version of the proxy image to deploy]
 	[ local == $(PROFILE) ] && exit 1
 	eval "$$(make aws-assume-role-export-variables)"
 	eval "$$(make populate-secret-variables)"
@@ -108,6 +108,7 @@ deploy-job: # Deploy project - mandatory: PROFILE=[name], STACK=[stack], VERSION
 # ==============================================================================
 # Supporting targets and variables
 
+# TODO : Think about specifying image VERSION here so as not to remove images being created by other pipelines.
 clean: # Clean up project
 	make \
 		api-clean \
@@ -160,7 +161,7 @@ build-data-job:
 	make file-replace-variables-in-dir DIR=$(DOCKER_DIR)/data/assets/data
 	make docker-build NAME=data VERSION=$(VERSION)
 
-clean-data-job:
+data-clean:
 	rm -rf $(DOCKER_DIR)/data/assets/data/*.sql
 	make docker-image-clean NAME=data
 
@@ -287,6 +288,9 @@ pipeline-send-notification:
 	make slack-it
 
 # ==============================================================================
+
+derive-build-tag:
+	echo $(BUILD_TIMESTAMP)-$(BUILD_COMMIT_HASH)
 
 .SILENT: \
 	dev-create-user \
