@@ -13,7 +13,7 @@ SET standard_conforming_strings = on;
 -- Roles
 --
 CREATE ROLE capacity_status_api;
-ALTER ROLE capacity_status_api INHERIT NOCREATEROLE NOCREATEDB LOGIN NOBYPASSRLS PASSWORD 'capacity_status_api';
+ALTER ROLE capacity_status_api INHERIT NOCREATEROLE NOCREATEDB LOGIN NOBYPASSRLS PASSWORD 'DB_DOS_PASSWORD_TO_REPLACE';
 COMMENT ON ROLE capacity_status_api IS 'Accessor role to the DoS DB for the DoS Capacity Status API.';
 
 -- User Configurations

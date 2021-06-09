@@ -11,6 +11,8 @@ pipeline {
   }
   environment {
     BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
+    // BUILD_VERSION = sh(returnStdout: true, script: "make project-get-build-tag BUILD_DATE=${BUILD_DATE}").trim()
+    BUILD_VERSION = sh(returnStdout: true, script: "make derive-build-tag").trim()
     PROFILE = 'dev'
   }
   triggers { pollSCM('* * * * *') }
@@ -18,6 +20,7 @@ pipeline {
     stage('Show Configuration') {
       steps {
         script { sh 'make show-configuration' }
+        script { sh 'echo $BUILD_VERSION' }
       }
     }
     stage('Start Test DB') {
@@ -27,7 +30,7 @@ pipeline {
     }
     stage('Build Images') {
       steps {
-        script { sh 'make build' }
+        script { sh 'make build VERSION=${BUILD_VERSION}' }
       }
     }
     stage('Run Unit Tests') {
@@ -39,7 +42,7 @@ pipeline {
     }
     stage('Push Images') {
       steps {
-        script { sh 'make push' }
+        script { sh "make push VERSION=${BUILD_VERSION}" }
       }
     }
     stage('Provision Infrastructure') {
@@ -48,19 +51,16 @@ pipeline {
       }
     }
     stage('Deploy') {
-      environment {
-        TAG = sh(returnStdout: true, script: "make project-get-build-tag BUILD_DATE=$BUILD_DATE").trim()
-      }
       steps {
-        script { sh "make deploy PROFILE=${PROFILE} API_IMAGE_TAG=${TAG} PROXY_IMAGE_TAG=${TAG} | tee /tmp/deployment_stats.txt" }
+        script { sh "make deploy PROFILE=${PROFILE} API_VERSION=${BUILD_VERSION} PROXY_VERSION=${BUILD_VERSION} | tee /tmp/deployment_stats.txt" }
       }
     }
     stage('Load Test Data') {
       when { expression { this.PROFILE == 'dev' } }
       steps {
-        script {
-          sh "make deploy-job PROFILE=${PROFILE} STACK=data || :"
-        }
+        script { sh "make build-data-job PROFILE=${PROFILE} VERSION=${BUILD_VERSION}" }
+        script { sh "make docker-push NAME=data VERSION=${BUILD_VERSION}" }
+        script { sh "make deploy-job PROFILE=${PROFILE} STACK=data VERSION=${BUILD_VERSION} || :" }
       }
     }
     stage('Deployment Summary') {

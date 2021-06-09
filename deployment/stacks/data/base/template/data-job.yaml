@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: set-up
-          image: AWS_ACCOUNT_ID_MGMT_TO_REPLACE.dkr.ecr.eu-west-2.amazonaws.com/uec-dos-api/cs/data:20200626101849
+          image: DOCKER_REGISTRY_TO_REPLACE/data:VERSION_TO_REPLACE
           command: ["/sbin/entrypoint.sh", "scripts", "/data"]
           envFrom:
             - configMapRef:

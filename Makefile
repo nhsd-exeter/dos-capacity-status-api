@@ -8,8 +8,8 @@ OMIT := */tests/*,*/migrations/*,*apps.py,*asgi.py,*wsgi.py,*manage.py,*api/sett
 
 build: project-config # Build project
 	make \
-		api-build \
-		proxy-build
+		api-build VERSION=$(VERSION)\
+		proxy-build VERSION=$(VERSION)\
 
 restart: stop start # Restart project
 
@@ -83,8 +83,8 @@ test-unit-only: # Run only unit test suite
 
 push: # Push project artefacts to the registry
 	make docker-login
-	make docker-push NAME=api
-	make docker-push NAME=proxy
+	make docker-push NAME=api VERSION=$(VERSION)
+	make docker-push NAME=proxy VERSION=$(VERSION)
 
 # ==============================================================================
 # Project targets: Ops workflow
@@ -94,13 +94,13 @@ plan: # Show the creation instance plan - mandatory: PROFILE=[profile name]
 		PROFILE=dev \
 		NAME=$(or $(NAME), test)
 
-deploy: # Deploy project - mandatory: PROFILE=[name], API_IMAGE_TAG=[docker tag], PROXY_IMAGE_TAG[docker-tag]
+deploy: # Deploy project - mandatory: PROFILE=[name], API_VERSION=[version of the api image to deploy], PROXY_VERSION=[version of the proxy image to deploy]
 	[ local == $(PROFILE) ] && exit 1
 	eval "$$(make aws-assume-role-export-variables)"
 	eval "$$(make populate-secret-variables)"
 	make k8s-deploy STACK=service
 
-deploy-job: # Deploy project - mandatory: PROFILE=[name], STACK=[stack]
+deploy-job: # Deploy project - mandatory: PROFILE=[name], STACK=[stack], VERSION=[version of the data image to deploy]
 	[ local == $(PROFILE) ] && exit 1
 	eval "$$(make populate-secret-variables)"
 	make k8s-deploy-job STACK=$(STACK)
@@ -108,10 +108,12 @@ deploy-job: # Deploy project - mandatory: PROFILE=[name], STACK=[stack]
 # ==============================================================================
 # Supporting targets and variables
 
+# TODO : Think about specifying image VERSION here so as not to remove images being created by other pipelines.
 clean: # Clean up project
 	make \
 		api-clean \
-		proxy-clean
+		proxy-clean \
+		data-clean
 	rm -rfv $(HOME)/.python/pip
 
 api-build:
@@ -122,7 +124,7 @@ api-build:
 		requirements.txt
 	cd $(PROJECT_DIR)
 	make ssl-copy-certificate-project DIR=$(PROJECT_DIR)/build/docker/api/assets/certificate
-	make docker-image NAME=api
+	make docker-image NAME=api VERSION=$(VERSION)
 
 api-clean:
 	make docker-image-clean NAME=api
@@ -140,13 +142,28 @@ proxy-build:
 	cp -rf \
 		$(PROJECT_DIR)/application/static \
 		$(DOCKER_DIR)/proxy/assets/application
-	make docker-image NAME=proxy
+	make docker-image NAME=proxy VERSION=$(VERSION)
 
 proxy-clean:
 	make docker-image-clean NAME=proxy
 	rm -rfv \
 		$(DOCKER_DIR)/proxy/assets/application/static \
 		$(DOCKER_DIR)/proxy/assets/certificate/certificate.*
+
+build-data-job:
+	cp -fv \
+		$(DATA_DIR)/aws-rds-sql/*.sql \
+		$(DOCKER_DIR)/data/assets/data
+	if [ "$(PROFILE)" != "local" ]; then
+		eval "$$(make aws-assume-role-export-variables)"
+		eval "$$(make secret-fetch-and-export-variables NAME=$(DEPLOYMENT_SECRETS))"
+	fi
+	make file-replace-variables-in-dir DIR=$(DOCKER_DIR)/data/assets/data
+	make docker-build NAME=data VERSION=$(VERSION)
+
+data-clean:
+	rm -rf $(DOCKER_DIR)/data/assets/data/*.sql
+	make docker-image-clean NAME=data
 
 # ---
 
@@ -186,6 +203,7 @@ trust-certificate: ssl-trust-certificate-project ## Trust the SSL development ce
 create-artefact-repository: ## Create Docker repositories to store artefacts
 	make docker-create-repository NAME=api
 	make docker-create-repository NAME=proxy
+	make docker-create-repository NAME=data
 
 # ---
 
@@ -271,9 +289,13 @@ pipeline-send-notification:
 
 # ==============================================================================
 
+derive-build-tag:
+	echo $(BUILD_TIMESTAMP)-$(BUILD_COMMIT_HASH)
+
 .SILENT: \
 	dev-create-user \
 	dev-smoke-test \
 	populate-secret-variables \
 	parse-profile-from-tag \
-	project-get-production-tag
+	project-get-production-tag \
+	derive-build-tag

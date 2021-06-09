@@ -33,7 +33,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: uec-dos-api-cs-proxy-configmap
-          image: DOCKER_REGISTRY_TO_REPLACE/proxy:PROXY_IMAGE_TAG_TO_REPLACE
+          image: DOCKER_REGISTRY_TO_REPLACE/proxy:PROXY_VERSION_TO_REPLACE
           imagePullPolicy: Always
           name: uec-dos-api-cs-proxy
           ports:
