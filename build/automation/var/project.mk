@@ -17,6 +17,11 @@ PROJECT_TECH_STACK_LIST = python,terraform
 DOCKER_REPOSITORIES =
 SSL_DOMAINS_PROD =
 
+SERVICE_ACCOUNT_NAME = $(SERVICE_PREFIX)-iam-sa
+SERVICE_ACCOUNT_ROLE = $(SERVICE_PREFIX)-host-role
+TF_VAR_service_account_name = $(SERVICE_ACCOUNT_NAME)
+TF_VAR_service_account_role = $(SERVICE_ACCOUNT_ROLE)
+
 # ==============================================================================
 # Business rules
 

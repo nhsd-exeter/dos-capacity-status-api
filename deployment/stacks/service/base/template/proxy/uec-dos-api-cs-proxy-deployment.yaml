@@ -24,6 +24,7 @@ spec:
       labels:
         app: uec-dos-api-cs-proxy
     spec:
+      serviceAccountName: SERVICE_ACCOUNT_NAME_TO_REPLACE
       containers:
         - env:
             - name: INSTANA_AGENT_HOST
@@ -59,6 +60,7 @@ spec:
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
-      securityContext: {}
+      securityContext:
+        runAsUser: 0
       terminationGracePeriodSeconds: 30
 status: {}

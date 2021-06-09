@@ -1,5 +1,6 @@
 resources:
   - namespace.yaml
+  - service-account.yaml
   - api/uec-dos-api-cs-deployment.yaml
   - api/uec-dos-api-cs-service.yaml
   - proxy/uec-dos-api-cs-proxy-deployment.yaml
