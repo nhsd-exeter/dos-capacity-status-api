@@ -6,7 +6,7 @@ metadata:
   labels:
     app: uec-dos-api-cs-proxy
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     - name: https
       protocol: TCP
