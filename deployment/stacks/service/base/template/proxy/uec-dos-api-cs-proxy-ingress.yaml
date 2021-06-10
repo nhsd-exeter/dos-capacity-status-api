@@ -14,6 +14,7 @@ metadata:
     alb.ingress.kubernetes.io/waf-acl-id: AWS_WAF_ACL_ID_TO_REPLACE
     alb.ingress.kubernetes.io/tags: Service=SERVICE_TAG_TO_REPLACE
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443},{"HTTP":80}]'
+    alb.ingress.kubernetes.io/security-groups: CS_API_SG_TO_REPLACE
 spec:
   rules:
     - http:

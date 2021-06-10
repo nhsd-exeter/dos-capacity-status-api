@@ -39,6 +39,7 @@ DOS_PASSWORD_KEY = DB_UET_RELEASE_USER_PASSWORD
 HTTP_PROTOCOL = https
 REQUEST_ID_HEADER = HTTP_X_REQUEST_ID
 
+#CS_API_SG = [secret]
 # ==============================================================================
 # Infrastructure variables
 
