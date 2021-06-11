@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: uec-dos-api-cs-proxy-service
+  name: uec-dos-api-cs-proxy-cluster-ip-service
   namespace: K8S_APP_NAMESPACE_TO_REPLACE
   labels:
     app: uec-dos-api-cs-proxy
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     - name: https
       protocol: TCP
