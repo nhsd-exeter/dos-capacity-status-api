@@ -48,6 +48,14 @@ spec:
             tcpSocket:
               port: 443
             timeoutSeconds: 1
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            successThreshold: 1
+            tcpSocket:
+              port: 443
+            timeoutSeconds: 1
           resources:
             limits:
               cpu: "1"

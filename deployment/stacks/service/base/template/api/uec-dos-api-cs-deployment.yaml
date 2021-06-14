@@ -40,6 +40,26 @@ spec:
           ports:
             - containerPort: 8443
               protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            successThreshold: 1
+            httpGet:
+              path: /
+              port: 8443
+              scheme: HTTPS
+            timeoutSeconds: 1
+          livenessProbe:
+            failureThreshold: 2
+            initialDelaySeconds: 35
+            periodSeconds: 15
+            successThreshold: 1
+            httpGet:
+              path: /
+              port: 8443
+              scheme: HTTPS
+            timeoutSeconds: 1
           resources:
             limits:
               cpu: "1"
