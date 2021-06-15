@@ -36,6 +36,8 @@ ALLOWED_HOSTS = [
     "cs.api.directoryofservices.nhs.uk",
 ]
 
+
+
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 if os.getenv("HTTP_PROTOCOL", "https") == "http":
     SESSION_COOKIE_SECURE = False
@@ -72,6 +74,7 @@ MIDDLEWARE = [
     "request_logging.middleware.LoggingMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "api.middleware.HealthCheckMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
