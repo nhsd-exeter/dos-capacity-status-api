@@ -36,8 +36,6 @@ ALLOWED_HOSTS = [
     "cs.api.directoryofservices.nhs.uk",
 ]
 
-
-
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 if os.getenv("HTTP_PROTOCOL", "https") == "http":
     SESSION_COOKIE_SECURE = False

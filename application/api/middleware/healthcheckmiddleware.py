@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from rest_framework import status
 
 
 class HealthCheckMiddleware:
@@ -7,5 +8,5 @@ class HealthCheckMiddleware:
 
     def __call__(self, request):
         if request.path == '/api/health':
-            return HttpResponse('Health Okay from CS API')
+            return HttpResponse(status=status.HTTP_200_OK, content='Health Okay from CS API')
         return self.get_response(request)
