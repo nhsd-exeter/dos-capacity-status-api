@@ -40,7 +40,7 @@ REQUEST_ID_HEADER = HTTP_X_REQUEST_ID
 # ==============================================================================
 # Infrastructure variables
 
-STACKS = service
+STACKS = service,mesh
 
 TF_VAR_profile = $(PROFILE)
 TF_VAR_aws_region = $(AWS_REGION)
@@ -72,3 +72,7 @@ TF_VAR_deletion_protection = false
 TF_VAR_db_auto_minor_version_upgrade = false
 TF_VAR_multi_az = false
 TF_VAR_skip_final_snapshot = false
+
+# MESH
+
+TF_VAR_mesh_name = $(SERVICE_PREFIX)-mesh
