@@ -4,6 +4,7 @@ set -e
 cp -fv /etc/nginx/nginx.conf.template /etc/nginx/nginx.conf
 
 sed -i "s;API_HOST_TO_REPLACE;${API_HOST//&/\\&};g" /etc/nginx/nginx.conf
+sed -i "s;REQ_PER_SEC_PROXY_THROTTLE_TO_REPLACE;${REQ_PER_SEC_PROXY_THROTTLE};g" /etc/nginx/nginx.conf
 
 allowed_host_list=${API_ADMIN_ALLOWED_HOSTS}
 allowed_hosts=
