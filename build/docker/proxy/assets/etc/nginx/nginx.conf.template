@@ -30,7 +30,7 @@ http {
     ~\.([0-9]+)$ $1;
   }
 
-  limit_req_zone $binary_remote_addr zone=api-limit:10m rate=3r/s;
+  limit_req_zone $binary_remote_addr zone=api-limit:10m rate=REQ_PER_SEC_PROXY_THROTTLE_TO_REPLACEr/s;
 
   server {
     listen 443 ssl;

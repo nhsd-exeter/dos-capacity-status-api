@@ -10,6 +10,8 @@ DEPLOYMENT_SECRETS = $(PROJECT_ID)/deployment
 
 K8S_TTL_LENGTH = 2 days
 API_HOST = uec-dos-api-cs
+# Please see ADR-009
+REQ_PER_SEC_PROXY_THROTTLE = 3
 #API_ADMIN_ALLOWED_HOSTS = [secret]
 #API_ADMIN_PASSWORD = [secret]
 

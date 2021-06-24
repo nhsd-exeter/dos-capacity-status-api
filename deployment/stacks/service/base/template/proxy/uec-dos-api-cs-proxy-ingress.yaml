@@ -9,6 +9,7 @@ metadata:
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/backend-protocol: HTTPS
     alb.ingress.kubernetes.io/healthcheck-protocol: HTTPS
+    alb.ingress.kubernetes.io/healthcheck-path: /health
     alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-2017-01
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:AWS_ACCOUNT_ID_TO_REPLACE:certificate/AWS_CERTIFICATE_ID_TO_REPLACE
     alb.ingress.kubernetes.io/waf-acl-id: AWS_WAF_ACL_ID_TO_REPLACE
